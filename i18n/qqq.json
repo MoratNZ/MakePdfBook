@@ -1,0 +1,8 @@
+{
+  "@metadata": {
+    "authors": ["<your username>"]
+  },
+  "makePdfBook": "The name of the extension's entry in Special:SpecialPages",
+  "makePdfBook-desc": "{{desc}}",
+  "makePdfBook-summary": "Description appearing on top of Special:MakePdfBook."
+}

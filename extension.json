@@ -1,0 +1,32 @@
+{
+  "name": "MakePdfBook",
+  "version": "0.0.0",
+  "author": ["David Maclagan"],
+  "url": "https://github.com/MoratNZ/MakePdfBook",
+  "descriptionmsg": "MakePdfBook-desc",
+  "license-name": "MIT",
+  "type": "other",
+  "AutoloadClasses": {
+    "SpecialMakePdfBook": "src/MakePdfBook.php"
+  },
+  "SpecialPages": {
+    "MakePdfBook": "SpecialMakePdfBook"
+  },
+  "config": {
+    "MakePdfBookCacheFileDir": {
+      "value": "/tmp",
+      "description": "The directory that cached PDFs are held"
+    },
+    "MakePdfBooktempFileDir": {
+      "value": "/tmp",
+      "description": "The directory that temp files used in PDF creation are held"
+    }
+  },
+  "ConfigRegistry": {
+    "MakePdfBook": "GlobalVarConfig::newInstance"
+  },
+  "MessagesDirs": {
+    "MakePdfBook": ["i18n"]
+  },
+  "manifest_version": 2
+}
