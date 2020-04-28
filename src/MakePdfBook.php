@@ -129,31 +129,6 @@ class SpecialMakePdfBook extends SpecialPage {
 		$cacheString .= $titlePage ? "\n" . $titlePage . ": " . Title::newFromText($titlePage)->getLatestRevID() : "";
 		return md5($cacheString);
 	}
-	function writeTitlePageTexFile($titlePage, $fileName){
-		$titlePageObject = Title::newFromText($titlePage);
-		$titlePageId = $titlePageObject->getArticleID();
-
-		$titlePageArticle = Article::newFromId($titlePageId);
-
-		$text = $titlePageArticle->getPage()->getContent()->getNativeData();
-
-		$text = utf8_decode($text);
-
-		file_put_contents($fileName, $text);
-
-	}
-	function writeArticleWikitextFile($title, $fileName){
-		$scriptPath = $wgServer . $wgScriptPath;
-		$opt = ParserOptions::newFromUser($wgUser);
-
-		$titleText = $this->stripNameSpace($title->getPrefixedText());
-		
-		$fullArticleUrl = $title->getFullUrl();
-		$article = new Article($title);
-		$text = $article->getPage()->getContent()->getNativeData();
-
-		file_put_contents($fileName, $text);		
-	}
 	function writeArticleHtmlFile($title, $fileName){
 		global $wgUploadDirectory, $wgScriptPath, $wgUser;
 		
@@ -227,7 +202,7 @@ class SpecialMakePdfBook extends SpecialPage {
 
 		return $directoryName;
 	}
-	function renderPdf($outputDir, $fileName, $category, $articles, $titlePage){
+	function renderPdf($outputDir, $outputFileName, $category, $articles, $titlePage){
 		global $wgServer, $wgScriptPath;
 		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'MakePdfBook' );
 		
@@ -238,27 +213,27 @@ class SpecialMakePdfBook extends SpecialPage {
 
 		// Create the content temp files
 		if ($titlePage) {
-			$this->writeTitlePageTexFile($titlePage, "$tempFileDir/titlepage.tex");
-			$titleOption = "-B $titlepageFile";
-		} else {
-			$titleOption = "";
+			$titlPage = Title::newFromText($titlePage)
+			$titlepageFileName = "$tempFileDir/titlepage.html";
+			$this->writeArticleHtmlFile($titlePage, $titlepageFileName);
 		}
 
 		$articleCount = 0;
-		$String = "";
 		foreach( $articles as $title){
 			$articleCount++;
-			$fileName = "$tempFileDir/chapter-$articleCount.html";
-			$pandocFileString .= "$fileName ";
+			$chapterFileName = "$tempFileDir/chapter-$articleCount.html";
 
-			$this->writeArticleHtmlFile($title, $fileName);
+			$this->writeArticleHtmlFile($title, $chapterFileName);
 		}
 
 		// Copy the template file to the holding dir
 		copy(dirname(__FILE__)."/../bin/template.tex", "$tempFileDir/template.tex");
 
 		// Call out to the book assembler
+		$cmd = dirname(__FILE__)."../bin/makePdfBook.pl $tempFileDir $outputDir/$outputFileName";
+		throw new Exception($cmd);
 		return;
+
 		// Build the pandoc command
 		$cover = $titlePage ? "cover $titlepageFile"  : "";
 
