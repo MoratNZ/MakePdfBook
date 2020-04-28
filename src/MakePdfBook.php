@@ -35,24 +35,25 @@ class SpecialMakePdfBook extends SpecialPage {
 
 		# Check that this is a valid category, and get its DB ID if it is.
 		# We don't actually care about the id, but want to use the exceptions for user feedback
+		# TODO if a category isn't set, dynamically build a page to offer all possible categories
 		try{
-		$category_id = $this->getCategoryId($category);
-		
-		# Get articles from category
-		$articles = $this->getCategoryArticles($category);
-		
-		# Get the cache file name
-		$cacheFile = $this->getCacheHash($articles, $titlePage);
+			$category_id = $this->getCategoryId($category);
+			
+			# Get articles from category
+			$articles = $this->getCategoryArticles($category);
+			
+			# Get the cache file name
+			$cacheFile = $this->getCacheHash($articles, $titlePage);
 
-		// If the file doesn't exist, render the content now
-		if ($forceRebuild || !file_exists($cacheDir . $cacheFile . ".pdf")) {
-			$this->renderPdf($cacheFileDir, $cacheFile, $category, $articles, $titlePage);
+			// If the file doesn't exist, render the content now
+			if ($forceRebuild || !file_exists($cacheDir . $cacheFile . ".pdf")) {
+				$this->renderPdf($cacheFileDir, $cacheFile, $category, $articles, $titlePage);
+			}
+
+			# Return the PDF, or an error page if generation has failed.
+		} catch (Exception $e){
+			$errorText = $e->getMessage();
 		}
-
-		# Return the PDF, or an error page if generation has failed.
-	} catch (Exception $e){
-		$errorText = $e->getMessage();
-	}
 		$output->disable();
 
 		if($testPdfOutput){
@@ -209,40 +210,67 @@ class SpecialMakePdfBook extends SpecialPage {
 			return $titleText;
 		}
 	}
+	function createEmptyDirectory($baseDirectory, $category){
+		$directoryName = "$baseDirectory/MakePdfBook/$category";
+
+		if(is_dir($directoryName)){
+			// The directory exists - empty it
+			$files = glob( $directoryName . '/*', GLOB_MARK ); //GLOB_MARK adds a slash to directories returned
+
+			foreach( $files as $file ){
+				unlink( $file );
+			}
+		} else {
+			// Create the directory
+			mkdir($directoryName, 0777, true);
+		} 
+
+		return $directoryName;
+	}
 	function renderPdf($outputDir, $fileName, $category, $articles, $titlePage){
 		global $wgServer, $wgScriptPath;
 		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'MakePdfBook' );
 		
-		$tempFileDir = $config->get( 'MakePdfBooktempFileDir' );
+		$baseTempFileDir = $config->get( 'MakePdfBooktempFileDir' );
+
+		// Create the holding directory for our temp files
+		$tempFileDir = $this->createEmptyDirectory($baseTempFileDir, $category);
 
 		// Create the content temp files
 		if ($titlePage) {
-			$this->writeTitlePageTexFile($titlePage, "$tempFileDir/pandoc-$category-titlepage.tex");
+			$this->writeTitlePageTexFile($titlePage, "$tempFileDir/titlepage.tex");
 			$titleOption = "-B $titlepageFile";
 		} else {
 			$titleOption = "";
 		}
 
 		$articleCount = 0;
-		$pandocFilesString = "";
+		$String = "";
 		foreach( $articles as $title){
 			$articleCount++;
-			$fileName = "$tempFileDir/MakePdfBook-$category-chapter-$articleCount.html";
-			$pandocFilesString .= "$fileName ";
+			$fileName = "$tempFileDir/chapter-$articleCount.html";
+			$pandocFileString .= "$fileName ";
 
 			$this->writeArticleHtmlFile($title, $fileName);
 		}
 
+		// Copy the template file to the holding dir
+		copy(dirname(__FILE__)."/../bin/template.tex", "$tempFileDir/template.tex");
+
+		// Call out to the book assembler
+		return;
 		// Build the pandoc command
 		$cover = $titlePage ? "cover $titlepageFile"  : "";
 
 		$tempTexFile = "$tempFileDir/pandoc-$category-tmpFile.tex";
 		$templateFile = dirname(__FILE__)."/../bin/template.tex";
-		$cmd = "PATH=/usr/bin/: pandoc -s -f html -t latex $titleOption --templateFile  $templateFile -s $pandocFileString -o $tempTexFile";
+		$cmd = "PATH=/usr/bin/: pandoc -s $pandocFileString -f html -t latex $titleOption --template  $templateFile -s $pandocFileString -o $tempTexFile";
 
 		throw new Exception($cmd);
 		// Build the tex file for the book
 		$shellResult = shell_exec("$cmd ");
+
+		throw new Exception($shellResult);
 
 		// Run modification scripts on the tex output
 		$cmd = escapeshellcmd("$pandocPath/texFix.pl $tempTexFile 2>>$debugFileDir/pandocpdefbook.errlog");
