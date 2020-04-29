@@ -113,8 +113,11 @@ if($titlepageFile){
     close $in;
 
     $content =~ s/\\%pagebreak\\%/\\newpage\n/ig;
-    $content =~ s/\\%startTitle\\%/\\begin{center}\n\\Huge\n/ig;
-    $content =~ s/\\%endTitle\\%/\\normalsize\n\\end{center}\n/ig;
+    $content =~ s/\\%startHuge\\%/\\Huge\n/ig;
+    $content =~ s/\\%startCenter\\%/\\begin{center}\n/ig;
+    $content =~ s/\\%endHuge\\%/\\normalsize\n/ig;
+    $content =~ s/\\%endCenter\\%/\\end{center}\n/ig;
+
     $content =~ s/\\%vspace\\%(\d+?)\\%/\\vspace{\1mm}\n/ig;
     
     open my $out, '>:encoding(utf8)', 'titlepage.tex' or die("Error: couldn't open titlepage.tex for writing - $!");
