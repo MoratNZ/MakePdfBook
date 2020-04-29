@@ -87,7 +87,15 @@ class SpecialMakePdfBook extends SpecialPage {
 		while ($row = $db->fetchRow($result)){
 			$category = $row[0];
 
-			$textString = "[$wgServer$wgScriptPath/index.php/Special:MakePdfBook?category=$category   $category ]";
+			$categoryTitlepage = $this->getCategoryTitlePage($category);
+
+			if($categoryTitlepage){
+				$textString = "[$wgServer$wgScriptPath/index.php/Special:MakePdfBook?category=$category   $category ] [[".$categoryTitlepage->getPrefixedDBkey()."|<titlepage>]]";
+			} else {
+				$textString = "[$wgServer$wgScriptPath/index.php/Special:MakePdfBook?category=$category   $category ]";
+			}
+
+			
 
 			if(method_exists($output, "addWikiTextAsInterface")){
 				$output->addWikiTextAsInterface($textString); # mediawiki >= 1.34
