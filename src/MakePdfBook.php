@@ -28,7 +28,6 @@ class SpecialMakePdfBook extends SpecialPage {
 
 		# Get request data 
 		$category = $request->getText( 'category' );
-		$titlePage = $request->getText('titlePage');
 		$forceRebuild = $request->getText('force');
 		$testPdfOutput = $request->getText('testPdfOutput');
 
@@ -45,11 +44,11 @@ class SpecialMakePdfBook extends SpecialPage {
 			$articles = $this->getCategoryArticles($category);
 			
 			# Get the cache file name
-			$cacheFile = $this->getCacheHash($articles, $titlePage).".pdf";
+			$cacheFile = $this->getCacheHash($articles).".pdf";
 
 			// If the file doesn't exist, render the content now
 			if ($forceRebuild || !file_exists("$cacheFileDir/$cacheFile")) {
-				$this->renderPdf($cacheFileDir, $cacheFile, $category, $articles, $titlePage);
+				$this->renderPdf($cacheFileDir, $cacheFile, $category, $articles);
 				if(!file_exists("$cacheFileDir/$cacheFile")){
 					throw new Exception("PDF generation has somehow silently failed. I am confused and ashamed.");
 				}
@@ -82,7 +81,8 @@ class SpecialMakePdfBook extends SpecialPage {
 
 		$result = $db->select(
 			'category',
-			'cat_title'
+			'cat_title',
+			'cat_pages > 0'
 		);
 		while ($row = $db->fetchRow($result)){
 			$category = $row[0];
@@ -95,14 +95,32 @@ class SpecialMakePdfBook extends SpecialPage {
 		$result = $db->select(
 			'categorylinks',
 			'cl_from',
-			"cl_to = ".$db->addQuotes($category),
-			'pandocPdfBook',
+			["cl_to = ".$db->addQuotes($category), 'cl_sortkey_prefix != "titlepage"'],
+			'MakePdfBook',
 			array('ORDER BY' => 'cl_sortkey')
 		);
 		while ($row = $db->fetchRow($result)){ 
 			$articles[] = Title::newFromID($row[0]);
 		}
 		return $articles;
+	}
+	function getCategoryTitlePage($category){
+		$db = wfGetDB( DB_REPLICA );
+		$result = $db->select(
+			'categorylinks',
+			'cl_from',
+			["cl_to = ".$db->addQuotes($category), 'cl_sortkey_prefix = "titlepage"'],
+			'MakePdfBook'
+		);
+		$numRows = $result->numRows();
+		if($numRows == 0){
+			return NULL;
+		} else if ($numRows == 1){
+			$row = $result->fetchRow();
+			return Title::newFromID($row[0]);
+		} else {
+			throw new Exception("There is more than one article in category $category labelled with sort key 'titlepage'. Please trim that down to one.");
+		}
 	}
 	function getCategoryId($category){
 		$db = wfGetDB( DB_REPLICA );
@@ -123,13 +141,12 @@ class SpecialMakePdfBook extends SpecialPage {
 			throw new Exception("We got more than one DB match for category $category. That should never happen.");
 		}
 	}
-	function getCacheHash($articles, $titlePage){
+	function getCacheHash($articles){
 		$cacheString = '\nFile sig: ' . md5(file_get_contents(__FILE__)); // the contents of the rendering code (this script),
-		
+		$cacheString = '\nFile sig: ' . md5(file_get_contents(dirname(__FILE__)."/../bin/template.tex")); // the contents of the tex template
 		foreach ($articles as $art){
 			$cacheString .= "\n" . $art->getPrefixedText() . ': ' . $art->getLatestRevID(); // and the latest revision(s) of the article(s)
 		}
-		$cacheString .= $titlePage ? "\n" . $titlePage . ": " . Title::newFromText($titlePage)->getLatestRevID() : "";
 		return md5($cacheString);
 	}
 
@@ -198,9 +215,10 @@ class SpecialMakePdfBook extends SpecialPage {
 
 		return $directoryName;
 	}
-	function renderPdf($outputDir, $outputFileName, $category, $articles, $titlePage){
+	function renderPdf($outputDir, $outputFileName, $category, $articles){
 		global $wgServer, $wgScriptPath;
 		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'MakePdfBook' );
+		$titlePage = $this->getCategoryTitlePage($category);
 		
 		$baseTempFileDir = $config->get( 'MakePdfBooktempFileDir' );
 
@@ -208,8 +226,7 @@ class SpecialMakePdfBook extends SpecialPage {
 		$tempFileDir = $this->createEmptyDirectory($baseTempFileDir, $category);
 
 		// Create the content temp files
-		if ($titlePage) {
-			$titlePage = Title::newFromText($titlePage);
+		if ($titlePage) {;
 			$titlepageFileName = "$tempFileDir/titlepage.html";
 			$this->writeArticleHtmlFile($titlePage, $titlepageFileName, true);
 		}
