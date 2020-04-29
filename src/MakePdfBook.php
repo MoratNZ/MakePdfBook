@@ -18,7 +18,6 @@ class SpecialMakePdfBook extends SpecialPage {
 		$output = $this->getOutput();
 		$this->setHeaders();
 
-
 		# Defaults for these config values are defined in extension.json
 		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig( 'MakePdfBook' );
 		
@@ -36,6 +35,9 @@ class SpecialMakePdfBook extends SpecialPage {
 		# Check that this is a valid category, and get its DB ID if it is.
 		# We don't actually care about the id, but want to use the exceptions for user feedback
 		# TODO if a category isn't set, dynamically build a page to offer all possible categories
+		if(! $category){
+			return $this->generateCategoryListPage();
+		}
 		try{
 			$category_id = $this->getCategoryId($category);
 			
@@ -46,8 +48,11 @@ class SpecialMakePdfBook extends SpecialPage {
 			$cacheFile = $this->getCacheHash($articles, $titlePage).".pdf";
 
 			// If the file doesn't exist, render the content now
-			if ($forceRebuild || !file_exists($cacheFileDir . $cacheFile)) {
+			if ($forceRebuild || !file_exists("$cacheFileDir/$cacheFile")) {
 				$this->renderPdf($cacheFileDir, $cacheFile, $category, $articles, $titlePage);
+				if(!file_exists("$cacheFileDir/$cacheFile")){
+					throw new Exception("PDF generation has somehow silently failed. I am confused and ashamed.");
+				}
 			}
 			# Return the PDF, or an error page if generation has failed.
 		} catch (Exception $e){
@@ -66,6 +71,22 @@ class SpecialMakePdfBook extends SpecialPage {
 		} else {
 			header( "Content-type: application/pdf" );
 			readfile("$cacheFileDir/$cacheFile");
+		}
+	}
+	function generateCategoryListPage(){
+		global $wgServer, $wgScriptPath;
+		$request = $this->getRequest();
+		$output = $this->getOutput();
+
+		$db = wfGetDB( DB_REPLICA );
+
+		$result = $db->select(
+			'category',
+			'cat_title'
+		);
+		while ($row = $db->fetchRow($result)){
+			$category = $row[0];
+			$output->addWikiTextAsInterface("[$wgServer$wgScriptPath/index.php/Special:MakePdfBook?category=$category   $category ]");
 		}
 	}
 	function getCategoryArticles($category){
@@ -147,7 +168,6 @@ class SpecialMakePdfBook extends SpecialPage {
 		} else {
 			$html  = utf8_decode("$h1  $text\n");
 		}
-		
 
 		file_put_contents($fileName, $html);
 	}
