@@ -159,7 +159,8 @@ my $lineCount = scalar(@lines);
 
 for(my $i = 0; $i < $lineCount; $i++){
     my $line = $lines[$i];
-    if($line =~ /^\\begin\{longtable\}\[\]\{@\{\}(.*)@\{\}\}$/){
+    if($line =~ /^\s*\\begin\{longtable\}\[\]\{@\{\}(.*)@\{\}\}$/){
+        #\begin{longtable}[]{@{}l@{}}
         my $columndefs = $1;
         my $count = length($columndefs);
         #$count += 1;
