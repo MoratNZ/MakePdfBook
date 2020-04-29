@@ -151,6 +151,11 @@ if($result){
 }
 
 # Modify the tex output, to account for pandoc's suboptimal preferences
+#
+# This next chunk is crude brute-force regex mangling. 
+# And the reason this work was spun out to a perl script rather than kept in php or 
+# farmed out to a civilised language like python
+
 open my $in, '<:encoding(utf8)','book.original.tex' or die("Error: couldn't open book.original.tex for reading - $!");
 my @lines = <$in>;
 close $in;
