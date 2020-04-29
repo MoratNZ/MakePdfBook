@@ -55,12 +55,90 @@ MIT
 my $directoryName = shift;
 my $outputFile = shift;
 
+# Check that the directory exists, and is a directory
+if(!(-e $directoryName && -d $directoryName)){
+    print "Error: $directoryName does not exist, or is not a directory\n";
+    exit 1;
+}
+if(!(-R $directoryName && -W $directoryName)){
+    print "Error: $directoryName must be both readable and writable\n";
+    exit 1;
+}
+chdir $directoryName;
+
 # Check whether the template file is present
+if( ! -e "template.tex"){
+    print "Error: template file $directoryName/template.tex does not exist\n";
+    exit 1;
+}
 
 # Check whether a titlepage is present
+my $titlepageFile;
 
-# Grab a list of all the chapters
+if( -e "titlepage.html"){
+    $titlepageFile = "titlepage.html";
+} 
+
+# Grab a list of all the chapters and sort them
+my @chapters = <"chapter-*.html">;
+
+@chapters = sort {substr($a, 8) <=> substr($b, 8)} @chapters;
+
+# If there is a titlepage, convert the HTML to tex
+my $cmd;
+my $titleOption;
+my $result;
+if($titlepageFile){
+    $cmd = "PATH=/usr/bin/: pandoc titlepage.html -o titlepage.tex 2>&1";
+    $result = `$cmd`;
+    if($result){
+        if( $result =~ /Cannot decode byte '(.*)'/){
+            my $badByte = $1;
+            print "Error converting titlepage to tex.\n".
+            "There is a special character (utf character code [$badByte]) that pandoc has trouble with\n".
+            "Unfortunately, you'll need to track it down and remove it.";
+        } else {
+            print "Error converting titlepage to tex - $result\n";
+        }
+        exit 1;
+    }
+    $titleOption = " --include-before-body titlepage.tex "
+} else {
+    $titleOption = "";
+}
+
+# Build the tex file for the body of the book
+my $sourceFileString = join(" ", @chapters);
+$cmd = "PATH=/usr/bin/: pandoc  -f html -t latex --template template.tex $titleOption -o book.tex $sourceFileString  2>&1";
+$result = `$cmd`;
+
+if($result){
+    if( $result =~ /Cannot decode byte '(.*)'/){
+        my $badByte = $1;
+        print "Error producing initial tex file for book.\n".
+        "There is a special character (utf character code [$badByte]) that pandoc has trouble with\n".
+        "Unfortunately, you'll need to track it down and remove it.\n";
+    } else {
+        print "Error producing initial tex file for book - $result\n";
+    }
+    exit 1;
+}
+
+# Modify the tex output, to account for pandoc's suboptimal preferences
+
+# Generate the PDF from the modified tex 
+$cmd = "PATH=/usr/bin/: pdflatex -halt-on-error -jobname temp book.tex 1>/dev/null";
+
+$result = `$cmd`; # creates the PDF with an empty TOC
+print $result;
+$result = `$cmd`; # Now there's a TOC, but the page numbers are wrong
+print $result;
+$result = `$cmd`; # Now the page numbers are right
+print $result;
+
+# Move the generated PDF to the output location
+
+rename "temp.pdf", $outputFile;
 
 
 
-printf "dir: %s\noutputFile:%s\n\n", $directoryName, $outputFile;

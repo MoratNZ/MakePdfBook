@@ -43,13 +43,12 @@ class SpecialMakePdfBook extends SpecialPage {
 			$articles = $this->getCategoryArticles($category);
 			
 			# Get the cache file name
-			$cacheFile = $this->getCacheHash($articles, $titlePage);
+			$cacheFile = $this->getCacheHash($articles, $titlePage).".pdf";
 
 			// If the file doesn't exist, render the content now
-			if ($forceRebuild || !file_exists($cacheDir . $cacheFile . ".pdf")) {
+			if ($forceRebuild || !file_exists($cacheFileDir . $cacheFile)) {
 				$this->renderPdf($cacheFileDir, $cacheFile, $category, $articles, $titlePage);
 			}
-
 			# Return the PDF, or an error page if generation has failed.
 		} catch (Exception $e){
 			$errorText = $e->getMessage();
@@ -62,27 +61,11 @@ class SpecialMakePdfBook extends SpecialPage {
 		} else if ($errorText){
 			header( "Content-type: text/html; charset=utf-8" );
 			print "<html><head></head><body><h1>Error creating PDF book</h1>";
-			print "<p>$errorText</p>";
+			print "<pre>$errorText</pre>";
 			print "</body></html>";
 		} else {
 			header( "Content-type: application/pdf" );
-			readfile("$cacheDir/$cacheFile.pdf");
-
-			// header( "Content-type: text/html; charset=utf-8" );
-			// print "<html><head></head><body><h1>It Worked!</h1>";
-			// print "<p>category = [$category]</p>";
-			// print "<p>titlePage = [$titlePage]</p>";
-			// print "<p>template = [$template]</p>";
-			// print "<p>forceRebuild = [$forceRebuild]</p>";
-			// print "</body></html>";
-			// print "$second_query";
-
-			// print "<p>There were $article_count articles:</p><ul>";
-			// foreach($articles as $art){
-			// 	print "<li>".$art->getPrefixedText()."</li>";
-			// }
-			// print "</ul>";
-			#$output->addWikiTextAsInterface( $wikitext );
+			readfile("$cacheFileDir/$cacheFile");
 		}
 	}
 	function getCategoryArticles($category){
@@ -119,7 +102,6 @@ class SpecialMakePdfBook extends SpecialPage {
 			throw new Exception("We got more than one DB match for category $category. That should never happen.");
 		}
 	}
-
 	function getCacheHash($articles, $titlePage){
 		$cacheString = '\nFile sig: ' . md5(file_get_contents(__FILE__)); // the contents of the rendering code (this script),
 		
@@ -130,7 +112,7 @@ class SpecialMakePdfBook extends SpecialPage {
 		return md5($cacheString);
 	}
 	function writeArticleHtmlFile($title, $fileName){
-		global $wgUploadDirectory, $wgScriptPath, $wgUser;
+		global $wgUploadDirectory, $wgScriptPath, $wgUser, $wgServer;
 		
 		$scriptPath = $wgServer . $wgScriptPath;
 		$opt = ParserOptions::newFromUser($wgUser);
@@ -213,7 +195,7 @@ class SpecialMakePdfBook extends SpecialPage {
 
 		// Create the content temp files
 		if ($titlePage) {
-			$titlPage = Title::newFromText($titlePage)
+			$titlePage = Title::newFromText($titlePage);
 			$titlepageFileName = "$tempFileDir/titlepage.html";
 			$this->writeArticleHtmlFile($titlePage, $titlepageFileName);
 		}
@@ -230,32 +212,12 @@ class SpecialMakePdfBook extends SpecialPage {
 		copy(dirname(__FILE__)."/../bin/template.tex", "$tempFileDir/template.tex");
 
 		// Call out to the book assembler
-		$cmd = dirname(__FILE__)."../bin/makePdfBook.pl $tempFileDir $outputDir/$outputFileName";
-		throw new Exception($cmd);
-		return;
+		$cmd = dirname(__FILE__)."/../bin/makePdfBook.pl $tempFileDir $outputDir/$outputFileName";
+		$shellResult = shell_exec($cmd);
 
-		// Build the pandoc command
-		$cover = $titlePage ? "cover $titlepageFile"  : "";
-
-		$tempTexFile = "$tempFileDir/pandoc-$category-tmpFile.tex";
-		$templateFile = dirname(__FILE__)."/../bin/template.tex";
-		$cmd = "PATH=/usr/bin/: pandoc -s $pandocFileString -f html -t latex $titleOption --template  $templateFile -s $pandocFileString -o $tempTexFile";
-
-		throw new Exception($cmd);
-		// Build the tex file for the book
-		$shellResult = shell_exec("$cmd ");
-
-		throw new Exception($shellResult);
-
-		// Run modification scripts on the tex output
-		$cmd = escapeshellcmd("$pandocPath/texFix.pl $tempTexFile 2>>$debugFileDir/pandocpdefbook.errlog");
-		$shellResult = shell_exec("$cmd ");
-
-		// Generate the pdf from the modified tex
-		$cmd = "PATH=/usr/bin/: pdflatex -jobname $fileName -output-directory $outputDir $tempTexFile";
-		$shellResult1 = shell_exec("$cmd ");
-		$shellResult2 = shell_exec("$cmd ");
-		$shellResult3 = shell_exec("$cmd "); # generation run twice to ensure Table of Contents generates correctly
+		if($shellResult){
+			throw new Exception($shellResult);
+		} 
 
 }
 }

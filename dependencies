@@ -1,7 +1,9 @@
 mediawiki >1.34
 perl 5
 pandoc >=1.19.2.4
-
+pdflatex
+texlive-latex-base
+texlive-latex-extra
 
 dev
 perl-doc
