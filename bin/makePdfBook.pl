@@ -216,7 +216,7 @@ for(my $i = 0; $i < $lineCount; $i++){
         $converted_file_name = sprintf "%s/%s", $directoryName, $converted_file_name;
 
         # convert the SVG to a PNG
-        my $cmd = "/usr/bin/inkscape -z -e \"$converted_file_name\" $img_file 2>&1";
+        my $cmd = "/usr/bin/inkscape -z -d 300 -e \"$converted_file_name\" $img_file 2>&1";
 
         $result = `$cmd`;
         if($result =~ /:\s+ERROR/){
