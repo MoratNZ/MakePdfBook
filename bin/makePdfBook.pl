@@ -10,6 +10,7 @@ makePdfBook.pl
 =head1 SYNOPSIS
 
 makePdfBook.pl directoryName outputFileName
+Outputs only on error.
 
 =over 8
 
@@ -211,9 +212,10 @@ for(my $i = 0; $i < $lineCount; $i++){
         # convert the SVG to a PNG
         my $cmd = "/usr/bin/inkscape -z -e \"$converted_file_name\" $img_file";
 
-        print $cmd;
-
-        `$cmd`;
+        $result = `$cmd`;
+        if($result =~ /Error/i){
+            print $result;
+        }
 
         $line =~ s/$img_file/$converted_file_name/;
     }
