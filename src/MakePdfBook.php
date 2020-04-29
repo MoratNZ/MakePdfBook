@@ -103,7 +103,7 @@ class SpecialMakePdfBook extends SpecialPage {
 		$result = $db->select(
 			'categorylinks',
 			'cl_from',
-			["cl_to = ".$db->addQuotes($category), 'cl_sortkey_prefix != "titlepage"'],
+			["cl_to = ".$db->addQuotes($category), 'cl_sortkey_prefix not like "%titlepage%"'],
 			'MakePdfBook',
 			array('ORDER BY' => 'cl_sortkey')
 		);
@@ -117,7 +117,7 @@ class SpecialMakePdfBook extends SpecialPage {
 		$result = $db->select(
 			'categorylinks',
 			'cl_from',
-			["cl_to = ".$db->addQuotes($category), 'cl_sortkey_prefix = "titlepage"'],
+			["cl_to = ".$db->addQuotes($category), 'cl_sortkey_prefix like "%titlepage%"'],
 			'MakePdfBook'
 		);
 		$numRows = $result->numRows();
@@ -260,4 +260,3 @@ class SpecialMakePdfBook extends SpecialPage {
 
 }
 }
-?>

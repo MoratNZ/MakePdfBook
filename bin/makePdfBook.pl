@@ -114,7 +114,7 @@ if($titlepageFile){
     close $in;
 
     $content =~ s/\\%pagebreak\\%/\\newpage\n/ig;
-    $content =~ s/\\%startHuge\\%/\\Huge\n/ig;
+    $content =~ s/\\%startHuge\\%/\n\\Huge\n/ig;
     $content =~ s/\\%startCenter\\%/\\begin{center}\n/ig;
     $content =~ s/\\%endHuge\\%/\\normalsize\n/ig;
     $content =~ s/\\%endCenter\\%/\\end{center}\n/ig;
@@ -210,11 +210,11 @@ for(my $i = 0; $i < $lineCount; $i++){
         $converted_file_name = sprintf "%s/%s", $directoryName, $converted_file_name;
 
         # convert the SVG to a PNG
-        my $cmd = "/usr/bin/inkscape -z -e \"$converted_file_name\" $img_file";
+        my $cmd = "/usr/bin/inkscape -z -e \"$converted_file_name\" $img_file 2>&1";
 
         $result = `$cmd`;
-        if($result =~ /Error/i){
-            print $result;
+        if($result =~ /:\s+ERROR/){
+            printf "Error converting %s - %s", $img_file, $result;
         }
 
         $line =~ s/$img_file/$converted_file_name/;
