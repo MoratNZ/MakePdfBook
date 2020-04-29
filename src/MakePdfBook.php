@@ -111,7 +111,8 @@ class SpecialMakePdfBook extends SpecialPage {
 		$cacheString .= $titlePage ? "\n" . $titlePage . ": " . Title::newFromText($titlePage)->getLatestRevID() : "";
 		return md5($cacheString);
 	}
-	function writeArticleHtmlFile($title, $fileName){
+
+	function writeArticleHtmlFile($title, $fileName, $treatAsTitlepage=false){
 		global $wgUploadDirectory, $wgScriptPath, $wgUser, $wgServer;
 		
 		$scriptPath = $wgServer . $wgScriptPath;
@@ -138,22 +139,15 @@ class SpecialMakePdfBook extends SpecialPage {
 		$pUrl = parse_url($scriptPath);
 		$imgpath = str_replace('/', '\/', $pUrl['path'] . '/' . basename($wgUploadDirectory)); // the image's path
 		$text = preg_replace("|(<img[^>]+?src=\"$imgpath)(/.+?>)|", "<img src=\"$wgUploadDirectory$2", $text);
-		$text = preg_replace("|<div\s*class=['\"]?noprint[\"']?>.+?</div>|s", "", $text); // non-printable areas
-		$text = preg_replace("|@{4}([^@]+?)@{4}|s", "<!--$1-->", $text);                  // HTML comments hack
-		$text = preg_replace_callback(
-			"|<span[^>]+class=\"mw-headline\"[^>]*>(.+?)</span>|",
-			function ($m) {
-				return preg_match('|id="(.+?)"|', $m[0], $n) ? "<a name=\"$n[1]\">$m[1]</a>" : $m[0];
-			},
-			$text
-		); // Make the doc heading spans in to A tags
-
-		#######
 
 		$titleText = basename($titleText);
 		$h1 =  "<center><h1>$titleText</h1></center>";
-
-		$html  = utf8_decode("$h1  $text\n");
+		if($treatAsTitlepage){
+			$html  = utf8_decode("$text\n");
+		} else {
+			$html  = utf8_decode("$h1  $text\n");
+		}
+		
 
 		file_put_contents($fileName, $html);
 	}
@@ -197,7 +191,7 @@ class SpecialMakePdfBook extends SpecialPage {
 		if ($titlePage) {
 			$titlePage = Title::newFromText($titlePage);
 			$titlepageFileName = "$tempFileDir/titlepage.html";
-			$this->writeArticleHtmlFile($titlePage, $titlepageFileName);
+			$this->writeArticleHtmlFile($titlePage, $titlepageFileName, true);
 		}
 
 		$articleCount = 0;
@@ -212,7 +206,7 @@ class SpecialMakePdfBook extends SpecialPage {
 		copy(dirname(__FILE__)."/../bin/template.tex", "$tempFileDir/template.tex");
 
 		// Call out to the book assembler
-		$cmd = dirname(__FILE__)."/../bin/makePdfBook.pl $tempFileDir $outputDir/$outputFileName";
+		$cmd = dirname(__FILE__)."/../bin/makePdfBook.pl $tempFileDir $outputDir/$outputFileName 2>&1";
 		$shellResult = shell_exec($cmd);
 
 		if($shellResult){

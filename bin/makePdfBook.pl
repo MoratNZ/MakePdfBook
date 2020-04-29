@@ -102,6 +102,28 @@ if($titlepageFile){
         }
         exit 1;
     }
+    # wrap some tex around the titlepage, to make it titlepagier
+
+    my $prepends = "\\setcounter{secnumdepth}{0}\n\\thispagestyle{empty}";
+    my $postpends = "\\setcounter{secnumdepth}{3}";
+
+    open my $in, '<:encoding(utf8)','titlepage.tex' or die("Error: couldn't open titlepage.tex for reading - $!");
+    local $/ = undef;
+    my $content = <$in>;
+    close $in;
+
+    $content =~ s/\\%pagebreak\\%/\\newpage\n/ig;
+    $content =~ s/\\%startTitle\\%/\\begin{center}\n\\Huge\n/ig;
+    $content =~ s/\\%endTitle\\%/\\normalsize\n\\end{center}\n/ig;
+    $content =~ s/\\%vspace\\%(\d+?)\\%/\\vspace{\1mm}\n/ig;
+    
+    open my $out, '>:encoding(utf8)', 'titlepage.tex' or die("Error: couldn't open titlepage.tex for writing - $!");
+    printf $out "%s\n%s\n%s", 
+        $prepends,
+        $content,
+        $postpends;
+    close $out;
+
     $titleOption = " --include-before-body titlepage.tex "
 } else {
     $titleOption = "";
@@ -109,7 +131,7 @@ if($titlepageFile){
 
 # Build the tex file for the body of the book
 my $sourceFileString = join(" ", @chapters);
-$cmd = "PATH=/usr/bin/: pandoc  -f html -t latex --template template.tex $titleOption -o book.tex $sourceFileString  2>&1";
+$cmd = "PATH=/usr/bin/: pandoc  -f html -t latex --template template.tex $titleOption -o book.original.tex $sourceFileString  2>&1";
 $result = `$cmd`;
 
 if($result){
@@ -125,16 +147,105 @@ if($result){
 }
 
 # Modify the tex output, to account for pandoc's suboptimal preferences
+open my $in, '<:encoding(utf8)','book.original.tex' or die("Error: couldn't open book.original.tex for reading - $!");
+my @lines = <$in>;
+close $in;
+
+my $lineCount = scalar(@lines);
+
+for(my $i = 0; $i < $lineCount; $i++){
+    my $line = $lines[$i];
+    if($line =~ /^\\begin\{longtable\}\[\]\{@\{\}(.*)@\{\}\}$/){
+        my $columndefs = $1;
+        my $count = length($columndefs);
+        #$count += 1;
+        my $width = 1/$count;
+       
+        my @lineArray;
+        my $textwidth = 160; # A4 paper width of 210mm less 2x 25mm margin
+        my $columnMargins = 4;
+        for(my $i = 0; $i<$count; $i++){
+            push @lineArray, sprintf("m{%.1f"."mm}", ($width*$textwidth - $columnMargins));
+        }
+
+        if($lines[$i + 1] =~ /caption/){ # The next line is a caption
+            my $offset = 1;
+            my $captionLine = "";
+
+            while ($captionLine !~ /\}/ && $offset < 100){
+                $captionLine .= sprintf(" %s", $lines[$i + $offset]);
+                $lines[$i + $offset] = "";
+                $offset++;
+            }
+            $line = sprintf "\\begin{table}[hbt!]\n%s\\begin{tabular}{|%s|}\n", $captionLine, join("|",  @lineArray);
+        } else {
+            $line = sprintf("\\begin{table}[hbt!]\n\\begin{tabular}{|%s|}\n", join("|", @lineArray));
+        }
+    } elsif ($line =~ /\\tabularnewline/){
+        $line =~ s/\\tabularnewline/\\tabularnewline \\hline/;
+    } elsif ($line =~ /\\(top|mid|bottom)rule/){
+        $lines[$i - 1] =~ s/\\hline//;
+    } elsif ($line =~ /\\end\{longtable\}/){
+        $line = "\\end{tabular}\n\\end{table}\n";
+    } elsif ($line =~ /\\endfirsthead/){
+        $lines[$i] = "";
+        until($line =~ /\\endhead/){
+            $lines[$i] = "";
+            $i += 1;
+            $line = $lines[$i]
+        }
+        $line = "";
+    } elsif ($line =~ /endhead/){
+        $line = "";
+    } elsif ($line =~ /includegraphics(?:\[\S+\])?\{(\S+.svg)\}/){
+        my $img_file = $1;
+
+        my $converted_file_name = $img_file;
+        $converted_file_name =~ s/.*\///;
+        $converted_file_name =~ s/\.svg/.png/;
+        $converted_file_name = sprintf "%s/%s", $directoryName, $converted_file_name;
+
+        # convert the SVG to a PNG
+        my $cmd = "/usr/bin/inkscape -z -e \"$converted_file_name\" $img_file";
+
+        print $cmd;
+
+        `$cmd`;
+
+        $line =~ s/$img_file/$converted_file_name/;
+    }
+
+    $line =~ s/\\begin\{minipage\}\[\S+\]\{\S+\\columnwidth\}//;
+    $line =~ s/\\end\{minipage\}//;
+
+    $lines[$i] = $line;
+}
+
+# dump content array into a single string
+my $content = join "", @lines;
+
+# to allow an easier fix of double quotes
+$content =~ s/\"(.*?)\"/``$1''/gs;
+
+
+open( my $out, '>:encoding(utf8)', 'book.tex') or die("Unable to open file book.tex to wrwite revised version - $!");
+print $out $content;
+close $out;
 
 # Generate the PDF from the modified tex 
-$cmd = "PATH=/usr/bin/: pdflatex -halt-on-error -jobname temp book.tex 1>/dev/null";
+$cmd = "PATH=/usr/bin/: pdflatex -halt-on-error -jobname temp book.tex";
 
-$result = `$cmd`; # creates the PDF with an empty TOC
-print $result;
-$result = `$cmd`; # Now there's a TOC, but the page numbers are wrong
-print $result;
-$result = `$cmd`; # Now the page numbers are right
-print $result;
+for(my $i = 0; $i<3; $i++){
+    # We regenerate the PDF three times so that the ToC works correctly.
+    # the first run has an empty ToC, 
+    # the second run has a ToC with incorrect page numbers
+    # the third run is Just Right.
+
+    $result = `$cmd`;
+    if($result =~ /Fatal error occurred/){
+        print $result;
+    }
+}
 
 # Move the generated PDF to the output location
 
