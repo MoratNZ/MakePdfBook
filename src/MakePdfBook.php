@@ -84,25 +84,34 @@ class SpecialMakePdfBook extends SpecialPage {
 			'cat_title',
 			'cat_pages > 0'
 		);
+
+		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!titlepage\n";
+
 		while ($row = $db->fetchRow($result)){
 			$category = $row[0];
 
 			$categoryTitlepage = $this->getCategoryTitlePage($category);
 
+			$textString .= "|-\n".
+				"|[$wgServer$wgScriptPath/index.php/Category:$category  $category]\n".
+				"|[$wgServer$wgScriptPath/index.php/Special:MakePdfBook?category=$category   pdf]\n";
+
 			if($categoryTitlepage){
-				$textString = "[$wgServer$wgScriptPath/index.php/Special:MakePdfBook?category=$category   $category ] [[".$categoryTitlepage->getPrefixedDBkey()."|<titlepage>]]";
+				$textString .= "|[".$categoryTitlepage->getPrefixedDBkey()."|[[$categoryTitlepage]]\n";
 			} else {
-				$textString = "[$wgServer$wgScriptPath/index.php/Special:MakePdfBook?category=$category   $category ]";
+				$textString .= "|\n";
 			}
+		}
+		$textString .= "|}\n";
 
-			
-
-			if(method_exists($output, "addWikiTextAsInterface")){
-				$output->addWikiTextAsInterface($textString); # mediawiki >= 1.34
-			} else {
-				$output->addWikiText($textString);
-			}
-			
+		$this->writeWikiText($textString);
+	}
+	function writeWikiText($textString){
+		$output = $this->getOutput();
+		if(method_exists($output, "addWikiTextAsInterface")){
+			$output->addWikiTextAsInterface($textString); # mediawiki >= 1.34
+		} else {
+			$output->addWikiText($textString);
 		}
 	}
 	function getCategoryArticles($category){
