@@ -135,7 +135,8 @@ if($titlepageFile){
 
 # Build the tex file for the body of the book
 my $sourceFileString = join(" ", @chapters);
-$cmd = "PATH=/usr/bin/: pandoc  -f html -t latex --template template.tex $titleOption -o book.original.tex $sourceFileString  2>&1";
+my $templateFile = "template.tex"
+$cmd = "PATH=/usr/bin/: pandoc  -f html -t latex --template $templateFile $titleOption -o book.original.tex $sourceFileString  2>&1";
 $result = `$cmd`;
 
 if($result){
