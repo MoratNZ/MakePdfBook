@@ -1,0 +1,40 @@
+\documentclass[12pt, a4paper]{book}
+\usepackage[a4paper, margin=25mm]{geometry}
+
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{4pt}\setlength{\parskip}{4pt}}
+
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{caption}
+\usepackage{hyperref}
+\usepackage{parskip}
+\usepackage{draftwatermark} \SetWatermarkScale{6}
+
+\widowpenalty10000
+\clubpenalty10000
+\raggedbottom
+\raggedright
+
+\captionsetup[table]{labelformat=empty}
+
+\hypersetup{colorlinks=false}
+
+\usepackage{fancyhdr}
+
+\fancyhf{}
+\fancyfoot[RO,LE]{Draft PDF generated: \today}
+\fancyfoot[C]{\thepage}
+\pagestyle{fancy}
+
+\begin{document}
+
+$include-before$
+
+\setcounter{tocdepth}{3}
+\tableofcontents
+
+$body$
+
+\end{document}

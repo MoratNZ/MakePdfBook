@@ -135,7 +135,7 @@ if($titlepageFile){
 
 # Build the tex file for the body of the book
 my $sourceFileString = join(" ", @chapters);
-my $templateFile = "template.tex"
+my $templateFile = "template.tex";
 $cmd = "PATH=/usr/bin/: pandoc  -f html -t latex --template $templateFile $titleOption -o book.original.tex $sourceFileString  2>&1";
 $result = `$cmd`;
 
@@ -145,6 +145,52 @@ if($result){
         print "Error producing initial tex file for book.\n".
         "There is a special character (utf character code [$badByte]) that pandoc has trouble with\n".
         "Unfortunately, you'll need to track it down and remove it.\n";
+    } elsif ($result =~ /UTF-8 decoding error in (\S+) at byte offset (\S+)/){
+        my $chapter_file = $1;
+        my $character_position = int($2);
+ 
+
+        my $context_amount = 40;
+
+        open(FILE, "<", $chapter_file) or die("Error reading in $chapter_file trying to find bad byte at position $character_position - $!");
+        my $file_content;
+        {
+            local $/;
+            $file_content = <FILE>;
+        }
+        close FILE;
+
+        my $title_guess = "";
+        if($file_content =~ /\<h1\>(.*?)\<\/h1\>/){
+            $title_guess = $1;
+        }
+
+
+
+        my $start_pos;
+        my $end_pos = length $file_content;
+
+        if($character_position > ($context_amount/2)){
+            $start_pos = int($character_position - $context_amount/2);
+        } else {
+            $start_pos = 0;
+        }
+
+        my $context_snippet = substr($file_content, $start_pos, $context_amount);
+
+        $context_snippet =~ s/\</&lt;/g;
+        $context_snippet =~ s/\>/&gt;\n/g;
+
+    
+        printf "There is a problematic character at byte position %s in file %s %s . Here is %s characters of context starting from character %s \n%s\n%s\n%s",
+            $character_position, 
+            $chapter_file, 
+            $title_guess ? "(My best guess is that this is the '$title_guess' chapter)" : "",
+            $context_amount,
+            $start_pos,
+            "-" x 40,
+            $context_snippet,
+            "-" x 40,;
     } else {
         print "Error producing initial tex file for book - $result\n";
     }
@@ -166,7 +212,8 @@ my $lineCount = scalar(@lines);
 for(my $i = 0; $i < $lineCount; $i++){
     my $line = $lines[$i];
     if($line =~ /^\s*\\begin\{longtable\}\[\]\{@\{\}(.*)@\{\}\}$/){
-        #\begin{longtable}[]{@{}l@{}}
+        # Regex matches:
+        # \begin{longtable}[]{@{}l@{}}
         my $columndefs = $1;
         my $count = length($columndefs);
         #$count += 1;
