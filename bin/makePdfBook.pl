@@ -133,6 +133,33 @@ if($titlepageFile){
     $titleOption = "";
 }
 
+# Do some cleanup on the HTML files, to remove a bunch of extraneous crap that mediawiki leaves in on export
+
+foreach my $chapter (@chapters){
+    open my $in, '<:encoding(utf8)', $chapter or die("Error: couldn't open $chapter for reading - $!");
+    chomp (my @lines = <$in>);
+    close $in;
+    
+    my @output;
+
+    foreach my $line (@lines){
+        $line =~s/&#8804;/SYMBOLlessThanOrEqualToSYMBOL/g;
+        $line =~ s/<div class="thumbinner".*?(<img src=.*?\/>).*?<div class="thumbcaption"><div.*?<a.*?<\/a><\/div>(.*?)<\/div>/<figure>\1<figcaption>\2<\/figcaption><\/figure>/;
+#<div class="thumbinner" style="width:302px;"><a href="/mediawiki/index.php/File:Fencing_Handbook_2020_Figure_1.png" class="image"><img src="/var/lib/mediawiki-1.34.0/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/300px-Fencing_Handbook_2020_Figure_1.png" decoding="async" width="300" height="291" class="thumbimage" srcset="/mediawiki/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/450px-Fencing_Handbook_2020_Figure_1.png 1.5x, /mediawiki/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/600px-Fencing_Handbook_2020_Figure_1.png 2x" /></a>  <div class="thumbcaption"><div class="magnify"><a href="/mediawiki/index.php/File:Fencing_Handbook_2020_Figure_1.png" class="internal" title="Enlarge"></a></div>Figure 1. With the handle vertical, the tip must touch the ground. In this example, the sword on the left is allowed, the sword on the right is not.</div></div><
+
+
+
+        push @output, $line;
+    }
+
+    
+    open my $out, '>', $chapter or die("Error: couldn't open $chapter for writing - $!");
+    print $out @output;
+    close $out;
+
+}
+
+
 # Build the tex file for the body of the book
 my $sourceFileString = join(" ", @chapters);
 my $templateFile = "template.tex";
@@ -283,8 +310,10 @@ for(my $i = 0; $i < $lineCount; $i++){
 # dump content array into a single string
 my $content = join "", @lines;
 
-# to allow an easier fix of double quotes
+# to allow an easier fix of double quotes and other character issues
 $content =~ s/\"(.*?)\"/``$1''/gs;
+
+$content =~ s/SYMBOLlessThanOrEqualToSYMBOL/\$\\leq\$/gs;
 
 
 open( my $out, '>:encoding(utf8)', 'book.tex') or die("Unable to open file book.tex to wrwite revised version - $!");
