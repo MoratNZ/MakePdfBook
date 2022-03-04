@@ -267,7 +267,7 @@ class SpecialMakePdfBook extends SpecialPage
 		$baseTempFileDir = $config->get('MakePdfBooktempFileDir');
 
 		# Check whether this is a draft
-		if (strpos(strtolower($category), "draft")) {
+		if (is_int(strpos(strtolower($category), "draft"))) {
 			$isDraft = true;
 		} else {
 			$isDraft = false;
