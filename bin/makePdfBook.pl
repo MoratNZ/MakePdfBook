@@ -292,12 +292,15 @@ for(my $i = 0; $i < $lineCount; $i++){
         $converted_file_name = sprintf "%s/%s", $directoryName, $converted_file_name;
 
         # convert the SVG to a PNG
-        my $cmd = "/usr/bin/inkscape -z -d 300 -e \"$converted_file_name\" $img_file 2>&1";
+        my $cmd = "/usr/bin/inkscape --export-dpi 300 --export-filename \"$converted_file_name\" $img_file 2>&1";
+
+        #TODO add better handling of errors in this section
 
         $result = `$cmd`;
         if($result =~ /:\s+ERROR/){
             printf "Error converting %s - %s", $img_file, $result;
         }
+
 
         $line =~ s/$img_file/$converted_file_name/;
     }
