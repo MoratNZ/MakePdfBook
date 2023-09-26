@@ -28,7 +28,14 @@
 \fancyfoot[C]{\thepage}
 \pagestyle{fancy}
 
-\renewcommand{\thesection}{\arabic{section}}
+% Lochac section numbering
+% \renewcommand{\thesection}{\arabic{section}}
+
+% Society section numbering
+\renewcommand{\thechapter}{\Roman{chapter}}
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\alph{subsubsection}}
 
 \begin{document}
 
