@@ -29,15 +29,16 @@
 \fancyfoot[C]{\thepage}
 \pagestyle{fancy}
 
+\setcounter{secnumdepth}{5}
+
 % Lochac section numbering
 % \renewcommand{\thesection}{\arabic{section}}
 
 % Society section numbering
-\renewcommand{\thesection}{\Roman{section}}
-\renewcommand{\thesubsection}{\Alpha{subsection}}
-\renewcommand{\thesubsubsection}{\arabic{subsubsection}}
-\renewcommand{\thesubsubsubsection}{\alpha{subsubsubsection}}
-\renewcommand{\thesubsubsubsubsection}{\roman{subsubsubsubsection}}
+\renewcommand{\thechapter}{\Roman{chapter}}
+\renewcommand{\thesection}{\Alph{section}}
+\renewcommand{\thesubsection}{\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\alph{subsubsection}}
 
 \begin{document}
 \raggedright
