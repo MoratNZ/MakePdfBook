@@ -29,8 +29,12 @@
 \fancyfoot[C]{\thepage}
 \pagestyle{fancy}
 
+\titleclass{\subsubsubsection}{straight}[\subsection]
+\newcounter{subsubsubsection}[subsubsection]
+\def\toclevel@subsubsubsection{4}
+
 \renewcommand{\numberline}[1]{#1~}
-\setcounter{secnumdepth}{5}
+\setcounter{secnumdepth}{7}
 
 % Lochac section numbering
 % \renewcommand{\thesection}{\arabic{section}}
@@ -40,6 +44,7 @@
 \renewcommand{\thesection}{\Alph{section}}
 \renewcommand{\thesubsection}{\arabic{subsection}}
 \renewcommand{\thesubsubsection}{\alph{subsubsection}}
+\renewcommand{\thesubsubsubsection}{\roman{subsubsection}}
 
 \begin{document}
 \raggedright
