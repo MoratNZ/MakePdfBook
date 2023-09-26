@@ -29,7 +29,15 @@
 \fancyfoot[C]{\thepage}
 \pagestyle{fancy}
 
-\renewcommand{\thesection}{\arabic{section}}
+% Lochac section numbering
+% \renewcommand{\thesection}{\arabic{section}}
+
+% Society section numbering
+\renewcommand{\thesection}{\Roman{section}}
+\renewcommand{\thesubsection}{\Alpha{subsection}}
+\renewcommand{\thesubsubsection}{\arabic{subsubsection}}
+\renewcommand{\thesubsubsubsection}{\alpha{subsubsubsection}}
+\renewcommand{\thesubsubsubsubsection}{\roman{subsubsubsubsection}}
 
 \begin{document}
 \raggedright
