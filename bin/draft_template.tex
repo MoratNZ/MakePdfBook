@@ -11,6 +11,7 @@
 \usepackage{hyperref}
 \usepackage{parskip}
 \usepackage{draftwatermark} \SetWatermarkScale{6}
+\usepackage{titlesec}
 
 \widowpenalty10000
 \clubpenalty10000
@@ -28,27 +29,24 @@
 \fancyfoot[C]{\thepage}
 \pagestyle{fancy}
 
-\titleclass{\subsubsubsection}{straight}[\subsection]
-\newcounter{subsubsubsection}[subsubsection]
-\def\toclevel@subsubsubsection{4}
-
-\renewcommand{\numberline}[1]{#1~}
-\setcounter{secnumdepth}{7}
 
 % Lochac section numbering
 % \renewcommand{\thesection}{\arabic{section}}
 
 % Society section numbering
-\renewcommand{\thechapter}{\Roman{chapter}}
-\renewcommand{\thesection}{\Alph{section}}
-\renewcommand{\thesubsection}{\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\alph{subsubsection}}
-\renewcommand{\thesubsubsubsection}{\roman{subsubsection}}
+\titleformat{\chapter}[hang]{\normalfont\bfseries\LARGE}{\Roman{chapter}}{1em}{}[]
+\titleformat{\section}[hang]{\normalfont\bfseries\Large}{\Alph{section}}{1em}{}[]
+\titleformat{\subsection}[hang]{\normalfont\bfseries\large}{\Alph{section}.\arabic{subsection}}{1em}{}[]
+\titleformat{\subsubsection}[hang]{\normalfont\bfseries}{\Alph{section}.\arabic{subsection}.\alph{subsubsection}}{1em}{}[]
+\titleformat{\paragraph}[hang]{\normalfont\bfseries\small}{\Alph{section}.\arabic{subsection}.\alph{subsubsection}.\roman{paragraph}}{1em}{}
+
+\renewcommand{\numberline}[1]{#1~}
 
 \begin{document}
 
 $include-before$
 
+\setcounter{secnumdepth}{5}
 \setcounter{tocdepth}{3}
 \tableofcontents
 
