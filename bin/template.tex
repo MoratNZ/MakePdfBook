@@ -11,6 +11,7 @@
 \usepackage{hyperref}
 \usepackage{parskip}
 \usepackage{xcolor}
+\usepackage{titlesec}
 
 \widowpenalty10000
 \clubpenalty10000
@@ -29,22 +30,25 @@
 \fancyfoot[C]{\thepage}
 \pagestyle{fancy}
 
-\titleclass{\subsubsubsection}{straight}[\subsection]
-\newcounter{subsubsubsection}[subsubsection]
-\def\toclevel@subsubsubsection{4}
-
-\renewcommand{\numberline}[1]{#1~}
-\setcounter{secnumdepth}{7}
-
 % Lochac section numbering
 % \renewcommand{\thesection}{\arabic{section}}
 
 % Society section numbering
-\renewcommand{\thechapter}{\Roman{chapter}}
-\renewcommand{\thesection}{\Alph{section}}
-\renewcommand{\thesubsection}{\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\alph{subsubsection}}
-\renewcommand{\thesubsubsubsection}{\roman{subsubsection}}
+\titleformat{\chapter}[hang]{}{\Roman{chapter}}{1em}{}[]
+\titleformat{\section}[hang]{}{\Alph{section}}{1em}{}[]
+\titleformat{\subsection}[hang]{}{\arabic{subsection}}{1em}{}[]
+\titleformat{\subsubsection}[hang]{}{\alph{subsubsection}{1em}{}[]
+
+
+\titleclass{\subsubsubsection}{straight}[\subsection]
+\newcounter{subsubsubsection}[subsubsection]
+\def\toclevel@subsubsubsection{4}
+\titleformat{\subsubsubsection}[hang]{}{\roman{subsubsubsection}{1em}{}[]
+
+
+\renewcommand{\numberline}[1]{#1~}
+\setcounter{secnumdepth}{5}
+
 
 \begin{document}
 \raggedright
