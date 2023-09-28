@@ -30,16 +30,12 @@
 \fancyfoot[C]{\thepage}
 \pagestyle{fancy}
 
-% Lochac section numbering
-% \renewcommand{\thesection}{\arabic{section}}
-
-% Society section numberin
-% Society section numbering
-\titleformat{\chapter}[hang]{\normalfont\bfseries\LARGE}{\Roman{chapter}}{1em}{}[]
-\titleformat{\section}[hang]{\normalfont\bfseries\Large}{\Alph{section}}{1em}{}[]
-\titleformat{\subsection}[hang]{\normalfont\bfseries\large}{\Alph{section}.\arabic{subsection}}{1em}{}[]
-\titleformat{\subsubsection}[hang]{\normalfont\bfseries}{\Alph{section}.\arabic{subsection}.\alph{subsubsection}}{1em}{}[]
-\titleformat{\paragraph}[hang]{\normalfont\bfseries\small}{\Alph{section}.\arabic{subsection}.\alph{subsubsection}.\roman{paragraph}}{1em}{}
+% section numbering
+\titleformat{\chapter}[hang]{\normalfont\bfseries\LARGE}{\thechapter}{1em}{}[]
+\titleformat{\section}[hang]{\normalfont\bfseries\Large}{\thesection}{1em}{}[]
+\titleformat{\subsection}[hang]{\normalfont\bfseries\large}{\thesubsection}{1em}{}[]
+\titleformat{\subsubsection}[hang]{\normalfont\bfseries}{\thesubsubsection}{1em}{}[]
+\titleformat{\paragraph}[hang]{\normalfont\bfseries\small}{\theparagraph}{1em}{}
 
 \renewcommand{\numberline}[1]{#1~}
 
