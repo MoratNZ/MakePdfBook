@@ -52,6 +52,8 @@ MIT
 
 =cut
 
+my $filthyHack = 1;
+
 # Grab the command line arguments
 my $directoryName = shift;
 my $outputFile = shift;
@@ -308,6 +310,12 @@ for(my $i = 0; $i < $lineCount; $i++){
     $line =~ s/\\begin\{minipage\}\[\S+\]\{\S+\\columnwidth\}//;
     $line =~ s/\\end\{minipage\}//;
 
+    # And now employ a filthy hack to deal with a pandoc html>tex regression
+
+    $line =~ s/^.section/\\chapter/;
+    $line =~ s/^.subsection/\\section/;
+    $line =~ s/^.subsubsection/\\subsection/;
+
     $lines[$i] = $line;
 }
 
@@ -321,7 +329,8 @@ $content =~ s/SYMBOLlessThanOrEqualToSYMBOL/\$\\leq\$/gs;
 $content =~ s/HLSTART(.*?)HLSTOP/\\textcolor{red}{\1}/gs;
 
 
-open( my $out, '>:encoding(utf8)', 'book.tex') or die("Unable to open file book.tex to wrwite revised version - $!");
+
+open( my $out, '>:encoding(utf8)', 'book.tex') or die("Unable to open file book.tex to write revised version - $!");
 print $out $content;
 close $out;
 
