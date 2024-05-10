@@ -63,7 +63,7 @@ class SpecialMakePdfBook extends SpecialPage
 				}
 			}
 			# Return the PDF, or an error page if generation has failed.
-		} catch (Exception $e) {
+		} catch (\Throwable $e) {
 			$errorText = $e->getMessage();
 		}
 		$output->disable();
