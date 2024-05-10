@@ -63,7 +63,7 @@ class SpecialMakePdfBook extends SpecialPage
 				}
 			}
 			# Return the PDF, or an error page if generation has failed.
-		} catch (\Throwable $e) {
+		} catch (Exception $e) {
 			$errorText = $e->getMessage();
 		}
 		$output->disable();
@@ -126,20 +126,26 @@ class SpecialMakePdfBook extends SpecialPage
 		}
 	}
 	function getCategoryArticles($category)
-	{
-		$db = wfGetDB(DB_REPLICA);
-		$articles = array();
-		$result = $db->select(
-			'categorylinks',
-			'cl_from',
-			["cl_to = " . $db->addQuotes($category), 'cl_sortkey_prefix not like "%titlepage%"'],
-			'MakePdfBook',
-			array('ORDER BY' => 'cl_sortkey')
-		);
-		while ($row = $db->fetchRow($result)) {
-			$articles[] = Title::newFromID($row[0]);
+    {
+        $articles = array();
+
+        $lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
+        $dbr = $lb->getConnectionRef( DB_REPLICA );
+
+
+        $result = $dbr->newSelectQueryBuilder()
+            ->select('cl_from')
+            ->from('categorylinks')
+            ->where(["cl_to = " . $dbr->addQuotes($category), 'cl_sortkey_prefix not like "%titlepage%"'])    
+            ->orderBy('cl_sortkey')
+            ->caller('MakePdfBook')
+            ->fetchResultSet();
+
+		foreach ($result as $row) {
+            $articles[] = Title::newFromID($row->cl_from);
 		}
-		return $articles;
+        
+        return $articles;
 	}
 	function getCategoryTitlePage($category)
 	{
