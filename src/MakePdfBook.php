@@ -63,7 +63,7 @@ class SpecialMakePdfBook extends SpecialPage
 				}
 			}
 			# Return the PDF, or an error page if generation has failed.
-		} catch (Exception $e) {
+		} catch (\Throwable $e) {
 			$errorText = $e->getMessage();
 		}
 		$output->disable();
@@ -86,19 +86,21 @@ class SpecialMakePdfBook extends SpecialPage
 		global $wgServer, $wgScriptPath;
 		$request = $this->getRequest();
 		$output = $this->getOutput();
-
-		$db = wfGetDB(DB_REPLICA);
-
-		$result = $db->select(
-			'category',
-			'cat_title',
-			'cat_pages > 0'
-		);
+		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
+        $dbr = $lb->getConnectionRef( DB_REPLICA );
 
 		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!titlepage\n";
 
-		while ($row = $db->fetchRow($result)) {
-			$category = $row[0];
+        $result = $dbr->newSelectQueryBuilder()
+            ->select('cat_title')
+            ->from('category')
+            ->where('cat_pages > 0')    
+            ->orderBy('cat_title')
+            ->caller('MakePdfBook')
+            ->fetchResultSet();
+
+		foreach ($result as $row) {
+			$category = $row->cat_title;
 
 			$categoryTitlepage = $this->getCategoryTitlePage($category);
 
@@ -149,13 +151,16 @@ class SpecialMakePdfBook extends SpecialPage
 	}
 	function getCategoryTitlePage($category)
 	{
-		$db = wfGetDB(DB_REPLICA);
-		$result = $db->select(
-			'categorylinks',
-			'cl_from',
-			["cl_to = " . $db->addQuotes($category), 'cl_sortkey_prefix like "%titlepage%"'],
-			'MakePdfBook'
-		);
+		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
+        $dbr = $lb->getConnectionRef( DB_REPLICA );
+
+        $result = $dbr->newSelectQueryBuilder()
+            ->select('cl_from')
+            ->from('categorylinks')
+            ->where(["cl_to = " . $dbr->addQuotes($category), 'cl_sortkey_prefix like "%titlepage%"'])    
+            ->caller('MakePdfBook')
+            ->fetchResultSet();
+
 		$numRows = $result->numRows();
 		if ($numRows == 0) {
 			return NULL;
@@ -201,7 +206,7 @@ class SpecialMakePdfBook extends SpecialPage
 		global $wgUploadDirectory, $wgScriptPath, $wgUser, $wgServer;
 
 		$scriptPath = $wgServer . $wgScriptPath;
-		$opt = ParserOptions::newFromUser($wgUser);
+		$opt = ParserOptions::newFromAnon();
 
 		$titleText = $this->stripNameSpace($title->getPrefixedText());
 
@@ -221,8 +226,8 @@ class SpecialMakePdfBook extends SpecialPage
 			'unwrap' => false,
 			'deduplicateStyles' => true,
 		]);
-		$pUrl = parse_url($scriptPath);
-		$imgpath = str_replace('/', '\/', $pUrl['path'] . '/' . basename($wgUploadDirectory)); // the image's path
+		$urlPath = parse_url($scriptPath, PHP_URL_PATH);
+		$imgpath = str_replace('/', '\/', $urlPath . '/' . basename($wgUploadDirectory)); // the image's path
 		$text = preg_replace("|(<img[^>]+?src=\"$imgpath)(/.+?>)|", "<img src=\"$wgUploadDirectory$2", $text);
 
 		$titleText = basename($titleText);
