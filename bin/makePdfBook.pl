@@ -241,22 +241,41 @@ my $lineCount = scalar(@lines);
 
 for(my $i = 0; $i < $lineCount; $i++){
     my $line = $lines[$i];
-    if($line =~ /^\s*\\begin\{longtable\}\[\]\{@\{\}(.*)@\{\}\}$/){
+    if($line =~ /^\s*\\begin\{longtable\}/){
         # Regex matches:
         # \begin{longtable}[]{@{}l@{}}
-        my $columndefs = $1;
-        my $count = length($columndefs);
-        #$count += 1;
+        # \begin{longtable}[]{@{}lllllll@{}}
+        # \begin{longtable}[]{@{}
+        #     >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+        #     >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+        #     >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+        #     >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+        #     >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
+        #     >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}@{}}
+        my $count = 1;
+        my $offset = 1;
+        if($line =~ /^\s*\\begin\{longtable\}\[\]\{@\{\}(.*)@\{\}\}$/){
+            my $columndefs = $1;
+            $count = length($columndefs);
+        } elsif($lines[$i + 1] =~ /^\s*>\{.*(\{.*\})?\}/){
+            while ($lines[$i + $offset] =~ /^\s*>\{.*(\{.*\})?\}/ && $offset < 100){
+                $count++;
+                $lines[$i + $offset] = "";
+                $offset++;
+            }
+        } else {
+            die( sprintf("longtable declaration not in a format I can parse:\n\n%s", $line));
+        }
         my $width = 1/$count;
        
         my @lineArray;
         my $textwidth = 160; # A4 paper width of 210mm less 2x 25mm margin
         my $columnMargins = 4;
-        for(my $i = 0; $i<$count; $i++){
+        for(my $j = 0; $j<$count; $j++){
             push @lineArray, sprintf("m{%.1f"."mm}", ($width*$textwidth - $columnMargins));
         }
 
-        if($lines[$i + 1] =~ /caption/){ # The next line is a caption
+        if($lines[$i + $offset ] =~ /caption/){ # The next line is a caption
             my $offset = 1;
             my $captionLine = "";
 
@@ -307,8 +326,8 @@ for(my $i = 0; $i < $lineCount; $i++){
         $line =~ s/$img_file/$converted_file_name/;
     }
 
-    $line =~ s/\\begin\{minipage\}\[\S+\]\{\S+\\columnwidth\}//;
-    $line =~ s/\\end\{minipage\}//;
+    # $line =~ s/\\begin\{minipage\}\[\S+\]\{\S+\\columnwidth\}//;
+    # $line =~ s/\\end\{minipage\}//;
 
     # And now employ a filthy hack to deal with a pandoc html>tex regression
 
