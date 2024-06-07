@@ -150,10 +150,14 @@ foreach my $chapter (@chapters){
 #<div class="thumbinner" style="width:302px;"><a href="/mediawiki/index.php/File:Fencing_Handbook_2020_Figure_1.png" class="image"><img src="/var/lib/mediawiki-1.34.0/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/300px-Fencing_Handbook_2020_Figure_1.png" decoding="async" width="300" height="291" class="thumbimage" srcset="/mediawiki/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/450px-Fencing_Handbook_2020_Figure_1.png 1.5x, /mediawiki/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/600px-Fencing_Handbook_2020_Figure_1.png 2x" /></a>  <div class="thumbcaption"><div class="magnify"><a href="/mediawiki/index.php/File:Fencing_Handbook_2020_Figure_1.png" class="internal" title="Enlarge"></a></div>Figure 1. With the handle vertical, the tip must touch the ground. In this example, the sword on the left is allowed, the sword on the right is not.</div></div><
         
         # Translation to preserve revision marking
+        #
+        # Note: this (the HLSTART/HLSTOP) is not an actual directive; it's a marker
+        #   that we'll change into the actual directive below, after the HTML > tex 
+        #   conversion
         $line =~ s/<span class="revision">(.*?)<\/span>/HLSTART\1HLSTOP/ig;
         # <span class="revision">Discuss proposed changes with the Kingdom Armoured Combat Marshal and the Earl Marshal.</span>
         # Ditto for the 'comment' marking
-        $line =~ s/<span class="comment">(.*?)<\/span>/\\emph{\1}/ig;
+        $line =~ s/<span class="comment">(.*?)<\/span>/COMMENTSTART\1COMMENTSTOP/ig;
 
         push @output, $line;
     }
@@ -347,6 +351,7 @@ $content =~ s/\"(.*?)\"/``$1''/gs;
 
 $content =~ s/SYMBOLlessThanOrEqualToSYMBOL/\$\\leq\$/gs;
 $content =~ s/HLSTART(.*?)HLSTOP/\\textcolor{red}{\1}/gs;
+$content =~ s/COMMENTSTART(.*?)COMMENTSTOP/\\emph{\\textcolor{blue}{\1}}/gs;
 
 
 
