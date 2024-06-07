@@ -152,7 +152,8 @@ foreach my $chapter (@chapters){
         # Translation to preserve revision marking
         $line =~ s/<span class="revision">(.*?)<\/span>/HLSTART\1HLSTOP/ig;
         # <span class="revision">Discuss proposed changes with the Kingdom Armoured Combat Marshal and the Earl Marshal.</span>
-
+        # Ditto for the 'comment' marking
+        $line =~ s/<span class="comment">(.*?)<\/span>/\\emph{\1}/ig;
 
         push @output, $line;
     }
