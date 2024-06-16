@@ -16,7 +16,7 @@ class SpecialMakePdfBook extends SpecialPage
 	}
 	function getDescription()
 	{
-		return wfMessage("makePdfBook");
+		return wfMessage("Make PDF book");
 	}
 
 	function execute($par)
