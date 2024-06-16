@@ -277,14 +277,6 @@ class SpecialMakePdfBook extends SpecialPage
 
 		$baseTempFileDir = $config->get('MakePdfBooktempFileDir');
 
-		# Check whether this is a draft
-		if (is_int(strpos(strtolower($category), "draft"))) {
-			$isDraft = true;
-		} else {
-			$isDraft = false;
-			//throw new Exception("It's not a draft - $category.");
-		}
-
 		// Create the holding directory for our temp files
 		$tempFileDir = $this->createEmptyDirectory($baseTempFileDir, $category);
 
@@ -303,7 +295,7 @@ class SpecialMakePdfBook extends SpecialPage
 		}
 
 		// Copy the template file to the holding dir
-		if ($isDraft) {
+		if ($makepdfIsDraft) {
 			copy(dirname(__FILE__) . "/../bin/draft_template.tex", "$tempFileDir/template.tex");
 		} else {
 			copy(dirname(__FILE__) . "/../bin/template.tex", "$tempFileDir/template.tex");
