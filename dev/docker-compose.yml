@@ -1,0 +1,58 @@
+# MediaWiki with MySQL
+# Access via "http://localhost"
+#   (or "http://$(docker-machine) ip)" if using docker-machine)
+services:
+  mediawiki:
+    depends_on:
+      database:
+        condition: service_healthy
+        restart: true
+    image: sca-rules-wiki:latest
+    environment:
+      - SITE_NAME=${SITE_NAME}
+      - BASE_URL=${BASE_URL}
+      - WIKI_EMAIL=${WIKI_EMAIL}
+      - DB_URL=database:3306
+      - DB_NAME=mediawiki
+      - DB_USER=mediawiki
+      - DB_PASSWORD=${MYSQL_PASSWORD}
+      - DB_SECRET_KEY=${DB_SECRET_KEY}
+      - DB_UPGRADE_KEY=${DB_UPGRADE_KEY}
+      - BACKUPS_LOCATION=/image_backups
+    restart: always
+    ports:
+      - 80:80
+    volumes:
+      - type: bind
+        source: ${CONTEXT_DIRECTORY}/image_backups
+        target: /image_backups
+        read_only: false
+      - type: bind
+        source: ${CONTEXT_DIRECTORY}/LocalSettings.php
+        target: /var/www/html/LocalSettings.php
+        read_only: true
+      - type: bind
+        source: ../
+        target: /var/www/html/extensions/MakePdfBook
+        read_only: false
+      
+  database:
+    image: sca-rules-db:latest
+    environment:
+      - DB_NAME=mediawiki
+      - MYSQL_USER=mediawiki
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - BACKUPS_LOCATION=/db_backups
+    restart: always
+
+    healthcheck:
+      test: mysqladmin ping -h 127.0.0.1 -u $$MYSQL_USER --password=$$MYSQL_PASSWORD
+      timeout: 20s
+      retries: 10
+
+    volumes:
+      - type: bind
+        source: ${CONTEXT_DIRECTORY}/db_backups
+        target: /db_backups
+        read_only: false
