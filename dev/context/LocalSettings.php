@@ -232,3 +232,4 @@ $wgGroupPermissions['ThrownWeaponsEditor']['editThrownWeapons'] = true;
 $wgGroupPermissions['YouthMartialEditor']['editYouthMartial'] = true;
 
 $wgShowExceptionDetails = true;
+$wgDebugDumpSql = true;
