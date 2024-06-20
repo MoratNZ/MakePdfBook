@@ -111,7 +111,7 @@ class SpecialMakePdfBook extends SpecialPage
 			if ($categoryTitlepage) {
 				$textString .= "|[" . $categoryTitlepage->getPrefixedDBkey() . "|[[$categoryTitlepage]]\n";
 			} else {
-				$textString .= "|\n";
+				$textString .= "| |[[".$category."_Title_page]] (add <nowiki>[[Category:".$category."|titlepage]]</nowiki> to bottom of page when you create it)\n";
 			}
 		}
 		$textString .= "|}\n";
