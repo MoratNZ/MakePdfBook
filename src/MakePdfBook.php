@@ -1,21 +1,16 @@
 <?php
 use MediaWiki\MediaWikiServices;
 
-/**
- * @var 
- * @var DB_REPLICA
- */
-
 class SpecialMakePdfBook extends SpecialPage
 {
 	# Defaults for these config values are defined in extension.json
 	private $config;
+
 	public function __construct()
 	{
 		parent::__construct('MakePdfBook');
 		$this->config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('MakePdfBook');
 		$this->parser = \MediaWiki\MediaWikiServices::getInstance()->getParser();
-
 
 	}
 	public function execute($par)
@@ -38,13 +33,11 @@ class SpecialMakePdfBook extends SpecialPage
 		# We don't actually care about the id, but want to use the exceptions for user feedback
 
 		if ($json) {
-			return $this->returnCategoryJson();
+			return $this->returnCategoryJson($category);
 		} elseif (!$category) {
 			return $this->generateCategoryListPage();
 		}
 		try {
-			$category_id = $this->getCategoryId($category);
-
 			# Get articles from category
 			$articles = $this->getCategoryArticles($category);
 
@@ -85,9 +78,10 @@ class SpecialMakePdfBook extends SpecialPage
 	{
 		return wfMessage("makePdfBook");
 	}
-	private function returnCategoryJson()
+	private function returnCategoryJson($category)
 	{
-		$categories = $this->getHandbooks();
+		$categories = $this->getBooks($category);
+		arsort($categories);
 
 		$output = $this->getOutput();
 		$output->disable();
@@ -98,54 +92,69 @@ class SpecialMakePdfBook extends SpecialPage
 	private function generateCategoryListPage()
 	{
 		global $wgServer, $wgScriptPath;
-		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
-		$dbr = $lb->getConnectionRef(DB_REPLICA);
+		$handbooks = $this->getBooks();
 
-		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!titlepage\n";
+		arsort($handbooks);
 
-		$result = $dbr->newSelectQueryBuilder()
-			->select('cat_title')
-			->from('category')
-			->where('cat_pages > 0')
-			->orderBy('cat_title')
-			->caller('MakePdfBook')
-			->fetchResultSet();
+		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!Titlepage\n";
 
-		foreach ($result as $row) {
-			$category = $row->cat_title;
-
-			$categoryTitlepage = $this->getCategoryTitlePage($category);
-
+		foreach ($handbooks as $category => $handbook) {
 			$textString .= "|-\n" .
 				"|[$wgServer$wgScriptPath/index.php/Category:$category  $category]\n" .
 				"|[$wgServer$wgScriptPath/index.php/Special:MakePdfBook?category=$category   pdf]\n";
 
-			if ($categoryTitlepage) {
-				$textString .= "|[" . $categoryTitlepage->getPrefixedDBkey() . "|[[$categoryTitlepage]]\n";
+			if (array_key_exists('titlepage', $handbook)) {
+				$textString .= "||[[" . $handbook['titlepage']['title'] . "]]\n";
 			} else {
 				$textString .= "| |[[" . $category . "_Title_page]] (add <nowiki>[[Category:" . $category . "|titlepage]]</nowiki> to bottom of page when you create it)\n";
 			}
 		}
 		$textString .= "|}\n";
 
-		$this->writeWikiText($textString);
-	}
-	private function writeWikiText($textString)
-	{
 		$output = $this->getOutput();
-		if (method_exists($output, "addWikiTextAsInterface")) {
-			$output->addWikiTextAsInterface($textString); # mediawiki >= 1.34
-		} else {
-			$output->addWikiText($textString);
-		}
+		$output->addWikiTextAsInterface($textString);
 	}
-	private function getHandbooks()
+	private function getCategoryArticles($category)
 	{
 		$articles = array();
 
 		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
 		$dbr = $lb->getConnectionRef(DB_REPLICA);
 
+		$result = $dbr->newSelectQueryBuilder()
+			->select('cl_from')
+			->from('categorylinks')
+			->where([
+				$dbr->expr("cl_to", "=", $category),
+				$dbr->expr("cl_sortkey_prefix", "not like", "%titlepage%"),
+			])
+			->orderBy('cl_sortkey')
+			->caller('MakePdfBook')
+			->fetchResultSet();
+
+		foreach ($result as $row) {
+			$articles[] = Title::newFromID($row->cl_from);
+		}
+
+		return $articles;
+	}
+	private function getBooks($category = false)
+	{
+		$articles = array();
+
+		$instance = MediaWikiServices::getInstance();
+		$lb = $instance->getDBLoadBalancer();
+		$dbr = $lb->getConnection(DB_REPLICA);
+
+		$whereClause = [
+			"cat_title like '%book%'",
+			"cl_sortkey_prefix not like '%titlepage%'",
+		];
+		if ($category) {
+			$whereClause[] = "cat_title =\"$category\""; # TODO: replace with an expr() call once we get MW 1.42
+		}
+
+		# Get the non-titlepage pages
 		$query = $dbr->newSelectQueryBuilder()
 			->select([
 				'cat_title',
@@ -155,9 +164,7 @@ class SpecialMakePdfBook extends SpecialPage
 			->from('page')
 			->join('categorylinks', null, 'page_id=cl_from')
 			->join('category', null, 'cl_to=cat_title')
-			->where([
-				'cat_title like "%book%"',
-			])
+			->where($whereClause)
 			->caller('MakePdfBook');
 		$result = $query->fetchResultSet();
 
@@ -171,17 +178,59 @@ class SpecialMakePdfBook extends SpecialPage
 
 			if (!array_key_exists($category, $articles)) {
 				$articles[$category] = [
+					'title' => $category,
 					'chapters' => []
 				];
 			}
 
 			$articles[$category]['chapters'][$sortKey] = [
 				'title' => $page->getText(),
-				'localUrl' => $page->getLocalURL(),
-				'linkUrl' => $page->getLinkURL(),
 				'sortKey' => $sortKey,
+				'url' => $page->getFullUrl(),
 			];
 		}
+		# Get the titlepage pages
+		#
+		# This is being done like this so that we can have fuzzy titlepage
+		# labelling in the wiki, but precise identification of titlepages here
+
+		$whereClause[1] = "cl_sortkey_prefix like '%titlepage%'";
+		$query = $dbr->newSelectQueryBuilder()
+			->select([
+				'cat_title',
+				'page_id',
+				'cl_sortkey_prefix',
+			])
+			->from('page')
+			->join('categorylinks', null, 'page_id=cl_from')
+			->join('category', null, 'cl_to=cat_title')
+			->where($whereClause)
+			->caller('MakePdfBook');
+
+		$result = $query->fetchResultSet();
+
+		foreach ($result as $row) {
+			$category = $row->cat_title;
+			$page_id = $row->page_id;
+			$sortKey = $row->cl_sortkey_prefix;
+
+			$page = Title::newFromID($page_id);
+
+			$titlePage = [
+				'title' => $page->getText(),
+				'url' => $page->getFullUrl(),
+			];
+			if (!array_key_exists($category, $articles)) {
+				$articles[$category] = [
+					'title' => $category,
+					'chapters' => [],
+					'titlepage' => $titlePage
+				];
+			} else {
+				$articles[$category]['titlepage'] = $titlePage;
+			}
+		}
+
 		return $articles;
 	}
 	private function getCategoryTitlePage($category)
@@ -204,26 +253,6 @@ class SpecialMakePdfBook extends SpecialPage
 			return Title::newFromID($row[0]);
 		} else {
 			throw new Exception("There is more than one article in category $category labelled with sort key 'titlepage'. Please trim that down to one.");
-		}
-	}
-	private function getCategoryId($category)
-	{
-		$db = wfGetDB(DB_REPLICA);
-		$result = $db->select(
-			'category',
-			'cat_id',
-			"cat_title=" . $db->addQuotes($category),
-			"MakePdfBook"
-		);
-		$numRows = $result->numRows();
-
-		if ($numRows == 0) {
-			throw new Exception("$category is not a valid category.");
-		} else if ($numRows == 1) {
-			$row = $result->fetchRow();
-			return $row[0];
-		} else {
-			throw new Exception("We got more than one DB match for category $category. That should never happen.");
 		}
 	}
 	private function getCacheHash($articles)
@@ -306,25 +335,16 @@ class SpecialMakePdfBook extends SpecialPage
 	}
 	private function renderPdf($outputDir, $outputFileName, $category, $articles)
 	{
-		global $wgServer, $wgScriptPath;
+		global $wgServer, $wgScriptPath, $makepdfIsDraft;
 		$titlePage = $this->getCategoryTitlePage($category);
 
 		$baseTempFileDir = $this->config->get('MakePdfBooktempFileDir');
-
-		# Check whether this is a draft
-		if (is_int(strpos(strtolower($category), "draft"))) {
-			$isDraft = true;
-		} else {
-			$isDraft = false;
-			//throw new Exception("It's not a draft - $category.");
-		}
 
 		// Create the holding directory for our temp files
 		$tempFileDir = $this->createEmptyDirectory($baseTempFileDir, $category);
 
 		// Create the content temp files
 		if ($titlePage) {
-			;
 			$titlepageFileName = "$tempFileDir/titlepage.html";
 			$this->writeArticleHtmlFile($titlePage, $titlepageFileName, true);
 		}
@@ -338,7 +358,7 @@ class SpecialMakePdfBook extends SpecialPage
 		}
 
 		// Copy the template file to the holding dir
-		if ($isDraft) {
+		if ($makepdfIsDraft) {
 			copy(dirname(__FILE__) . "/../bin/draft_template.tex", "$tempFileDir/template.tex");
 		} else {
 			copy(dirname(__FILE__) . "/../bin/template.tex", "$tempFileDir/template.tex");

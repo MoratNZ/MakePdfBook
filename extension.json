@@ -7,10 +7,24 @@
   "license-name": "MIT",
   "type": "other",
   "AutoloadClasses": {
-    "SpecialMakePdfBook": "src/MakePdfBook.php"
+    "SpecialMakePdfBook": "src/MakePdfBook.php",
+    "MakePdfBookHooks": "src/MakePdfBookHooks.php"
   },
   "SpecialPages": {
     "MakePdfBook": "SpecialMakePdfBook"
+  },
+  "ResourceModules": {
+    "ext.makePdfBook": {
+      "localBasePath": "resources/ext.MakePdfBook",
+      "remoteExtPath": "MakePdfBook/modules/ext.MakePdfBook",
+      "styles": [],
+      "packageFiles": ["index.js"],
+      "messages": [],
+      "dependencies": ["mediawiki.util"]
+    }
+  },
+  "Hooks": {
+    "BeforePageDisplay": ["MakePdfBookHooks::addHooks"]
   },
   "config": {
     "MakePdfBookCacheFileDir": {
