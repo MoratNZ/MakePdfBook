@@ -7,8 +7,9 @@
   "license-name": "MIT",
   "type": "other",
   "AutoloadClasses": {
-    "SpecialMakePdfBook": "src/MakePdfBook.php",
-    "MakePdfBookHooks": "src/MakePdfBookHooks.php"
+    "SpecialMakePdfBook": "src/SpecialMakePdfBook.php",
+    "MakePdfBookHooks": "src/MakePdfBookHooks.php",
+    "MakePdfBookHelpers": "src/MakePdfBookHelpers.php"
   },
   "SpecialPages": {
     "MakePdfBook": "SpecialMakePdfBook"
