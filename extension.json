@@ -1,18 +1,16 @@
 {
   "name": "MakePdfBook",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "author": ["David Maclagan"],
   "url": "https://github.com/MoratNZ/MakePdfBook",
   "descriptionmsg": "MakePdfBook-desc",
   "license-name": "MIT",
   "type": "other",
-  "AutoloadClasses": {
-    "SpecialMakePdfBook": "src/SpecialMakePdfBook.php",
-    "MakePdfBookHooks": "src/MakePdfBookHooks.php",
-    "MakePdfBookHelpers": "src/MakePdfBookHelpers.php"
+  "AutoLoadNamespaces": {
+    "MediaWiki\\Extension\\MakePdfBook\\": "src/"
   },
   "SpecialPages": {
-    "MakePdfBook": "SpecialMakePdfBook"
+    "MakePdfBook": "MediaWiki\\Extension\\MakePdfBook\\SpecialMakePdfBook"
   },
   "ResourceModules": {
     "ext.makePdfBook": {
@@ -24,9 +22,7 @@
       "dependencies": ["mediawiki.util"]
     }
   },
-  "Hooks": {
-    "BeforePageDisplay": ["MakePdfBookHooks::addHooks"]
-  },
+
   "config": {
     "MakePdfBookCacheFileDir": {
       "value": "/tmp",
