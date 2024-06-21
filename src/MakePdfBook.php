@@ -1,49 +1,45 @@
 <?php
-
 use MediaWiki\MediaWikiServices;
+
+/**
+ * @var 
+ * @var DB_REPLICA
+ */
 
 class SpecialMakePdfBook extends SpecialPage
 {
-
-	function __construct()
+	# Defaults for these config values are defined in extension.json
+	private $config;
+	public function __construct()
 	{
 		parent::__construct('MakePdfBook');
+		$this->config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('MakePdfBook');
 		$this->parser = \MediaWiki\MediaWikiServices::getInstance()->getParser();
-	}
-	function getGroupName()
-	{
-		return 'other';
-	}
-	function getDescription()
-	{
-		return wfMessage("makePdfBook");
-	}
 
-	function execute($par)
+
+	}
+	public function execute($par)
 	{
 		$request = $this->getRequest();
 		$output = $this->getOutput();
 		$this->setHeaders();
 
-		# Defaults for these config values are defined in extension.json
-		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('MakePdfBook');
-
-		$tempFileDir = $config->get('MakePdfBooktempFileDir');
-		$cacheFileDir = $config->get('MakePdfBookCacheFileDir');
+		$cacheFileDir = $this->config->get('MakePdfBookCacheFileDir');
 
 		$errorText = "";
 
 		# Get request data 
 		$category = $request->getText('category');
+		$json = $request->getText('json');
 		$forceRebuild = $request->getText('force');
 		$testPdfOutput = $request->getText('testPdfOutput');
 
-
-
 		# Check that this is a valid category, and get its DB ID if it is.
 		# We don't actually care about the id, but want to use the exceptions for user feedback
-		# TODO if a category isn't set, dynamically build a page to offer all possible categories
-		if (!$category) {
+
+		if ($json) {
+			return $this->returnCategoryJson();
+		} elseif (!$category) {
 			return $this->generateCategoryListPage();
 		}
 		try {
@@ -81,23 +77,39 @@ class SpecialMakePdfBook extends SpecialPage
 			readfile("$cacheFileDir/$cacheFile");
 		}
 	}
-	function generateCategoryListPage()
+	public function getGroupName()
+	{
+		return 'other';
+	}
+	public function getDescription()
+	{
+		return wfMessage("makePdfBook");
+	}
+	private function returnCategoryJson()
+	{
+		$categories = $this->getHandbooks();
+
+		$output = $this->getOutput();
+		$output->disable();
+
+		header("Content-type: application/json; charset=utf-8");
+		print json_encode($categories, JSON_PRETTY_PRINT);
+	}
+	private function generateCategoryListPage()
 	{
 		global $wgServer, $wgScriptPath;
-		$request = $this->getRequest();
-		$output = $this->getOutput();
 		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
-        $dbr = $lb->getConnectionRef( DB_REPLICA );
+		$dbr = $lb->getConnectionRef(DB_REPLICA);
 
 		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!titlepage\n";
 
-        $result = $dbr->newSelectQueryBuilder()
-            ->select('cat_title')
-            ->from('category')
-            ->where('cat_pages > 0')    
-            ->orderBy('cat_title')
-            ->caller('MakePdfBook')
-            ->fetchResultSet();
+		$result = $dbr->newSelectQueryBuilder()
+			->select('cat_title')
+			->from('category')
+			->where('cat_pages > 0')
+			->orderBy('cat_title')
+			->caller('MakePdfBook')
+			->fetchResultSet();
 
 		foreach ($result as $row) {
 			$category = $row->cat_title;
@@ -111,14 +123,14 @@ class SpecialMakePdfBook extends SpecialPage
 			if ($categoryTitlepage) {
 				$textString .= "|[" . $categoryTitlepage->getPrefixedDBkey() . "|[[$categoryTitlepage]]\n";
 			} else {
-				$textString .= "| |[[".$category."_Title_page]] (add <nowiki>[[Category:".$category."|titlepage]]</nowiki> to bottom of page when you create it)\n";
+				$textString .= "| |[[" . $category . "_Title_page]] (add <nowiki>[[Category:" . $category . "|titlepage]]</nowiki> to bottom of page when you create it)\n";
 			}
 		}
 		$textString .= "|}\n";
 
 		$this->writeWikiText($textString);
 	}
-	function writeWikiText($textString)
+	private function writeWikiText($textString)
 	{
 		$output = $this->getOutput();
 		if (method_exists($output, "addWikiTextAsInterface")) {
@@ -127,39 +139,62 @@ class SpecialMakePdfBook extends SpecialPage
 			$output->addWikiText($textString);
 		}
 	}
-	function getCategoryArticles($category)
-    {
-        $articles = array();
+	private function getHandbooks()
+	{
+		$articles = array();
 
-        $lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
-        $dbr = $lb->getConnectionRef( DB_REPLICA );
+		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
+		$dbr = $lb->getConnectionRef(DB_REPLICA);
 
+		$query = $dbr->newSelectQueryBuilder()
+			->select([
+				'cat_title',
+				'page_id',
+				'cl_sortkey_prefix',
+			])
+			->from('page')
+			->join('categorylinks', null, 'page_id=cl_from')
+			->join('category', null, 'cl_to=cat_title')
+			->where([
+				'cat_title like "%book%"',
+			])
+			->caller('MakePdfBook');
+		$result = $query->fetchResultSet();
 
-        $result = $dbr->newSelectQueryBuilder()
-            ->select('cl_from')
-            ->from('categorylinks')
-            ->where(["cl_to = " . $dbr->addQuotes($category), 'cl_sortkey_prefix not like "%titlepage%"'])    
-            ->orderBy('cl_sortkey')
-            ->caller('MakePdfBook')
-            ->fetchResultSet();
 
 		foreach ($result as $row) {
-            $articles[] = Title::newFromID($row->cl_from);
+			$category = $row->cat_title;
+			$page_id = $row->page_id;
+			$sortKey = $row->cl_sortkey_prefix;
+
+			$page = Title::newFromID($page_id);
+
+			if (!array_key_exists($category, $articles)) {
+				$articles[$category] = [
+					'chapters' => []
+				];
+			}
+
+			$articles[$category]['chapters'][$sortKey] = [
+				'title' => $page->getText(),
+				'localUrl' => $page->getLocalURL(),
+				'linkUrl' => $page->getLinkURL(),
+				'sortKey' => $sortKey,
+			];
 		}
-        
-        return $articles;
+		return $articles;
 	}
-	function getCategoryTitlePage($category)
+	private function getCategoryTitlePage($category)
 	{
 		$lb = MediaWikiServices::getInstance()->getDBLoadBalancer();
-        $dbr = $lb->getConnectionRef( DB_REPLICA );
+		$dbr = $lb->getConnectionRef(DB_REPLICA);
 
-        $result = $dbr->newSelectQueryBuilder()
-            ->select('cl_from')
-            ->from('categorylinks')
-            ->where(["cl_to = " . $dbr->addQuotes($category), 'cl_sortkey_prefix like "%titlepage%"'])    
-            ->caller('MakePdfBook')
-            ->fetchResultSet();
+		$result = $dbr->newSelectQueryBuilder()
+			->select('cl_from')
+			->from('categorylinks')
+			->where(["cl_to = " . $dbr->addQuotes($category), 'cl_sortkey_prefix like "%titlepage%"'])
+			->caller('MakePdfBook')
+			->fetchResultSet();
 
 		$numRows = $result->numRows();
 		if ($numRows == 0) {
@@ -171,7 +206,7 @@ class SpecialMakePdfBook extends SpecialPage
 			throw new Exception("There is more than one article in category $category labelled with sort key 'titlepage'. Please trim that down to one.");
 		}
 	}
-	function getCategoryId($category)
+	private function getCategoryId($category)
 	{
 		$db = wfGetDB(DB_REPLICA);
 		$result = $db->select(
@@ -191,7 +226,7 @@ class SpecialMakePdfBook extends SpecialPage
 			throw new Exception("We got more than one DB match for category $category. That should never happen.");
 		}
 	}
-	function getCacheHash($articles)
+	private function getCacheHash($articles)
 	{
 		$cacheString = '\nFile sig: ' . md5(file_get_contents(__FILE__)); // the contents of the rendering code (this script),
 		$cacheString = '\nFile sig: ' . md5(file_get_contents(dirname(__FILE__) . "/../bin/template.tex")); // the contents of the tex template
@@ -201,7 +236,7 @@ class SpecialMakePdfBook extends SpecialPage
 		return md5($cacheString);
 	}
 
-	function writeArticleHtmlFile($title, $fileName, $treatAsTitlepage = false)
+	private function writeArticleHtmlFile($title, $fileName, $treatAsTitlepage = false)
 	{
 		global $wgUploadDirectory, $wgScriptPath, $wgUser, $wgServer;
 
@@ -231,16 +266,16 @@ class SpecialMakePdfBook extends SpecialPage
 		$text = preg_replace("|(<img[^>]+?src=\"$imgpath)(/.+?>)|", "<img src=\"$wgUploadDirectory$2", $text);
 
 		$titleText = basename($titleText);
-		$h1 =  "<center><h1>$titleText</h1></center>";
+		$h1 = "<center><h1>$titleText</h1></center>";
 		if ($treatAsTitlepage) {
-			$html  = utf8_decode("$text\n");
+			$html = utf8_decode("$text\n");
 		} else {
-			$html  = utf8_decode("$h1  $text\n");
+			$html = utf8_decode("$h1  $text\n");
 		}
 
 		file_put_contents($fileName, $html);
 	}
-	function stripNameSpace($titleText)
+	private function stripNameSpace($titleText)
 	{
 		// This is a filthy filthy hack to remove namespace labelling from page titles
 		// the correct solution is to access the DISPLAYTITLE
@@ -251,7 +286,7 @@ class SpecialMakePdfBook extends SpecialPage
 			return $titleText;
 		}
 	}
-	function createEmptyDirectory($baseDirectory, $category)
+	private function createEmptyDirectory($baseDirectory, $category)
 	{
 		$directoryName = "$baseDirectory/MakePdfBook/$category";
 
@@ -269,13 +304,12 @@ class SpecialMakePdfBook extends SpecialPage
 
 		return $directoryName;
 	}
-	function renderPdf($outputDir, $outputFileName, $category, $articles)
+	private function renderPdf($outputDir, $outputFileName, $category, $articles)
 	{
 		global $wgServer, $wgScriptPath;
-		$config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('MakePdfBook');
 		$titlePage = $this->getCategoryTitlePage($category);
 
-		$baseTempFileDir = $config->get('MakePdfBooktempFileDir');
+		$baseTempFileDir = $this->config->get('MakePdfBooktempFileDir');
 
 		# Check whether this is a draft
 		if (is_int(strpos(strtolower($category), "draft"))) {
@@ -289,7 +323,8 @@ class SpecialMakePdfBook extends SpecialPage
 		$tempFileDir = $this->createEmptyDirectory($baseTempFileDir, $category);
 
 		// Create the content temp files
-		if ($titlePage) {;
+		if ($titlePage) {
+			;
 			$titlepageFileName = "$tempFileDir/titlepage.html";
 			$this->writeArticleHtmlFile($titlePage, $titlepageFileName, true);
 		}
