@@ -6,12 +6,11 @@
   "descriptionmsg": "MakePdfBook-desc",
   "license-name": "MIT",
   "type": "other",
-  "AutoloadClasses": {
-    "SpecialMakePdfBook": "src/MakePdfBook.php",
-    "MakePdfBookHooks": "src/MakePdfBookHooks.php"
+  "AutoloadNamespaces": {
+    "MediaWiki\\Extension\\MyExtension\\": "src/"
   },
   "SpecialPages": {
-    "MakePdfBook": "SpecialMakePdfBook"
+    "MakePdfBook": "MediaWiki\\Extension\\MyExtension\\SpecialMakePdfBook"
   },
   "ResourceModules": {
     "ext.makePdfBook": {
@@ -23,9 +22,7 @@
       "dependencies": ["mediawiki.util"]
     }
   },
-  "Hooks": {
-    "BeforePageDisplay": ["MakePdfBookHooks::addHooks"]
-  },
+
   "config": {
     "MakePdfBookCacheFileDir": {
       "value": "/tmp",

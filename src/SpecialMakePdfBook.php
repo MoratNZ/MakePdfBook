@@ -1,7 +1,10 @@
 <?php
+namespace MediaWiki\Extension\MyExtension;
+
 use MediaWiki\MediaWikiServices;
 
-class SpecialMakePdfBook extends SpecialPage
+
+class SpecialMakePdfBook extends \SpecialPage
 {
 	# Defaults for these config values are defined in extension.json
 	private $config;
