@@ -7,10 +7,10 @@
   "license-name": "MIT",
   "type": "other",
   "AutoLoadNamespaces": {
-    "MediaWiki\\Extension\\MakePdfBook\\": "src/"
+    "MediaWiki\\Extension\\MyExtension\\": "src/"
   },
   "SpecialPages": {
-    "MakePdfBook": "MediaWiki\\Extension\\MakePdfBook\\SpecialMakePdfBook"
+    "MakePdfBook": "MediaWiki\\Extension\\MyExtension\\SpecialMakePdfBook"
   },
   "ResourceModules": {
     "ext.makePdfBook": {
@@ -22,7 +22,6 @@
       "dependencies": ["mediawiki.util"]
     }
   },
-
   "config": {
     "MakePdfBookCacheFileDir": {
       "value": "/tmp",

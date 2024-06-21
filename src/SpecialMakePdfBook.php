@@ -1,29 +1,9 @@
 <?php
-namespace MediaWiki\Extension\MakePdfBook;
+namespace MediaWiki\Extension\MyExtension;
 
 use MediaWiki\MediaWikiServices;
-use MediaWiki\SpecialPage\SpecialPage;
 
-class SpecialMakePdfBook extends SpecialPage
-{
-	# Defaults for these config values are defined in extension.json
-	private $config;
-
-	public function __construct()
-	{
-		parent::__construct('MakePdfBook');
-		$this->config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('MakePdfBook');
-		$this->parser = MediaWikiServices::getInstance()->getParser();
-
-	}
-	public function execute($subpage) # $subpage parameter included for signature compatibility only
-	{
-		$output = $this->getOutput();
-		$wikitext = 'Hello world!';
-		$output->addWikiTextAsInterface($wikitext);
-	}
-}
-class Bob extends SpecialPage
+class SpecialMakePdfBook extends \SpecialPage
 {
 	# Defaults for these config values are defined in extension.json
 	private $config;
