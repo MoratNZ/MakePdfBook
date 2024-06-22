@@ -6,21 +6,26 @@
   "descriptionmsg": "MakePdfBook-desc",
   "license-name": "MIT",
   "type": "other",
-  "AutoLoadNamespaces": {
-    "MediaWiki\\Extension\\MyExtension\\": "src/"
+  "AutoloadNamespaces": {
+    "MediaWiki\\Extension\\MakePdfBook\\": "src/"
   },
   "SpecialPages": {
-    "MakePdfBook": "MediaWiki\\Extension\\MyExtension\\SpecialMakePdfBook"
+    "MakePdfBook": "MediaWiki\\Extension\\MakePdfBook\\SpecialMakePdfBook"
   },
   "ResourceModules": {
     "ext.makePdfBook": {
       "localBasePath": "resources/ext.MakePdfBook",
       "remoteExtPath": "MakePdfBook/modules/ext.MakePdfBook",
       "styles": [],
-      "packageFiles": ["index.js"],
+      "packageFiles": ["MakePdfBook.js"],
       "messages": [],
       "dependencies": ["mediawiki.util"]
     }
+  },
+  "Hooks": {
+    "BeforePageDisplay": [
+      "MediaWiki\\Extension\\MakePdfBook\\MakePdfBookHooks::addHooks"
+    ]
   },
   "config": {
     "MakePdfBookCacheFileDir": {
