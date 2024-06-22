@@ -17,12 +17,16 @@
       "localBasePath": "resources/ext.MakePdfBook",
       "remoteExtPath": "MakePdfBook/modules/ext.MakePdfBook",
       "styles": [],
-      "packageFiles": ["index.js"],
+      "packageFiles": ["MakePdfBook.js"],
       "messages": [],
       "dependencies": ["mediawiki.util"]
     }
   },
-
+  "Hooks": {
+    "BeforePageDisplay": [
+      "MediaWiki\\Extension\\MakePdfBook\\MakePdfBookHooks::addHooks"
+    ]
+  },
   "config": {
     "MakePdfBookCacheFileDir": {
       "value": "/tmp",
