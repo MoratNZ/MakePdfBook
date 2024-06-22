@@ -12,7 +12,7 @@ class SpecialMakePdfBook extends \SpecialPage
 	{
 		parent::__construct('MakePdfBook');
 		$this->config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('MakePdfBook');
-		$this->parser = \MediaWiki\MediaWikiServices::getInstance()->getParser();
+		$this->parser = MediaWikiServices::getInstance()->getParser();
 
 	}
 	public function execute($par)
