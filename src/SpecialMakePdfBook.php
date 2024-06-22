@@ -8,13 +8,14 @@ class SpecialMakePdfBook extends \SpecialPage
 {
 	# Defaults for these config values are defined in extension.json
 	private $config;
+	private Books $books;
 
 	public function __construct()
 	{
 		parent::__construct('MakePdfBook');
 		$this->config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('MakePdfBook');
 		$this->parser = MediaWikiServices::getInstance()->getParser();
-
+		$this->books = new Books();
 	}
 	public function execute($subpage) # $subpage parameter included for signature compatibility only
 	{
@@ -40,7 +41,7 @@ class SpecialMakePdfBook extends \SpecialPage
 		if ($json) {
 			return $this->returnCategoryJson($category);
 		} elseif (!$category) {
-			return $this->generateCategoryListPage();
+			return $this->buildSpecialPage();
 		}
 		try {
 			# Get articles from category
@@ -94,36 +95,38 @@ class SpecialMakePdfBook extends \SpecialPage
 		header("Content-type: application/json; charset=utf-8");
 		print json_encode($categories, JSON_PRETTY_PRINT);
 	}
-	private function generateCategoryListPage()
+	private function buildSpecialPage(): void
 	{
 		global $wgServer, $wgScriptPath;
-		$handbooks = Book::getBooks();
-
-		arsort($handbooks);
 
 		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!Titlepage\n";
 
-		foreach ($handbooks as $category => $handbook) {
-			$textString .= "|-\n" .
-				"|[$wgServer$wgScriptPath/index.php/Category:$category  $category]\n" .
-				"|[$wgServer$wgScriptPath/index.php/Special:MakePdfBook?category=$category   pdf]\n";
+		foreach ($this->books->getTitlePages()->getBooks(sorted: true) as $book) {
+			$textString .= sprintf(
+				"|-\n|[%s %s]\n|[%s   pdf]\n",
+				$book->title->getFullUrlForRedirect(),
+				$book->title->getText(),
+				$book->getPdfLink()
+			);
 
-			if (array_key_exists('titlepage', $handbook)) {
-				$textString .= "||[[" . $handbook['titlepage']['title'] . "]]\n";
+			if (empty($book->titlepage)) {
+				$textString .= sprintf(
+					"| |[[%s_Title_page]] (add <nowiki>[[Category:%s|titlepage]]</nowiki> to bottom of page when you create it)\n",
+					$book->title->getDBkey(),
+					$book->title->getDBkey()
+				);
 			} else {
-				$textString .= "| |[[" . $category . "_Title_page]] (add <nowiki>[[Category:" . $category . "|titlepage]]</nowiki> to bottom of page when you create it)\n";
+				$textString .= sprintf(
+					"||[[%s|%s]]\n",
+					$book->titlepage->title->getPrefixedText(),
+					$book->titlepage->title->getText()
+				);
 			}
 		}
 		$textString .= "|}\n";
 
-		$output = $this->getOutput();
-		$output->addWikiTextAsInterface($textString);
+		$this->getOutput()->addWikiTextAsInterface($textString);
 	}
-
-
-
-
-
 	private function getCategoryArticles($category)
 	{
 		$articles = array();

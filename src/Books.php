@@ -1,24 +1,27 @@
 <?php
 namespace MediaWiki\Extension\MakePdfBook;
 
-
+use \OutOfBoundsException;
 use MediaWiki\MediaWikiServices;
-use Book;
+use MediaWiki\Extension\MakePdfBook\Book;
+use \Wikimedia\Rdbms\DBConnRef;
 
 class Books
 {
+    private array $books = [];
+    public DBConnRef $dbr;
     public function __construct()
-    {
-        $this->books = [];
-    }
-    private function getBooks()
     {
         $instance = MediaWikiServices::getInstance();
         $lb = $instance->getDBLoadBalancer();
-        $dbr = $lb->getConnection(DB_REPLICA);
 
+        $this->dbr = $lb->getConnection(DB_REPLICA);
+        $this->fetchBooks();
+    }
+    private function fetchBooks()
+    {
         # the book categories
-        $query = $dbr->newSelectQueryBuilder()
+        $query = $this->dbr->newSelectQueryBuilder()
             ->select(['cat_title'])
             ->from('category')
             ->where("cat_title like '%book%'")
@@ -27,28 +30,35 @@ class Books
 
         foreach ($result as $row) {
             $category = $row->cat_title;
-            $this->books[$category] = new Book($category);
+            $this->addBook($category);
         }
         return $this;
     }
-    public static function getBooksDetails($category = false)
+    private function addBook(string $category): Book
     {
-        $articles = array();
-
-        $instance = MediaWikiServices::getInstance();
-        $lb = $instance->getDBLoadBalancer();
-        $dbr = $lb->getConnection(DB_REPLICA);
-
-        $whereClause = [
-            "cat_title like '%book%'",
-            "cl_sortkey_prefix not like '%titlepage%'",
-        ];
-        if ($category) {
-            $whereClause[] = "cat_title =\"$category\""; # TODO: replace with an expr() call once we get MW 1.42
+        $newBook = new Book($category);
+        $this->books[$category] = $newBook;
+        return $newBook;
+    }
+    public function getBook(string $category): Book
+    {
+        if (array_key_exists($category, $this->books)) {
+            return $this->books[$category];
+        } else {
+            throw new OutOfBoundsException(sprintf('There is no such book as "%s"', $category));
         }
-
-        # Get the non-titlepage pages
-        $query = $dbr->newSelectQueryBuilder()
+    }
+    public function getBooks(bool $sorted = false): array
+    {
+        $clonedBook = [...$this->books];
+        if ($sorted) {
+            arsort($clonedBook);
+        }
+        return $clonedBook;
+    }
+    public function getTitlePages(): Books
+    {
+        $query = $this->dbr->newSelectQueryBuilder()
             ->select([
                 'cat_title',
                 'page_id',
@@ -57,38 +67,26 @@ class Books
             ->from('page')
             ->join('categorylinks', null, 'page_id=cl_from')
             ->join('category', null, 'cl_to=cat_title')
-            ->where($whereClause)
+            ->where("cl_sortkey_prefix like '%titlepage%'")
             ->caller('MakePdfBook');
-        $result = $query->fetchResultSet();
 
+        $result = $query->fetchResultSet();
 
         foreach ($result as $row) {
             $category = $row->cat_title;
-            $page_id = $row->page_id;
-            $sortKey = $row->cl_sortkey_prefix;
+            $pageId = $row->page_id;
 
-            $page = \Title::newFromID($page_id);
-
-            if (!array_key_exists($category, $articles)) {
-                $articles[$category] = [
-                    'title' => $category,
-                    'chapters' => []
-                ];
+            try {
+                $this->getBook($category)->setTitlepage($pageId);
+            } catch (OutOfBoundsException $e) {
+                $this->addBook($category)->setTitlepage($pageId);
             }
-
-            $articles[$category]['chapters'][$sortKey] = [
-                'title' => $page->getText(),
-                'sortKey' => $sortKey,
-                'url' => $page->getFullUrl(),
-            ];
         }
-        # Get the titlepage pages
-#
-# This is being done like this so that we can have fuzzy titlepage
-# labelling in the wiki, but precise identification of titlepages here
-
-        $whereClause[1] = "cl_sortkey_prefix like '%titlepage%'";
-        $query = $dbr->newSelectQueryBuilder()
+        return $this;
+    }
+    public function getChapters(): Books
+    {
+        $query = $this->dbr->newSelectQueryBuilder()
             ->select([
                 'cat_title',
                 'page_id',
@@ -97,33 +95,22 @@ class Books
             ->from('page')
             ->join('categorylinks', null, 'page_id=cl_from')
             ->join('category', null, 'cl_to=cat_title')
-            ->where($whereClause)
+            ->where("cl_sortkey_prefix not like '%titlepage%'")
             ->caller('MakePdfBook');
 
         $result = $query->fetchResultSet();
 
         foreach ($result as $row) {
             $category = $row->cat_title;
-            $page_id = $row->page_id;
+            $pageId = $row->page_id;
             $sortKey = $row->cl_sortkey_prefix;
 
-            $page = \Title::newFromID($page_id);
-
-            $titlePage = [
-                'title' => $page->getText(),
-                'url' => $page->getFullUrl(),
-            ];
-            if (!array_key_exists($category, $articles)) {
-                $articles[$category] = [
-                    'title' => $category,
-                    'chapters' => [],
-                    'titlepage' => $titlePage
-                ];
-            } else {
-                $articles[$category]['titlepage'] = $titlePage;
+            try {
+                $this->getBook($category)->addChapter($pageId, $sortKey);
+            } catch (OutOfBoundsException $e) {
+                $this->addBook($category)->addChapter($pageId, $sortKey);
             }
         }
-
-        return $articles;
+        return $this;
     }
 }

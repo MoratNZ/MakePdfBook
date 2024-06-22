@@ -5,12 +5,21 @@ use MediaWiki\MediaWikiServices;
 
 class Chapter
 {
-    public function __construct(Book $book, string $title, string $sortKey)
+    public Book $book;
+    private int $pageId;
+    public \Title $title;
+    public string $sortKey;
+    public ?int $number = null;
+    private ?string $htmlContent = null;
+    public function __construct(Book $book, int $pageId, string $sortKey)
     {
         $this->book = $book;
-        $this->title = $title;
+        $this->page_id = $pageId;
+        $this->title = \Title::newFromID($pageId);
         $this->sortKey = $sortKey;
-        $this->number = null;
-        $this->htmlContent = null;
+    }
+    public function getLink(): string
+    {
+        return $this->title->getLocalUrl();
     }
 }
