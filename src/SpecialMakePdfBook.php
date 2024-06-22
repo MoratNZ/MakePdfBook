@@ -1,8 +1,7 @@
 <?php
-namespace MediaWiki\Extension\MyExtension;
+namespace MediaWiki\Extension\MakePdfBook;
 
 use MediaWiki\MediaWikiServices;
-
 
 class SpecialMakePdfBook extends \SpecialPage
 {
@@ -177,7 +176,7 @@ class SpecialMakePdfBook extends \SpecialPage
 			$page_id = $row->page_id;
 			$sortKey = $row->cl_sortkey_prefix;
 
-			$page = Title::newFromID($page_id);
+			$page = \Title::newFromID($page_id);
 
 			if (!array_key_exists($category, $articles)) {
 				$articles[$category] = [
@@ -217,7 +216,7 @@ class SpecialMakePdfBook extends \SpecialPage
 			$page_id = $row->page_id;
 			$sortKey = $row->cl_sortkey_prefix;
 
-			$page = Title::newFromID($page_id);
+			$page = \Title::newFromID($page_id);
 
 			$titlePage = [
 				'title' => $page->getText(),
@@ -253,7 +252,7 @@ class SpecialMakePdfBook extends \SpecialPage
 			return NULL;
 		} else if ($numRows == 1) {
 			$row = $result->fetchRow();
-			return Title::newFromID($row[0]);
+			return \Title::newFromID($row[0]);
 		} else {
 			throw new Exception("There is more than one article in category $category labelled with sort key 'titlepage'. Please trim that down to one.");
 		}

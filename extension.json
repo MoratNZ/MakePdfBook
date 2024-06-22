@@ -7,10 +7,10 @@
   "license-name": "MIT",
   "type": "other",
   "AutoloadNamespaces": {
-    "MediaWiki\\Extension\\MyExtension\\": "src/"
+    "MediaWiki\\Extension\\MakePdfBook\\": "src/"
   },
   "SpecialPages": {
-    "MakePdfBook": "MediaWiki\\Extension\\MyExtension\\SpecialMakePdfBook"
+    "MakePdfBook": "MediaWiki\\Extension\\MakePdfBook\\SpecialMakePdfBook"
   },
   "ResourceModules": {
     "ext.makePdfBook": {

@@ -1,5 +1,4 @@
 <?php
-
 class MakePdfBookHooks
 {
     public static function addHooks(&$out)
