@@ -3,19 +3,20 @@ namespace MediaWiki\Extension\MakePdfBook;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Extension\MakePdfBook\Chapter;
+use \Title;
 
 
 class Book
 {
     private string $category;
-    public \Title $title;
+    public Title $title;
     public ?Chapter $titlepage = null;
     protected array $chapters = [];
     public static string $TITLEPAGE_SORTKEY = 'titlepage';
     public function __construct(string $category)
     {
         $this->category = $category;
-        $this->title = \Title::newFromText(sprintf("Category:%s", $category));
+        $this->title = Title::newFromText(sprintf("Category:%s", $category));
     }
     public function setTitlepage(int $pageId): Book
     {
@@ -24,7 +25,7 @@ class Book
     }
     public function addChapter(int $pageId, string $sortKey): Book
     {
-        $title = \Title::newFromID($pageId);
+        $title = Title::newFromID($pageId);
 
         $this->chapters[$title->get_text] = new Chapter($this, $title, $sortKey);
         return $this;
