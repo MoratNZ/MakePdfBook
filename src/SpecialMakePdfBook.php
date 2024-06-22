@@ -3,8 +3,9 @@ namespace MediaWiki\Extension\MakePdfBook;
 
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Extension\MakePdfBook\Books;
+use MediaWiki\SpecialPage\SpecialPage;
 
-class SpecialMakePdfBook extends \SpecialPage
+class SpecialMakePdfBook extends SpecialPage
 {
 	# Defaults for these config values are defined in extension.json
 	private $config;
@@ -23,13 +24,13 @@ class SpecialMakePdfBook extends \SpecialPage
 		$output = $this->getOutput();
 		$this->setHeaders();
 
-		$books = new Books();
-
 		$cacheFileDir = $this->config->get('MakePdfBookCacheFileDir');
 
 		$errorText = "";
 
 		# Get request data 
+		$testOutput = $request->getText('testOutput');
+
 		$category = $request->getText('category');
 		$json = $request->getText('json');
 		$forceRebuild = $request->getText('force');
@@ -43,6 +44,11 @@ class SpecialMakePdfBook extends \SpecialPage
 		} elseif (!$category) {
 			return $this->buildSpecialPage();
 		}
+
+		if ($testOutput) {
+			return $this->testOutput($category);
+		}
+
 		try {
 			# Get articles from category
 			$articles = $this->getCategoryArticles($category);
@@ -83,6 +89,17 @@ class SpecialMakePdfBook extends \SpecialPage
 	public function getDescription()
 	{
 		return wfMessage("makePdfBook");
+	}
+	private function testOutput($category)
+	{
+		$this->books->getChapters();
+		$this->getOutput()->disable();
+		header("Content-type: text/plain; charset=utf-8");
+
+		printf(
+			"<nowiki>%s</nowiki>",
+			$this->books->getBook($category)->render()
+		);
 	}
 
 	private function returnCategoryJson($category)

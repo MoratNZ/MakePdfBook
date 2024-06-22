@@ -1,10 +1,9 @@
 <?php
 namespace MediaWiki\Extension\MakePdfBook;
 
-use MediaWiki\MediaWikiServices;
 use MediaWiki\Extension\MakePdfBook\Chapter;
-use \Title;
-
+use MediaWiki\Title\Title;
+use \OutOfBoundsException;
 
 class Book
 {
@@ -27,7 +26,7 @@ class Book
     {
         $title = Title::newFromID($pageId);
 
-        $this->chapters[$title->get_text] = new Chapter($this, $title, $sortKey);
+        $this->chapters[$title->get_text] = new Chapter($this, $pageId, $sortKey);
         return $this;
     }
     public function getChapter(string $title): Chapter
@@ -35,7 +34,7 @@ class Book
         if (array_key_exists($title, $this->chapters)) {
             return $this->chapters[$title];
         } else {
-            throw new \InvalidArgumentException(sprintf("No chapter called '%s' in %s", $title, $this->category));
+            throw new OutOfBoundsException(sprintf("No chapter called '%s' in %s", $title, $this->category));
         }
     }
     public function getFullUrl(): string
@@ -50,5 +49,7 @@ class Book
     }
     public function render()
     {
+        $bob = array_keys($this->chapters)[0];
+        return $this->chapters[$bob]->getHtmlContent();
     }
 }
