@@ -2,7 +2,7 @@
 namespace MediaWiki\Extension\MakePdfBook;
 
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Extension\MakePdfBook\Book;
+use MediaWiki\Extension\MakePdfBook\Books;
 
 class SpecialMakePdfBook extends \SpecialPage
 {
@@ -21,6 +21,8 @@ class SpecialMakePdfBook extends \SpecialPage
 		$request = $this->getRequest();
 		$output = $this->getOutput();
 		$this->setHeaders();
+
+		$books = new Books();
 
 		$cacheFileDir = $this->config->get('MakePdfBookCacheFileDir');
 
