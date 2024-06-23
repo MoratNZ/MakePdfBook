@@ -30,7 +30,7 @@ class SpecialMakePdfBook extends SpecialPage
 			case "render":
 				return $this->renderPdf($parsedUrl['target'], $parsedUrl['parameters']);
 			case "json":
-				return $this->returnJson($parsedUrl['target'], $parsedUrl['parameters']);
+				return $this->buildJsonResponse($parsedUrl['target'], $parsedUrl['parameters']);
 			case "testoutput":
 				return $this->testOutput($parsedUrl['command'], $parsedUrl['target'], $parsedUrl['parameters']);
 		}
@@ -137,7 +137,7 @@ class SpecialMakePdfBook extends SpecialPage
 		$this->getOutput()->addWikiTextAsInterface($textString);
 	}
 
-	private function returnJson($category, $params)
+	private function buildJsonResponse($category, $params)
 	{
 		$jsonText = json_encode(['hello', "world"]);
 		if ($category) {
