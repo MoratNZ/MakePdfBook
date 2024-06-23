@@ -6,7 +6,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\Extension\MakePdfBook\Book;
 use \Wikimedia\Rdbms\DBConnRef;
 
-class Books
+class BookSet implements \JsonSerializable
 {
     private array $books = [];
     public DBConnRef $dbr;
@@ -17,6 +17,12 @@ class Books
 
         $this->dbr = $lb->getConnection(DB_REPLICA);
         $this->fetchBooks();
+    }
+    public function jsonSerialize(): array
+    {
+        return [
+            "books" => $this->books
+        ];
     }
     private function fetchBooks()
     {
@@ -37,6 +43,7 @@ class Books
     private function addBook(string $category): Book
     {
         $newBook = new Book($category);
+        $newBook->bookSet = $this;
         $this->books[$category] = $newBook;
         return $newBook;
     }
@@ -56,7 +63,7 @@ class Books
         }
         return $clonedBook;
     }
-    public function getTitlePages(): Books
+    public function fetchTitlePages(): BookSet
     {
         $query = $this->dbr->newSelectQueryBuilder()
             ->select([
@@ -84,7 +91,7 @@ class Books
         }
         return $this;
     }
-    public function getChapters(): Books
+    public function fetchChapters(): BookSet
     {
         $query = $this->dbr->newSelectQueryBuilder()
             ->select([

@@ -2,26 +2,27 @@
 namespace MediaWiki\Extension\MakePdfBook;
 
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Extension\MakePdfBook\Books;
+use MediaWiki\Extension\MakePdfBook\BookSet;
 use MediaWiki\SpecialPage\SpecialPage;
+use \OutOfBoundsException;
 
 class SpecialMakePdfBook extends SpecialPage
 {
 	# Defaults for these config values are defined in extension.json
 	private $config;
-	private Books $books;
+	private BookSet $bookSet;
 
 	public function __construct()
 	{
 		parent::__construct('MakePdfBook');
 		$this->config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('MakePdfBook');
 		$this->parser = MediaWikiServices::getInstance()->getParser();
-		$this->books = new Books();
+		$this->bookSet = new BookSet();
 	}
 	public function execute($subpage) # $subpage parameter included for signature compatibility only
 	{
 		$parsedUrl = $this->parseMyUrl();
-		return $this->testOutput($parsedUrl['command'], $parsedUrl['target'], $parsedUrl['parameters']);
+		// return $this->testOutput($parsedUrl['command'], $parsedUrl['target'], $parsedUrl['parameters']);
 
 		switch ($parsedUrl['command']) {
 			case false:
@@ -29,73 +30,55 @@ class SpecialMakePdfBook extends SpecialPage
 			case "render":
 				return $this->renderPdf($parsedUrl['target'], $parsedUrl['parameters']);
 			case "json":
-				return $this->returnCategoryJson($parsedUrl['target'], $parsedUrl['parameters']);
-			case "testOutput":
+				return $this->returnJson($parsedUrl['target'], $parsedUrl['parameters']);
+			case "testoutput":
 				return $this->testOutput($parsedUrl['command'], $parsedUrl['target'], $parsedUrl['parameters']);
-
 		}
+		return $this->buildErrorPage(
+			sprintf("%s is not a valid command for MakePdfBook", $parsedUrl['command'])
+		);
+		// $request = $this->getRequest();
+		// $output = $this->getOutput();
+		// $this->setHeaders();
 
-		$request = $this->getRequest();
-		$output = $this->getOutput();
-		$this->setHeaders();
+		// $cacheFileDir = $this->config->get('MakePdfBookCacheFileDir');
 
-		$cacheFileDir = $this->config->get('MakePdfBookCacheFileDir');
+		// $errorText = "";
 
-		$errorText = "";
+		// # Get request data 
 
-		# Get request data 
-		$testOutput = $request->getText('testOutput');
+		// try {
+		// 	# Get articles from category
+		// 	$articles = $this->getCategoryArticles($category);
 
-		$category = $request->getText('category');
-		$json = $request->getText('json');
-		$forceRebuild = $request->getText('force');
-		$testPdfOutput = $request->getText('testPdfOutput');
+		// 	# Get the cache file name
+		// 	$cacheFile = $this->getCacheHash($articles) . ".pdf";
 
-		# Check that this is a valid category, and get its DB ID if it is.
-		# We don't actually care about the id, but want to use the exceptions for user feedback
+		// 	// If the file doesn't exist, render the content now
+		// 	if ($forceRebuild || !file_exists("$cacheFileDir/$cacheFile")) {
+		// 		$this->renderPdf($cacheFileDir, $cacheFile, $category, $articles);
+		// 		if (!file_exists("$cacheFileDir/$cacheFile")) {
+		// 			throw new Exception("PDF generation has somehow silently failed. I am confused and ashamed.");
+		// 		}
+		// 	}
+		// 	# Return the PDF, or an error page if generation has failed.
+		// } catch (\Throwable $e) {
+		// 	$errorText = $e->getMessage();
+		// }
+		// $output->disable();
 
-		if ($json) {
-			return $this->returnCategoryJson($category);
-		} elseif (!$category) {
-			return $this->buildSpecialPage();
-		}
-
-		if ($testOutput) {
-			return $this->testOutput($category);
-		}
-
-		try {
-			# Get articles from category
-			$articles = $this->getCategoryArticles($category);
-
-			# Get the cache file name
-			$cacheFile = $this->getCacheHash($articles) . ".pdf";
-
-			// If the file doesn't exist, render the content now
-			if ($forceRebuild || !file_exists("$cacheFileDir/$cacheFile")) {
-				$this->renderPdf($cacheFileDir, $cacheFile, $category, $articles);
-				if (!file_exists("$cacheFileDir/$cacheFile")) {
-					throw new Exception("PDF generation has somehow silently failed. I am confused and ashamed.");
-				}
-			}
-			# Return the PDF, or an error page if generation has failed.
-		} catch (\Throwable $e) {
-			$errorText = $e->getMessage();
-		}
-		$output->disable();
-
-		if ($testPdfOutput) {
-			header("Content-type: application/pdf");
-			readfile("/home/morat/MakePdfBook/test/marshal_handbook.pdf");
-		} else if ($errorText) {
-			header("Content-type: text/html; charset=utf-8");
-			print "<html><head></head><body><h1>Error creating PDF book</h1>";
-			print "<pre>$errorText</pre>";
-			print "</body></html>";
-		} else {
-			header("Content-type: application/pdf");
-			readfile("$cacheFileDir/$cacheFile");
-		}
+		// if ($testPdfOutput) {
+		// 	header("Content-type: application/pdf");
+		// 	readfile("/home/morat/MakePdfBook/test/marshal_handbook.pdf");
+		// } else if ($errorText) {
+		// 	header("Content-type: text/html; charset=utf-8");
+		// 	print "<html><head></head><body><h1>Error creating PDF book</h1>";
+		// 	print "<pre>$errorText</pre>";
+		// 	print "</body></html>";
+		// } else {
+		// 	header("Content-type: application/pdf");
+		// 	readfile("$cacheFileDir/$cacheFile");
+		// }
 	}
 	public function getGroupName()
 	{
@@ -154,23 +137,49 @@ class SpecialMakePdfBook extends SpecialPage
 		$this->getOutput()->addWikiTextAsInterface($textString);
 	}
 
-	private function returnCategoryJson($category, $params)
+	private function returnJson($category, $params)
 	{
-		$categories = Book::getBooks($category);
-		arsort($categories);
+		$jsonText = json_encode(['hello', "world"]);
+		if ($category) {
+			try {
+				$jsonText = json_encode(
+					$this->bookSet
+						->getBook($category)
+						->fetchChapters()
+						->fetchTitlePage(),
+					JSON_PRETTY_PRINT
+				);
+			} catch (OutOfBoundsException) {
+				$jsonText = sprintf('"error": "\'%s\' is not a valid book"', $category);
+			}
+		} else {
+			$jsonText = json_encode(
+				$this->bookSet
+					->fetchChapters()
+					->fetchTitlePages(),
+				JSON_PRETTY_PRINT
+			);
+		}
 
-		$output = $this->getOutput();
-		$output->disable();
+		$this->getOutput()->disable();
 		header("Content-type: application/json; charset=utf-8");
-		print json_encode($categories, JSON_PRETTY_PRINT);
+
+		print $jsonText;
+	}
+	private function buildErrorPage($errorMessage)
+	{
+		$this->getOutput()->addWikiTextAsInterface(
+			sprintf(
+				"<h2>Error processing MakePdfBook command:</h2><pre>%s</pre>",
+				$errorMessage
+			)
+		);
 	}
 	private function buildSpecialPage(): void
 	{
-		global $wgServer, $wgScriptPath;
-
 		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!Titlepage\n";
 
-		foreach ($this->books->getTitlePages()->getBooks(sorted: true) as $book) {
+		foreach ($this->bookSet->fetchTitlePages()->getBooks(sorted: true) as $book) {
 			$textString .= sprintf(
 				"|-\n|[%s %s]\n|[%s   pdf]\n",
 				$book->title->getFullUrlForRedirect(),

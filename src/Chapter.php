@@ -5,7 +5,7 @@ use MediaWiki\MediaWikiServices;
 use MediaWiki\Title\Title;
 use \WikiPage;
 
-class Chapter
+class Chapter implements \JsonSerializable
 {
     public Book $book;
     private int $pageId;
@@ -21,6 +21,13 @@ class Chapter
         $this->title = \Title::newFromID($pageId);
         $this->page = new Wikipage($this->title);
         $this->sortKey = $sortKey;
+    }
+    public function jsonSerialize(): array
+    {
+        return [
+            "title" => $this->title->getText(),
+            "sortKey" => $this->sortKey
+        ];
     }
     private function fetchHtmlContent(): Chapter
     {
