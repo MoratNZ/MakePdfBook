@@ -8,6 +8,7 @@ use \OutOfBoundsException;
 class Book implements \JsonSerializable
 {
     private string $category;
+    private ?string $cacheHash = null;
     public BookSet $bookSet;
     public Title $title;
     public ?Chapter $titlepage = null;
@@ -57,11 +58,6 @@ class Book implements \JsonSerializable
     {
         global $wgServer, $wgScriptPath;
         return sprintf("%s%s/index.php/Special:MakePdfBook?category=%s", $wgServer, $wgScriptPath, $this->category);
-    }
-    public function render()
-    {
-        $bob = array_keys($this->chapters)[0];
-        return $this->chapters[$bob]->getHtmlContent();
     }
     public function fetchTitlePage(): Book
     {
@@ -115,5 +111,51 @@ class Book implements \JsonSerializable
             $this->addChapter($pageId, $sortKey);
         }
         return $this;
+    }
+    public function getCacheHash(): string
+    {
+        if (empty($this->cacheHash)) {
+            $cacheString = "";
+            $relevantDirectories = ['src', 'bin'];
+
+            # Get the last modified time for relevant files
+            foreach ($relevantDirectories as $directory) {
+                $path = sprintf(
+                    "%s/../%s",
+                    dirname(__FILE__),
+                    $directory
+                );
+                $directoryFiles = scandir($path);
+                foreach ($directoryFiles as $fileName) {
+                    $fullName = sprintf("%s/%s", $path, $fileName);
+                    $cacheString .= sprintf(
+                        "%s:%s\n",
+                        $fullName,
+                        filemtime($fullName)
+                    );
+                }
+            }
+            # Get revision id for all chapters
+            foreach ($this->chapters as $chapter) {
+                $cacheString .= sprintf(
+                    "%s:%s\n",
+                    $chapter->title->getText(),
+                    $chapter->getRevId()
+                );
+            }
+            $this->cacheHash = md5($cacheString);
+        }
+        return $this->cacheHash;
+    }
+    public function writeContent($directory)
+    {
+        if ($this->titlepage) {
+            $this->titlepage->writeHtml(sprintf("%s/titlepage.html", $directory));
+        }
+        $chapterNumber = 0;
+        foreach ($this->chapters as $chapter) {
+            $chapterNumber++;
+            $chapter->writeHtml(sprintf("%s/chapter-%s.html", $directory, $chapterNumber));
+        }
     }
 }

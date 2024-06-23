@@ -2,8 +2,9 @@
 namespace MediaWiki\Extension\MakePdfBook;
 
 use MediaWiki\MediaWikiServices;
-use MediaWiki\Extension\MakePdfBook\BookSet;
 use MediaWiki\SpecialPage\SpecialPage;
+use MediaWiki\Extension\MakePdfBook\MakePdfBook;
+use MediaWiki\Extension\MakePdfBook\BookSet;
 use \OutOfBoundsException;
 
 class SpecialMakePdfBook extends SpecialPage
@@ -11,6 +12,7 @@ class SpecialMakePdfBook extends SpecialPage
 	# Defaults for these config values are defined in extension.json
 	private $config;
 	private BookSet $bookSet;
+	private MakePdfBook $engine;
 
 	public function __construct()
 	{
@@ -18,25 +20,37 @@ class SpecialMakePdfBook extends SpecialPage
 		$this->config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('MakePdfBook');
 		$this->parser = MediaWikiServices::getInstance()->getParser();
 		$this->bookSet = new BookSet();
+		$this->engine = new MakePdfBook();
 	}
 	public function execute($subpage) # $subpage parameter included for signature compatibility only
 	{
 		$parsedUrl = $this->parseMyUrl();
 		// return $this->testOutput($parsedUrl['command'], $parsedUrl['target'], $parsedUrl['parameters']);
 
-		switch ($parsedUrl['command']) {
-			case false:
-				return $this->buildSpecialPage();
-			case "render":
-				return $this->renderPdf($parsedUrl['target'], $parsedUrl['parameters']);
-			case "json":
-				return $this->buildJsonResponse($parsedUrl['target'], $parsedUrl['parameters']);
-			case "testoutput":
-				return $this->testOutput($parsedUrl['command'], $parsedUrl['target'], $parsedUrl['parameters']);
+		try {
+			switch ($parsedUrl['command']) {
+				case false:
+					return $this->buildSpecialPage();
+				case "render":
+					return $this->renderPdf($parsedUrl['target'], $parsedUrl['parameters']);
+				case "json":
+					return $this->buildJsonResponse($parsedUrl['target'], $parsedUrl['parameters']);
+				case "testoutput":
+					return $this->testOutput($parsedUrl['command'], $parsedUrl['target'], $parsedUrl['parameters']);
+			}
+			return $this->buildErrorPage(
+				sprintf("%s is not a valid command for MakePdfBook", $parsedUrl['command'])
+			);
+		} catch (\Exception $e) {
+			return $this->buildErrorPage(
+				sprintf(
+					"Encountered error while attempting to execute MakePdfBook command \'%s\' for target \'%s\'.\n\nError was:\n%s",
+					$parsedUrl['command'],
+					$parsedUrl['target'],
+					$e
+				)
+			);
 		}
-		return $this->buildErrorPage(
-			sprintf("%s is not a valid command for MakePdfBook", $parsedUrl['command'])
-		);
 		// $request = $this->getRequest();
 		// $output = $this->getOutput();
 		// $this->setHeaders();
@@ -163,7 +177,6 @@ class SpecialMakePdfBook extends SpecialPage
 
 		$this->getOutput()->disable();
 		header("Content-type: application/json; charset=utf-8");
-
 		print $jsonText;
 	}
 	private function buildErrorPage($errorMessage)
@@ -311,62 +324,65 @@ class SpecialMakePdfBook extends SpecialPage
 			return $titleText;
 		}
 	}
-	private function createEmptyDirectory($baseDirectory, $category)
+
+	private function renderPdf($category, $params)
 	{
-		$directoryName = "$baseDirectory/MakePdfBook/$category";
+		# get the book and load its content
+		$book = $this->bookSet->getBook($category)
+			->fetchChapters()
+			->fetchTitlePage();
 
-		if (is_dir($directoryName)) {
-			// The directory exists - empty it
-			$files = glob($directoryName . '/*', GLOB_MARK); //GLOB_MARK adds a slash to directories returned
+		$cacheHash = $book->getCacheHash();
 
-			foreach ($files as $file) {
-				unlink($file);
-			}
-		} else {
-			// Create the directory
-			mkdir($directoryName, 0777, true);
+		# check whether cached version is up to date
+		$pdfFile = $this->engine->getCacheFile($cacheHash);
+
+		# If the cache is empty or we're forcing a rebuild, render an up to date pdf
+		if (empty($pdfFile) || (key_exists('force', $params) && $params['force'] == 'true')) {
+			$pdfFile = $this->engine->render($book);
 		}
 
-		return $directoryName;
-	}
-	private function renderPdf($outputDir, $outputFileName, $category, $articles)
-	{
-		global $wgServer, $wgScriptPath, $makepdfIsDraft;
-		$titlePage = $this->getCategoryTitlePage($category);
+		# serve the cached pdf
+		$this->getOutput()->disable();
+		header("Content-type: application/pdf");
+		readfile($pdfFile);
 
-		$baseTempFileDir = $this->config->get('MakePdfBooktempFileDir');
+		// global $wgServer, $wgScriptPath, $makepdfIsDraft;
+		// $titlePage = $this->getCategoryTitlePage($category);
 
-		// Create the holding directory for our temp files
-		$tempFileDir = $this->createEmptyDirectory($baseTempFileDir, $category);
+		// $baseTempFileDir = $this->config->get('MakePdfBooktempFileDir');
 
-		// Create the content temp files
-		if ($titlePage) {
-			$titlepageFileName = "$tempFileDir/titlepage.html";
-			$this->writeArticleHtmlFile($titlePage, $titlepageFileName, true);
-		}
+		// // Create the holding directory for our temp files
+		// $tempFileDir = $this->createEmptyDirectory($baseTempFileDir, $category);
 
-		$articleCount = 0;
-		foreach ($articles as $title) {
-			$articleCount++;
-			$chapterFileName = "$tempFileDir/chapter-$articleCount.html";
+		// // Create the content temp files
+		// if ($titlePage) {
+		// 	$titlepageFileName = "$tempFileDir/titlepage.html";
+		// 	$this->writeArticleHtmlFile($titlePage, $titlepageFileName, true);
+		// }
 
-			$this->writeArticleHtmlFile($title, $chapterFileName);
-		}
+		// $articleCount = 0;
+		// foreach ($articles as $title) {
+		// 	$articleCount++;
+		// 	$chapterFileName = "$tempFileDir/chapter-$articleCount.html";
 
-		// Copy the template file to the holding dir
-		if ($makepdfIsDraft) {
-			copy(dirname(__FILE__) . "/../bin/draft_template.tex", "$tempFileDir/template.tex");
-		} else {
-			copy(dirname(__FILE__) . "/../bin/template.tex", "$tempFileDir/template.tex");
-		}
+		// 	$this->writeArticleHtmlFile($title, $chapterFileName);
+		// }
+
+		// // Copy the template file to the holding dir
+		// if ($makepdfIsDraft) {
+		// 	copy(dirname(__FILE__) . "/../bin/draft_template.tex", "$tempFileDir/template.tex");
+		// } else {
+		// 	copy(dirname(__FILE__) . "/../bin/template.tex", "$tempFileDir/template.tex");
+		// }
 
 
-		// Call out to the book assembler
-		$cmd = dirname(__FILE__) . "/../bin/makePdfBook.pl $tempFileDir $outputDir/$outputFileName 2>&1";
-		$shellResult = shell_exec($cmd);
+		// // Call out to the book assembler
+		// $cmd = dirname(__FILE__) . "/../bin/makePdfBook.pl $tempFileDir $outputDir/$outputFileName 2>&1";
+		// $shellResult = shell_exec($cmd);
 
-		if ($shellResult) {
-			throw new Exception($shellResult);
-		}
+		// if ($shellResult) {
+		// 	throw new Exception($shellResult);
+		// }
 	}
 }

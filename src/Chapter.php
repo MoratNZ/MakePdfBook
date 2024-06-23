@@ -33,7 +33,12 @@ class Chapter implements \JsonSerializable
     {
         global $wgUploadDirectory, $wgScriptPath, $wgUser, $wgServer;
 
-        $this->htmlContent = $this->page->getParserOutput()->getText();
+        $this->htmlContent = $this->page->getParserOutput()->getText(options: [
+            'allowTOC' => false,
+            'enableSectionEditLinks' => false,
+            'unwrap' => false,
+            'deduplicateStyles' => true,
+        ]);
 
         # Replace http paths to images with a path to that image in the server's filesystem
         $scriptPath = $wgServer . $wgScriptPath;
@@ -62,9 +67,13 @@ class Chapter implements \JsonSerializable
             return $this->htmlContent;
         }
     }
-    public function saveAs($fileName): void
+    public function writeHtml(string $fileName): void
     {
-        file_put_contents($fileName, $this->htmlContent);
+        file_put_contents($fileName, $this->getHtmlContent());
+    }
+    public function getRevId()
+    {
+        return $this->page->getRevisionRecord()->getId();
     }
 
 }

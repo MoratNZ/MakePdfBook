@@ -231,5 +231,8 @@ $wgGroupPermissions['SiegeEditor']['editSiege'] = true;
 $wgGroupPermissions['ThrownWeaponsEditor']['editThrownWeapons'] = true;
 $wgGroupPermissions['YouthMartialEditor']['editYouthMartial'] = true;
 
+# Dev settings. For the love of sweet fluffy monkeys never ever use these in prod
 $wgShowExceptionDetails = true;
 $wgDebugDumpSql = true;
+$wgMainCacheType = CACHE_NONE;
+$wgCacheDirectory = false;
