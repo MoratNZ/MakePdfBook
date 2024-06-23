@@ -31,17 +31,22 @@ class Chapter implements \JsonSerializable
     }
     private function fetchHtmlContent(): Chapter
     {
-        if ($this->isTitlepage()) {
-            $formatString = "%s";
-        } else {
-            $formatString = sprintf(
-                "<h1>%s</h1>\n%%s",
-                $this->title->getText()
-            );
-        }
-        $this->htmlContent = sprintf(
-            $formatString,
-            $this->page->getParserOutput()->getText()
+        global $wgUploadDirectory, $wgScriptPath, $wgUser, $wgServer;
+
+        $this->htmlContent = $this->page->getParserOutput()->getText();
+
+        # Replace http paths to images with a path to that image in the server's filesystem
+        $scriptPath = $wgServer . $wgScriptPath;
+        $urlPath = parse_url($scriptPath, PHP_URL_PATH);
+        $imgpath = str_replace(
+            '/',
+            '\/',
+            $urlPath . '/' . basename($wgUploadDirectory)  // the image's path
+        );
+        $this->htmlContent = preg_replace(
+            "|(<img[^>]+?src=\"$imgpath)(/.+?>)|",
+            "<img src=\"$wgUploadDirectory$2",
+            $this->htmlContent
         );
         return $this;
     }
@@ -59,6 +64,7 @@ class Chapter implements \JsonSerializable
     }
     public function saveAs($fileName): void
     {
+        file_put_contents($fileName, $this->htmlContent);
     }
 
 }
