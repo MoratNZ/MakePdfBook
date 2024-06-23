@@ -20,6 +20,21 @@ class SpecialMakePdfBook extends SpecialPage
 	}
 	public function execute($subpage) # $subpage parameter included for signature compatibility only
 	{
+		$parsedUrl = $this->parseMyUrl();
+		return $this->testOutput($parsedUrl['command'], $parsedUrl['target'], $parsedUrl['parameters']);
+
+		switch ($parsedUrl['command']) {
+			case false:
+				return $this->buildSpecialPage();
+			case "render":
+				return $this->renderPdf($parsedUrl['target'], $parsedUrl['parameters']);
+			case "json":
+				return $this->returnCategoryJson($parsedUrl['target'], $parsedUrl['parameters']);
+			case "testOutput":
+				return $this->testOutput($parsedUrl['command'], $parsedUrl['target'], $parsedUrl['parameters']);
+
+		}
+
 		$request = $this->getRequest();
 		$output = $this->getOutput();
 		$this->setHeaders();
@@ -90,19 +105,56 @@ class SpecialMakePdfBook extends SpecialPage
 	{
 		return wfMessage("makePdfBook");
 	}
-	private function testOutput($category)
+	private function getUrlSuffix(): string
 	{
-		$this->books->getChapters();
-		$this->getOutput()->disable();
-		header("Content-type: text/plain; charset=utf-8");
-
-		printf(
-			"<nowiki>%s</nowiki>",
-			$this->books->getBook($category)->render()
+		return str_replace(
+			$this->getPageTitle()->getLocalURL(), # /index.php/Special:MakePdfBook
+			"",
+			$this->getRequest()->getRequestURL() # /index.php/Special:MakePdfBook/steve/?testOutput=true&category=bob
 		);
 	}
+	private function parseMyUrl(): array
+	{
+		$suffix = $this->getUrlSuffix();
+		$components = parse_url($suffix);
+		if (key_exists("path", $components)) {
+			$urlPath = explode('/', $components["path"]);
+			# trim empty entries from path array
+			# These are caused by leading or trailing slashes in the path
+			if ($urlPath[0] == "") {
+				unset($urlPath[0]);
+			}
+			$lastKey = array_key_last($urlPath);
+			if ($urlPath[$lastKey] == "") {
+				unset($urlPath[$lastKey]);
+			}
+		} else {
+			$urlPath = [];
+		}
+		if (key_exists("query", $components)) {
+			parse_str($components["query"], $params);
+		} else {
+			$params = [];
+		}
+		return [
+			"command" => key_exists(1, $urlPath) ? strtolower($urlPath[1]) : false,
+			"target" => key_exists(2, $urlPath) ? $urlPath[2] : false,
+			"parameters" => $params
+		];
+	}
+	private function testOutput(string $command, string $target, array $params)
+	{
+		$textString = sprintf(
+			"command: %s\n\ntarget: %s\n\nparams: %s",
+			$command ? $command : "<bool: false>",
+			$target ? $target : "<bool: false>",
+			var_export($params, return: true)
+		);
 
-	private function returnCategoryJson($category)
+		$this->getOutput()->addWikiTextAsInterface($textString);
+	}
+
+	private function returnCategoryJson($category, $params)
 	{
 		$categories = Book::getBooks($category);
 		arsort($categories);

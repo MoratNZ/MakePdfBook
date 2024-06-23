@@ -24,8 +24,23 @@ class Chapter
     }
     private function fetchHtmlContent(): Chapter
     {
-        $this->htmlContent = $this->page->getParserOutput()->getText();
+        if ($this->isTitlepage()) {
+            $formatString = "%s";
+        } else {
+            $formatString = sprintf(
+                "<h1>%s</h1>\n%%s",
+                $this->title->getText()
+            );
+        }
+        $this->htmlContent = sprintf(
+            $formatString,
+            $this->page->getParserOutput()->getText()
+        );
         return $this;
+    }
+    private function isTitlepage(): bool
+    {
+        return $this->sortKey === Book::TITLEPAGE_SORTKEY;
     }
     public function getHtmlContent(): string
     {
@@ -34,6 +49,9 @@ class Chapter
         } else {
             return $this->htmlContent;
         }
+    }
+    public function saveAs($fileName): void
+    {
     }
 
 }
