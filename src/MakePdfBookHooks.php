@@ -3,7 +3,7 @@ namespace MediaWiki\Extension\MakePdfBook;
 
 class MakePdfBookHooks
 {
-    public static function addHooks(&$out)
+    public static function onBeforePageDisplay(&$out)
     {
         $out->addModules('ext.makePdfBook');
         return true;

@@ -24,7 +24,7 @@
   },
   "Hooks": {
     "BeforePageDisplay": [
-      "MediaWiki\\Extension\\MakePdfBook\\MakePdfBookHooks::addHooks"
+      "MediaWiki\\Extension\\MakePdfBook\\MakePdfBookHooks::onBeforePageDisplay"
     ]
   },
   "config": {

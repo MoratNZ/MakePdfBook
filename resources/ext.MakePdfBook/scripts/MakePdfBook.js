@@ -456,7 +456,7 @@ function CustomizeModificationsOfSidebar() {
   var nameSpace = mw.config.get("wgCanonicalNamespace");
 
   setBannerImage(nameSpace);
-  buildSideMenu();
+  // buildSideMenu();
 }
 
 jQuery(CustomizeModificationsOfSidebar);
