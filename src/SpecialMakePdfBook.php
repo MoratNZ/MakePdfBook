@@ -79,9 +79,11 @@ class SpecialMakePdfBook extends SpecialPage
 			if ($urlPath[0] == "") {
 				unset($urlPath[0]);
 			}
-			$lastKey = array_key_last($urlPath);
-			if ($urlPath[$lastKey] == "") {
-				unset($urlPath[$lastKey]);
+			if (count($urlPath)) {
+				$lastKey = array_key_last($urlPath);
+				if ($urlPath[$lastKey] == "") {
+					unset($urlPath[$lastKey]);
+				}
 			}
 		} else {
 			$urlPath = [];
