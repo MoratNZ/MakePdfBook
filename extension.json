@@ -25,6 +25,12 @@
   "Hooks": {
     "BeforePageDisplay": [
       "MediaWiki\\Extension\\MakePdfBook\\MakePdfBookHooks::onBeforePageDisplay"
+    ],
+    "SidebarBeforeOutput": [
+      "MediaWiki\\Extension\\MakePdfBook\\MakePdfBookHooks::onSidebarBeforeOutput"
+    ],
+    "SkinAfterPortlet": [
+      "MediaWiki\\Extension\\MakePdfBook\\MakePdfBookHooks::onSkinAfterPortlet"
     ]
   },
   "config": {

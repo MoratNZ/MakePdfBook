@@ -85,16 +85,45 @@ body {
     border: 2px solid black;
   }
   
-  /* hide toolbox initially */
-  div#p-tb {
-    visibility: hidden;
+  /* Disable 'Switch to old look' menu item */
+
+  div.vector-main-menu-action {
+    display:none;
   }
   
+  /* display pdf icon */
+
   
-  /* page styling */
+  /* Sidebar text */
+  div.makepdfbook-sidebar-title{
+    font-size: 18px;
+  }
+  div.makepdfbook-book-title{
+    font-size: 16px;
+    /* width:80%; */
+    display: inline-block;
+  }
+  div.makepdfbook-pdf-icon {
+    width: 18px;
+    height:18px;
+    /* width: 15%; */
+    display: inline-block;
+  }
+  div.makepdfbook-book-chapters{
+    border-top: #888888;
+    margin-left: 1em;
+  }
+  div.makepdfbook-chapter-title{
+    font-size: 14px;
+    
+  }
+  ul.makepdfbook-book-list{
+
+  }
+
   
   div#mw-panel{
-    margin-top:10em;
+    /* margin-top:10em; */
     width:20em;
     font-size: 1em;
   }
@@ -104,27 +133,27 @@ body {
   }
   div#left-navigation{
     margin-left: 21em;
-    margin-top: 17.5em;
+    /* margin-top: 17.5em; */
   }
   div#right-navigation{
-    margin-top: 17.5em;
+    /* margin-top: 17.5em; */
   }
   div#footer{
     margin-left: 21em;
   }
   div#mw-head-base {
     margin-left: 21em;
-    height:20em;
+    /* height:20em; */
   }
   div#p-logo {
     width: 15em;
-    height: 20em;
-    top: -19em;
+    /* height: 20em; */
+    /* top: -19em; */
   }
   .mw-wiki-logo{
      width: 20em !important;
-     height: 20em !important;
+     /* height: 20em !important; */
   }
   div#mw-panel div.portal div.body ul li {
     font-size: 0.875em;
-  }
+  } 

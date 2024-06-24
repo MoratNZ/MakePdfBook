@@ -12,7 +12,7 @@ class Book implements \JsonSerializable
     public BookSet $bookSet;
     public Title $title;
     public ?Chapter $titlepage = null;
-    protected array $chapters = [];
+    private array $chapters = [];
     const TITLEPAGE_SORTKEY = 'titlepage';
     public function __construct(string $category)
     {
@@ -54,10 +54,14 @@ class Book implements \JsonSerializable
         global $wgServer, $wgScriptPath;
         return sprintf("%s%s/index.php/Category:%s", $wgServer, $wgScriptPath, $this->category);
     }
+    public function getUrl(): string
+    {
+        return sprintf("/index.php/Category:%s", $this->category);
+    }
     public function getPdfLink(): string
     {
         global $wgServer, $wgScriptPath;
-        return sprintf("%s%s/index.php/Special:MakePdfBook?category=%s", $wgServer, $wgScriptPath, $this->category);
+        return sprintf("%s%s/index.php/Special:MakePdfBook/render/%s", $wgServer, $wgScriptPath, $this->category); #TODO make this nicer
     }
     public function fetchTitlePage(): Book
     {
@@ -84,6 +88,10 @@ class Book implements \JsonSerializable
             $this->setTitlepage($pageId);
         }
         return $this;
+    }
+    public function containsChapter($title): bool
+    {
+        return array_key_exists($title, $this->chapters);
     }
     public function fetchChapters(): Book
     {
@@ -136,6 +144,13 @@ class Book implements \JsonSerializable
                 }
             }
             # Get revision id for all chapters
+            if ($this->titlepage) {
+                $cacheString .= sprintf(
+                    "%s:%s",
+                    $this->titlepage->title->getText(),
+                    $this->titlepage->getRevId()
+                );
+            }
             foreach ($this->chapters as $chapter) {
                 $cacheString .= sprintf(
                     "%s:%s\n",
@@ -147,13 +162,21 @@ class Book implements \JsonSerializable
         }
         return $this->cacheHash;
     }
+    public function getChapters()
+    {
+        $clonedChapters = [...$this->chapters];
+        usort($clonedChapters, function ($a, $b) {
+            return strcmp($a->sortKey, $b->sortKey);
+        });
+        return $clonedChapters;
+    }
     public function writeContent($directory)
     {
         if ($this->titlepage) {
             $this->titlepage->writeHtml(sprintf("%s/titlepage.html", $directory));
         }
         $chapterNumber = 0;
-        foreach ($this->chapters as $chapter) {
+        foreach ($this->getChapters() as $chapter) {
             $chapterNumber++;
             $chapter->writeHtml(sprintf("%s/chapter-%s.html", $directory, $chapterNumber));
         }
