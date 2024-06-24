@@ -151,10 +151,10 @@ foreach my $chapter (@chapters){
         
         # Translation to preserve revision marking
         #
-        # Note: this (the HLSTART/HLSTOP) is not an actual directive; it's a marker
+        # Note: this (the REVSTART/REVSTOP) is not an actual directive; it's a marker
         #   that we'll change into the actual directive below, after the HTML > tex 
         #   conversion
-        $line =~ s/<span class="revision">(.*?)<\/span>/HLSTART\1HLSTOP/ig;
+        $line =~ s/<span class="revision">(.*?)<\/span>/REVSTART\1REVSTOP/ig;
         # <span class="revision">Discuss proposed changes with the Kingdom Armoured Combat Marshal and the Earl Marshal.</span>
         # Ditto for the 'comment' marking
         $line =~ s/<span class="comment">(.*?)<\/span>/COMMENTSTART\1COMMENTSTOP/ig;
@@ -163,7 +163,7 @@ foreach my $chapter (@chapters){
     }
 
     
-    open my $out, '>', $chapter or die("Error: couldn't open $chapter for writing - $!");
+    open my $out,'>:encoding(utf8)', $chapter or die("Error: couldn't open $chapter for writing - $!");
     print $out @output;
     close $out;
 
@@ -189,7 +189,7 @@ if($result){
 
         my $context_amount = 40;
 
-        open(FILE, "<", $chapter_file) or die("Error reading in $chapter_file trying to find bad byte at position $character_position - $!");
+        open(FILE, "<:encoding(utf8)'", $chapter_file) or die("Error reading in $chapter_file trying to find bad byte at position $character_position - $!");
         my $file_content;
         {
             local $/;
@@ -350,7 +350,7 @@ my $content = join "", @lines;
 $content =~ s/\"(.*?)\"/``$1''/gs;
 
 $content =~ s/SYMBOLlessThanOrEqualToSYMBOL/\$\\leq\$/gs;
-$content =~ s/HLSTART(.*?)HLSTOP/\\textcolor{red}{\1}/gs;
+$content =~ s/REVSTART(.*?)REVSTOP/\\textcolor{red}{\1}/gs;
 $content =~ s/COMMENTSTART(.*?)COMMENTSTOP/\\emph{\\textcolor{blue}{\1}}/gs;
 
 
