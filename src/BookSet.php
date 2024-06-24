@@ -5,6 +5,7 @@ use \OutOfBoundsException;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Extension\MakePdfBook\Book;
 use \Wikimedia\Rdbms\DBConnRef;
+use MediaWiki\Title\Title;
 
 class BookSet implements \JsonSerializable
 {
@@ -16,12 +17,12 @@ class BookSet implements \JsonSerializable
         $lb = $instance->getDBLoadBalancer();
 
         $this->dbr = $lb->getConnection(DB_REPLICA);
-        $this->fetchBooks();
+        $this->fetchBooks()->fetchChapters()->fetchTitlePages();
     }
     public function jsonSerialize(): array
     {
         return [
-            "books" => $this->books
+            "books" => $this->getBooks()
         ];
     }
     private function fetchBooks()
@@ -49,19 +50,29 @@ class BookSet implements \JsonSerializable
     }
     public function getBook(string $category): Book
     {
-        if (array_key_exists($category, $this->books)) {
-            return $this->books[$category];
-        } else {
-            throw new OutOfBoundsException(sprintf('There is no such book as "%s"', $category));
+        $title = Title::newFromText($category)->getDBkey();
+        $books = $this->getBooks();
+
+        foreach ($books as $book) {
+            if ($book->title->getDBkey() == $title) {
+                return $book;
+            }
         }
+        throw new OutOfBoundsException(sprintf('There is no such book as "%s"', $category));
+
+        // if (array_key_exists($title, $books)) {
+        //     return $books[$title];
+        // } else {
+        //     throw new OutOfBoundsException(sprintf('There is no such book as "%s"', $category));
+        // }
     }
     public function getBooks(bool $sorted = false): array
     {
-        $clonedBook = [...$this->books];
+        $clonedBooks = [...$this->books];
         if ($sorted) {
-            arsort($clonedBook);
+            arsort($clonedBooks);
         }
-        return $clonedBook;
+        return $clonedBooks;
     }
     public function fetchTitlePages(): BookSet
     {

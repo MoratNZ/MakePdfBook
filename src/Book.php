@@ -24,7 +24,7 @@ class Book implements \JsonSerializable
         return [
             "title" => $this->title->getText(),
             "titlepage" => $this->titlepage,
-            "chapters" => $this->chapters,
+            "chapters" => $this->getChapters(),
         ];
     }
     public function setTitlepage(int $pageId): Book
@@ -65,6 +65,10 @@ class Book implements \JsonSerializable
     }
     public function fetchTitlePage(): Book
     {
+        # TODO: This is currently bypassed, with BookSet always grabbing all
+        # chapters and titlepages, as this is getting the wrong book's 
+        # page under some circumstances, and I can't see why. 
+
         $query = $this->bookSet->dbr->newSelectQueryBuilder()
             ->select([
                 'page_id',
@@ -95,6 +99,9 @@ class Book implements \JsonSerializable
     }
     public function fetchChapters(): Book
     {
+        # TODO: This is currently bypassed, with BookSet always grabbing all
+        # chapters and titlepages, as this is getting the wrong book's 
+        # page under some circumstances, and I can't see why. 
         $query = $this->bookSet->dbr->newSelectQueryBuilder()
             ->select([
                 'cat_title',
@@ -146,7 +153,7 @@ class Book implements \JsonSerializable
             # Get revision id for all chapters
             if ($this->titlepage) {
                 $cacheString .= sprintf(
-                    "%s:%s",
+                    "%s:%s\n",
                     $this->titlepage->title->getText(),
                     $this->titlepage->getRevId()
                 );
@@ -172,7 +179,7 @@ class Book implements \JsonSerializable
     }
     public function writeContent($directory)
     {
-        if ($this->titlepage) {
+        if (!empty($this->titlepage)) {
             $this->titlepage->writeHtml(sprintf("%s/titlepage.html", $directory));
         }
         $chapterNumber = 0;

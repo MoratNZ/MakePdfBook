@@ -117,9 +117,7 @@ class SpecialMakePdfBook extends SpecialPage
 			try {
 				$jsonText = json_encode(
 					$this->bookSet
-						->getBook($category)
-						->fetchChapters()
-						->fetchTitlePage(),
+						->getBook($category),
 					JSON_PRETTY_PRINT
 				);
 			} catch (OutOfBoundsException) {
@@ -127,9 +125,7 @@ class SpecialMakePdfBook extends SpecialPage
 			}
 		} else {
 			$jsonText = json_encode(
-				$this->bookSet
-					->fetchChapters()
-					->fetchTitlePages(),
+				$this->bookSet,
 				JSON_PRETTY_PRINT
 			);
 		}
@@ -180,9 +176,7 @@ class SpecialMakePdfBook extends SpecialPage
 	private function servePdf($category, $params)
 	{
 		# get the book and load its content
-		$book = $this->bookSet->getBook($category)
-			->fetchChapters()
-			->fetchTitlePage();
+		$book = $this->bookSet->getBook($category);
 
 		$cacheHash = $book->getCacheHash();
 
