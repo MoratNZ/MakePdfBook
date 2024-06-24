@@ -110,12 +110,17 @@ body {
     display: inline-block;
   }
   div.makepdfbook-book-chapters{
-    border-top: #888888;
+    border-top: 1px solid #888888;
     margin-left: 1em;
   }
   div.makepdfbook-chapter-title{
     font-size: 14px;
-    
+  }
+  div.makepdfbook-book-content{
+    border-top: 2px solid #f0f0f0;
+  }
+  div.makepdfbook-active-book{
+    background-color: lightgrey;
   }
   ul.makepdfbook-book-list{
 

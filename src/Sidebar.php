@@ -35,37 +35,50 @@ class Sidebar
             $bookSet = new BookSet();
             $bookSet->fetchChapters();
 
-            $page_name = $skin->getRelevantTitle()->getText();
+            $pageName = $skin->getRelevantTitle()->getText();
 
             $html .= "<hr><span class = 'makepdfbook-sidebar-title'>Books</span>\n";
             $html .= "<div class = 'makepdfbook-book-list'>\n";
+
+            #TODO: this handling of marking the active book does not bring me joy
             foreach ($bookSet->getBooks() as $book) {
+                $activeBook = ($book->title->getText() == $pageName || $book->containsChapter($pageName));
                 $html .= sprintf(
-                    "<div class='makepdfbook-book-title' ><a href = '%s'>%s</a></div>",
+                    "<div class='makepdfbook-book-content%s'>",
+                    $activeBook ? " makepdfbook-active-book" : ""
+                );
+                $html .= sprintf(
+                    "<div class='makepdfbook-book-title' ><a href = '%s'>%s</a></div>\n",
                     $book->getUrl(),
                     $book->title->getText()
                 );
                 $html .= sprintf(
-                    "<div class='makepdfbook-pdf-icon' ><a href = '%s' ><img src='%s' /></a></div>",
+                    "<div class='makepdfbook-pdf-icon' ><a href = '%s' ><img src='%s' %s/></a></div>\n",
                     $book->getPdfLink(),
-                    "https://upload.wikimedia.org/wikipedia/commons/6/6c/PDF_icon.svg"
+                    "https://upload.wikimedia.org/wikipedia/commons/6/6c/PDF_icon.svg",
+                    "width='18' height='18'" #This is filithy - need to find a better way of avoiding FOUT - probably including and resizing the svg
                 );
-                $html .= "</div>\n";
-                if ($book->title->getText() == $page_name || $book->containsChapter($page_name)) {
-                    $html .= "<div class='makepdfbook-book-chapters'>";
-                    foreach ($book->getChapters() as $chapter) {
-                        $html .= sprintf(
-                            "<div class='makepdfbook-chapter-title'><a href = '%s'>%s</a></div>",
-                            $chapter->title->getLocalURL(),
-                            $chapter->title->getText()
-                        );
-                    }
-                    $html .= "</div>";
+                if ($activeBook) {
+                    $html .= self::generateChapterHtml($book);
                 }
-
-                $html .= "</li>\n";
+                $html .= "</div>";
             }
-            $html .= "</ul>\n";
+            $html .= "</div>";
+
         }
+    }
+    private static function generateChapterHtml($book)
+    {
+        $html = "<div class='makepdfbook-book-chapters'>\n";
+        foreach ($book->getChapters() as $chapter) {
+            $html .= sprintf(
+                "<div class='makepdfbook-chapter-title'><a href = '%s'>%s</a></div>\n",
+                $chapter->title->getLocalURL(),
+                $chapter->title->getText()
+            );
+        }
+        $html .= "</div>";
+
+        return $html;
     }
 }
