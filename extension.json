@@ -16,8 +16,8 @@
     "ext.makePdfBook": {
       "localBasePath": "resources/ext.MakePdfBook",
       "remoteExtPath": "MakePdfBook/modules/ext.MakePdfBook",
-      "styles": [],
-      "packageFiles": ["MakePdfBook.js"],
+      "styles": ["styles/MakePdfBook.css"],
+      "packageFiles": ["scripts/MakePdfBook.js"],
       "messages": [],
       "dependencies": ["mediawiki.util"]
     }
