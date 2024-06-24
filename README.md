@@ -18,3 +18,6 @@ Need to write up:
 - Edit away; the `docker-compose.yaml` hot-mounts this directory as the MakePdfBook extension in the MediaWiki container, so any changes you make here will be instantly reflected in the container's behaviour.
 
 TODO: write notes somewhere about debugging MakePdfBook behaviour - specifically about jumping into the mediawiki container and going spelunking in the temp files generated into `/tmp/MakePdfBook/Test`
+
+## Acknowledgements
+This was inspired by, and springboarded off, the work of **Aran Dunkley** on the [MediaWiki PdfBook extension](https://www.mediawiki.org/wiki/Extension:PdfBook).

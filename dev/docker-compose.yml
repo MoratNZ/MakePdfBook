@@ -30,7 +30,7 @@ services:
       - type: bind
         source: ${CONTEXT_DIRECTORY}/LocalSettings.php
         target: /var/www/html/LocalSettings.php
-        read_only: true
+        read_only: false
       - type: bind
         source: ../
         target: /var/www/html/extensions/MakePdfBook

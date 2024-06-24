@@ -1,16 +1,37 @@
 {
   "name": "MakePdfBook",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "author": ["David Maclagan"],
   "url": "https://github.com/MoratNZ/MakePdfBook",
   "descriptionmsg": "MakePdfBook-desc",
   "license-name": "MIT",
   "type": "other",
-  "AutoloadClasses": {
-    "SpecialMakePdfBook": "src/MakePdfBook.php"
+  "AutoloadNamespaces": {
+    "MediaWiki\\Extension\\MakePdfBook\\": "src/"
   },
   "SpecialPages": {
-    "MakePdfBook": "SpecialMakePdfBook"
+    "MakePdfBook": "MediaWiki\\Extension\\MakePdfBook\\SpecialMakePdfBook"
+  },
+  "ResourceModules": {
+    "ext.makePdfBook": {
+      "localBasePath": "resources/ext.MakePdfBook",
+      "remoteExtPath": "MakePdfBook/modules/ext.MakePdfBook",
+      "styles": ["styles/MakePdfBook.css"],
+      "packageFiles": ["scripts/MakePdfBook.js"],
+      "messages": [],
+      "dependencies": ["mediawiki.util"]
+    }
+  },
+  "Hooks": {
+    "BeforePageDisplay": [
+      "MediaWiki\\Extension\\MakePdfBook\\MakePdfBookHooks::onBeforePageDisplay"
+    ],
+    "SidebarBeforeOutput": [
+      "MediaWiki\\Extension\\MakePdfBook\\MakePdfBookHooks::onSidebarBeforeOutput"
+    ],
+    "SkinAfterPortlet": [
+      "MediaWiki\\Extension\\MakePdfBook\\MakePdfBookHooks::onSkinAfterPortlet"
+    ]
   },
   "config": {
     "MakePdfBookCacheFileDir": {

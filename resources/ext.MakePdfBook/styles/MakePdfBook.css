@@ -1,0 +1,164 @@
+/* CSS placed here will be applied to all skins */
+/* section-based ol numbering*/
+
+body {
+    counter-reset: h2Counter h3Counter h4Counter tableCounter;
+  }
+  .revision {
+    background:#00ffff;
+  }
+  .note{
+    background:#00FF00;
+  }
+  
+  .rulesNumbering .toc ul {
+    list-style-type: none;
+  }
+  
+  .rulesNumbering h2 {
+    counter-reset: h3Counter h4Counter;
+    counter-increment: h2Counter;
+  }
+  .rulesNumbering h2:before {
+    content: counter(page) "." counter(h2Counter) " ";
+  }
+  
+  /* this is required to stop the 'contents' heading in the ToC from becoming '1 contents' */
+  .rulesNumbering .toctitle h2 {
+    counter-increment: none;
+  }
+  .rulesNumbering .toctitle h2:before {
+    content: none;
+  }
+  
+  .rulesNumbering h3 {
+    counter-reset: h4Counter;
+    counter-increment: h3Counter;
+  }
+  .rulesNumbering h3:before {
+    content: counter(page) "." counter(h2Counter) "." counter(h3Counter) " ";
+  }
+  
+  .rulesNumbering h4 {
+    counter-increment: h4Counter;
+  }
+  .rulesNumbering h4:before {
+    content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) " ";
+  }
+  
+  /* styling for ordered lists */
+  .rulesNumbering ol {
+    list-style-type: decimal;
+  }
+  
+  .rulesNumbering ol>li>ol{
+    list-style-type: lower-alpha;
+  }
+  .rulesNumbering ol>li>ol>li>ol{
+    list-style-type: lower-roman;
+  }
+  
+  .rulesNumbering ul{
+    text-indent: 0px;
+    list-style-type: circle;
+  }
+  .rulesNumbering ul>li>ul {
+    text-indent: 0px;
+    list-style-type: circle;
+  }
+  .rulesNumbering ul>li>ul>li>ul {
+    text-indent: 0px;
+    list-style-type: circle;
+  }
+  
+   caption:before {
+    counter-increment: tableCounter;
+    content: "Table " counter(page) "." counter(tableCounter);
+  }
+  
+  
+  /* Giving table borders */
+  table.withBorders {
+    border-collapse: collapse;
+  }
+  .withBorders, .withBorders th, .withBorders td {
+    border: 2px solid black;
+  }
+  
+  /* Disable 'Switch to old look' menu item */
+
+  div.vector-main-menu-action {
+    display:none;
+  }
+  
+  /* display pdf icon */
+
+  
+  /* Sidebar text */
+  div.makepdfbook-sidebar-title{
+    font-size: 18px;
+  }
+  div.makepdfbook-book-title{
+    font-size: 16px;
+    /* width:80%; */
+    display: inline-block;
+  }
+  div.makepdfbook-pdf-icon {
+    width: 18px;
+    height:18px;
+    /* width: 15%; */
+    display: inline-block;
+  }
+  div.makepdfbook-book-chapters{
+    border-top: 1px solid #888888;
+    margin-left: 1em;
+  }
+  div.makepdfbook-chapter-title{
+    font-size: 14px;
+  }
+  div.makepdfbook-book-content{
+    border-top: 2px solid #f0f0f0;
+  }
+  div.makepdfbook-active-book{
+    background-color: lightgrey;
+  }
+  ul.makepdfbook-book-list{
+
+  }
+
+  
+  div#mw-panel{
+    /* margin-top:10em; */
+    width:20em;
+    font-size: 1em;
+  }
+  
+  div#content{
+    margin-left: 21em;
+  }
+  div#left-navigation{
+    margin-left: 21em;
+    /* margin-top: 17.5em; */
+  }
+  div#right-navigation{
+    /* margin-top: 17.5em; */
+  }
+  div#footer{
+    margin-left: 21em;
+  }
+  div#mw-head-base {
+    margin-left: 21em;
+    /* height:20em; */
+  }
+  div#p-logo {
+    width: 15em;
+    /* height: 20em; */
+    /* top: -19em; */
+  }
+  .mw-wiki-logo{
+     width: 20em !important;
+     /* height: 20em !important; */
+  }
+  div#mw-panel div.portal div.body ul li {
+    font-size: 0.875em;
+  } 
