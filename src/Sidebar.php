@@ -51,7 +51,7 @@ class Sidebar
                     "https://upload.wikimedia.org/wikipedia/commons/6/6c/PDF_icon.svg"
                 );
                 $html .= "</div>\n";
-                if ($book->containsChapter($page_name)) {
+                if ($book->title->getText() == $page_name || $book->containsChapter($page_name)) {
                     $html .= "<div class='makepdfbook-book-chapters'>";
                     foreach ($book->getChapters() as $chapter) {
                         $html .= sprintf(
