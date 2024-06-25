@@ -10,14 +10,15 @@ use MediaWiki\Title\Title;
 class BookSet implements \JsonSerializable
 {
     private array $books = [];
-    private string $titlepageSortKey;
-    private string $contentsSortKey;
+    public string $titlepageSortKey;
+    public string $contentsSortKey;
     public DBConnRef $dbr;
     public function __construct()
     {
         global $makepdfTitlepageSortKey, $makepdfContentsSortKey;
-        $titlepageSortKey = $makepdfTitlepageSortKey ? $makepdfTitlepageSortKey : 'titlepage';
-        $contentsSortKey = $makepdfContentsSortKey ? $makepdfContentsSortKey : 'handbook';
+        $this->titlepageSortKey = $makepdfTitlepageSortKey ? $makepdfTitlepageSortKey : 'titlepage';
+        $this->contentsSortKey = $makepdfContentsSortKey ? $makepdfContentsSortKey : 'handbook';
+
         $instance = MediaWikiServices::getInstance();
         $lb = $instance->getDBLoadBalancer();
 
