@@ -114,24 +114,24 @@ ul.makepdfbook-book-list{
 /* widen the left panel */
 div#mw-panel{
   /* margin-top:10em; */
-  width:20em;
+  width:300px;
   font-size: 1em;
 }
-div#content{
-  margin-left: 21em;
+#content{
+  margin-left: 300px;
 }
-div#left-navigation{
-  margin-left: 21em;
+#left-navigation{
+  margin-left: 300px;
   /* margin-top: 17.5em; */
 }
-div#right-navigation{
+#right-navigation{
   /* margin-top: 17.5em; */
 }
-div#footer{
-  margin-left: 21em;
+#footer{
+  margin-left: 300px;
 }
-div#mw-head-base {
-  margin-left: 21em;
+#mw-head-base {
+  margin-left: 300px;
   /* height:20em; */
 }
 div#p-logo {
@@ -140,7 +140,7 @@ div#p-logo {
   /* top: -19em; */
 }
 .mw-wiki-logo{
-    width: 20em !important;
+    width: 300px !important;
     /* height: 20em !important; */
 }
 div#mw-panel div.portal div.body ul li {
