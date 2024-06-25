@@ -18,7 +18,7 @@ $makepdfIsDraft = false;
 
 # Define the magic sortKeys for titlepages and contents pages
 $makepdfTitlepageSortKey = 'titlepage';
-$makepdfContentsSortKey = 'handbook';
+$makepdfContentsSortKey = 'contents';
 
 ## Uncomment this to disable output compression
 # $wgDisableOutputCompression = true;
