@@ -45,7 +45,6 @@ class BookSet implements \JsonSerializable
             $category = $row->cat_title;
             $this->addBook($category);
         }
-        arsort($this->books);
         return $this;
     }
     private function addBook(string $category): Book
@@ -77,7 +76,7 @@ class BookSet implements \JsonSerializable
     {
         $clonedBooks = [...$this->books];
         if ($sorted) {
-            arsort($clonedBooks);
+            asort($clonedBooks);
         }
         return $clonedBooks;
     }
@@ -117,7 +116,6 @@ class BookSet implements \JsonSerializable
                     $book->addChapter($pageId, $sortKey);
             }
         }
-        arsort($this->books);
         return $this;
     }
     // public function fetchTitlePages(): BookSet
