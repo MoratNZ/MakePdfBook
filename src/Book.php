@@ -43,7 +43,7 @@ class Book implements \JsonSerializable
         $newChapter = new Chapter($this, $pageId, $sortKey);
         $newChapter->book = $this;
 
-        $this->chapters[$title->getText()] = $newChapter;
+        $this->chapters[$title->getPrefixedText()] = $newChapter;
         return $this;
     }
     public function getChapter(string $title): Chapter
