@@ -145,7 +145,7 @@ class SpecialMakePdfBook extends SpecialPage
 	}
 	private function buildSpecialPage(): void
 	{
-		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!Titlepage\n";
+		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!Titlepage\n!Contents page";
 
 		foreach ($this->bookSet->getBooks(sorted: true) as $book) {
 			$textString .= sprintf(
@@ -165,7 +165,20 @@ class SpecialMakePdfBook extends SpecialPage
 				$textString .= sprintf(
 					"||[[%s|%s]]\n",
 					$book->titlepage->title->getPrefixedText(),
-					$book->titlepage->title->getText()
+					$book->titlepage->title->getPrefixedText()
+				);
+			}
+			if (empty($book->contentsPage)) {
+				$textString .= sprintf(
+					"| |[[%s_contents_page]] (add <nowiki>[[Category:%s|contents]]</nowiki> to bottom of page when you create it)\n",
+					$book->title->getDBkey(),
+					$book->title->getDBkey()
+				);
+			} else {
+				$textString .= sprintf(
+					"||[[%s|%s]]\n",
+					$book->contentsPage->title->getPrefixedText(),
+					$book->contentsPage->title->getPrefixedText()
 				);
 			}
 		}
