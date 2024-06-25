@@ -177,8 +177,8 @@ class SpecialMakePdfBook extends SpecialPage
 			} else {
 				$textString .= sprintf(
 					"||[[%s|%s]]\n",
-					$book->contentsPage->title->getPrefixedText(),
-					$book->contentsPage->title->getPrefixedText()
+					$book->contentsPage->getPrefixedText(),
+					$book->contentsPage->getPrefixedText()
 				);
 			}
 		}
