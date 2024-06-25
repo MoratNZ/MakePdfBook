@@ -119,6 +119,7 @@ div#mw-panel{
 }
 #content{
   margin-left: 300px;
+  min-height: 75vh;
 }
 #left-navigation{
   margin-left: 300px;
