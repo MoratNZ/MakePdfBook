@@ -34,14 +34,17 @@ class Sidebar
         if ($portletName == 'navigation') {
             $bookSet = new BookSet();
 
+            $pageRelevantTitle = $skin->getRelevantTitle();
+
             $html .= "<hr><span class = 'makepdfbook-sidebar-title'>Books</span>\n";
             $html .= "<div class = 'makepdfbook-book-list'>\n";
 
             #TODO: this handling of marking the active book does not bring me joy
             foreach ($bookSet->getBooks() as $book) {
                 $activeBook = (
-                    $book->title->getText() == $skin->getRelevantTitle()->getText()
-                    || $book->containsChapter($skin->getRelevantTitle()->getPrefixedText())
+                    $book->title->getText() == $pageRelevantTitle->getText()
+                    || $book->contentsPage->getPrefixedText() == $pageRelevantTitle->getPrefixedText()
+                    || $book->containsChapter($pageRelevantTitle->getPrefixedText())
                 );
                 $html .= sprintf(
                     "<div class='makepdfbook-book-content%s'>",
