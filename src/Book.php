@@ -12,8 +12,8 @@ class Book implements \JsonSerializable
     public BookSet $bookSet;
     public Title $title;
     public ?Chapter $titlepage = null;
+    public ?Title $contentsPage = null;
     private array $chapters = [];
-    const TITLEPAGE_SORTKEY = 'titlepage';
     public function __construct(string $category)
     {
         $this->category = $category;
@@ -29,7 +29,12 @@ class Book implements \JsonSerializable
     }
     public function setTitlepage(int $pageId): Book
     {
-        $this->titlepage = new Chapter($this, $pageId, self::TITLEPAGE_SORTKEY);
+        $this->titlepage = new Chapter($this, $pageId, $this->bookSet->titlepageSortKey);
+        return $this;
+    }
+    public function setContentsPage(int $pageId): Book
+    {
+        $this->contentsPage = Title::newFromID($pageId);
         return $this;
     }
     public function addChapter(int $pageId, string $sortKey): Book

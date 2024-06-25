@@ -10,14 +10,19 @@ use MediaWiki\Title\Title;
 class BookSet implements \JsonSerializable
 {
     private array $books = [];
+    private string $titlepageSortKey;
+    private string $contentsSortKey;
     public DBConnRef $dbr;
     public function __construct()
     {
+        global $makepdfTitlepageSortKey, $makepdfContentsSortKey;
+        $titlepageSortKey = $makepdfTitlepageSortKey ? $makepdfTitlepageSortKey : 'titlepage';
+        $contentsSortKey = $makepdfContentsSortKey ? $makepdfContentsSortKey : 'handbook';
         $instance = MediaWikiServices::getInstance();
         $lb = $instance->getDBLoadBalancer();
 
         $this->dbr = $lb->getConnection(DB_REPLICA);
-        $this->fetchBooks()->fetchChapters()->fetchTitlePages();
+        $this->fetchBooks()->fetchContent();
     }
     public function jsonSerialize(): array
     {
@@ -73,6 +78,44 @@ class BookSet implements \JsonSerializable
             arsort($clonedBooks);
         }
         return $clonedBooks;
+    }
+    public function fetchContent(): BookSet
+    {
+        $query = $this->dbr->newSelectQueryBuilder()
+            ->select([
+                'cat_title',
+                'page_id',
+                'cl_sortkey_prefix',
+            ])
+            ->from('page')
+            ->join('categorylinks', null, 'page_id=cl_from')
+            ->join('category', null, 'cl_to=cat_title')
+            ->caller('MakePdfBook');
+
+        $result = $query->fetchResultSet();
+
+        foreach ($result as $row) {
+            $category = $row->cat_title;
+            $pageId = $row->page_id;
+            $sortKey = $row->cl_sortkey_prefix;
+
+            try {
+                $book = $this->getBook($category);
+            } catch (OutOfBoundsException $e) {
+                $book = $this->addBook($category);
+            }
+            switch ($sortKey) {
+                case $this->titlepageSortKey:
+                    $book->setTitlepage($pageId);
+                    break;
+                case $this->contentsSortKey:
+                    $book->setContentsPage($pageId);
+                    break;
+                default:
+                    $book->addChapter($pageId, $sortKey);
+            }
+        }
+        return $this;
     }
     public function fetchTitlePages(): BookSet
     {

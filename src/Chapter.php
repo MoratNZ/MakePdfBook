@@ -57,7 +57,7 @@ class Chapter implements \JsonSerializable
     }
     private function isTitlepage(): bool
     {
-        return $this->sortKey === Book::TITLEPAGE_SORTKEY;
+        return $this->sortKey === $this->book->bookSet->titlepageSortKey;
     }
     public function getHtmlContent(): string
     {

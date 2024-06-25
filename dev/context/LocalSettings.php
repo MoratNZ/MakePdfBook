@@ -13,6 +13,13 @@ if (!defined('MEDIAWIKI')) {
 	exit;
 }
 
+# Set this as a draft wiki (enables watermarking of pdf output etc)
+$makepdfIsDraft = false;
+
+# Define the magic sortKeys for titlepages and contents pages
+$makepdfTitlepageSortKey = 'titlepage';
+$makepdfContentsSortKey = 'handbook';
+
 ## Uncomment this to disable output compression
 # $wgDisableOutputCompression = true;
 
@@ -34,7 +41,7 @@ $wgResourceBasePath = $wgScriptPath;
 
 ## The URL path to the logo.  Make sure you change this from the default,
 ## or else you'll overwrite your logo when you upgrade!
-#$wgLogo = "http://lochac.sca.org/lochac/pics/Lochac304.gif";
+$wgLogo = getenv("LOGO_URL");
 
 ## UPO means: this is also a user preference option
 
@@ -55,7 +62,7 @@ $wgDBname = getenv('DB_NAME');
 $wgDBuser = getenv('DB_USER');
 $wgDBpassword = getenv("DB_PASSWORD");
 
-# MySQL specific 
+# MySQL specific settings
 $wgDBprefix = "";
 
 # MySQL table options to use during installation or update
@@ -110,12 +117,13 @@ $wgRightsIcon = "";
 # Path to the GNU diff3 utility. Used for conflict resolution.
 $wgDiff3 = "/usr/bin/diff3";
 
+
+
 ## Default skin: you can change the default skin. Use the internal symbolic
 ## names, ie 'vector', 'monobook':
 $wgDefaultSkin = "vector";
 
 # Enabled skins.
-wfLoadSkin('MonoBook');
 wfLoadSkin('Vector');
 
 
@@ -127,19 +135,11 @@ wfLoadExtension('VisualEditor');
 wfLoadExtension('WikiEditor');
 wfLoadExtension('TemplateData');
 
-require_once ("$IP/extensions/ExternalRedirect/ExternalRedirect.php");
-$wgExternalRedirectNsIDs = array(1000, 1002, 1004, 1006, 1008, 1010, 1012);
-$makepdfIsDraft = false;
 
 # Allow uploading of SVGs and render them correctly
 $wgFileExtensions[] = 'svg';
 $wgAllowTitlesInSVG = true;
 $wgSVGNativeRendering = true;
-
-#$wgSVGConverter = 'inkscape';
-#$wgSVGConverterPath = '/usr/bin';
-$wgTmpDirectory = '/tmp';
-$wgMaxShellMemory = '1024000';  #required to get the conversion to run
 
 # End of automatically generated settings.
 # Add more configuration options below.
@@ -231,8 +231,4 @@ $wgGroupPermissions['SiegeEditor']['editSiege'] = true;
 $wgGroupPermissions['ThrownWeaponsEditor']['editThrownWeapons'] = true;
 $wgGroupPermissions['YouthMartialEditor']['editYouthMartial'] = true;
 
-# Dev settings. For the love of sweet fluffy monkeys never ever use these in prod
 $wgShowExceptionDetails = true;
-$wgDebugDumpSql = true;
-$wgMainCacheType = CACHE_NONE;
-$wgCacheDirectory = false;

@@ -147,7 +147,7 @@ class SpecialMakePdfBook extends SpecialPage
 	{
 		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!Titlepage\n";
 
-		foreach ($this->bookSet->fetchTitlePages()->getBooks(sorted: true) as $book) {
+		foreach ($this->bookSet->getBooks(sorted: true) as $book) {
 			$textString .= sprintf(
 				"|-\n|[%s %s]\n|[%s   pdf]\n",
 				$book->title->getFullUrlForRedirect(),

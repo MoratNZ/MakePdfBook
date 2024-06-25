@@ -33,7 +33,6 @@ class Sidebar
     {
         if ($portletName == 'navigation') {
             $bookSet = new BookSet();
-            $bookSet->fetchChapters();
 
             $pageName = $skin->getRelevantTitle()->getText();
 
