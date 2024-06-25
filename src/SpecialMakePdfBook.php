@@ -145,7 +145,7 @@ class SpecialMakePdfBook extends SpecialPage
 	}
 	private function buildSpecialPage(): void
 	{
-		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!Titlepage\n!Contents page";
+		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!Titlepage\n!Contents page\n";
 
 		foreach ($this->bookSet->getBooks(sorted: true) as $book) {
 			$textString .= sprintf(
