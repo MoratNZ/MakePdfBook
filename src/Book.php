@@ -61,7 +61,11 @@ class Book implements \JsonSerializable
     }
     public function getUrl(): string
     {
-        return sprintf("/index.php/Category:%s", $this->category);
+        if (empty($this->contentsPage)) {
+            return sprintf("/index.php/Category:%s", $this->category);
+        } else {
+            return $this->contentsPage->getLocalURL();
+        }
     }
     public function getPdfLink(): string
     {
