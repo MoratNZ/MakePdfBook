@@ -68,70 +68,70 @@ class Book implements \JsonSerializable
         global $wgServer, $wgScriptPath;
         return sprintf("%s%s/index.php/Special:MakePdfBook/render/%s", $wgServer, $wgScriptPath, $this->category); #TODO make this nicer
     }
-    public function fetchTitlePage(): Book
-    {
-        # TODO: This is currently bypassed, with BookSet always grabbing all
-        # chapters and titlepages, as this is getting the wrong book's 
-        # page under some circumstances, and I can't see why. 
+    // public function fetchTitlePage(): Book
+    // {
+    //     # TODO: This is currently bypassed, with BookSet always grabbing all
+    //     # chapters and titlepages, as this is getting the wrong book's 
+    //     # page under some circumstances, and I can't see why. 
 
-        $query = $this->bookSet->dbr->newSelectQueryBuilder()
-            ->select([
-                'page_id',
-                'cl_sortkey_prefix',
-            ])
-            ->from('page')
-            ->join('categorylinks', null, 'page_id=cl_from')
-            ->join('category', null, 'cl_to=cat_title')
-            ->where(
-                "cl_sortkey_prefix like '%titlepage%'",
-                sprintf("cat_title=\"%s\"", $this->category)
-            )
-            ->caller('MakePdfBook');
+    //     $query = $this->bookSet->dbr->newSelectQueryBuilder()
+    //         ->select([
+    //             'page_id',
+    //             'cl_sortkey_prefix',
+    //         ])
+    //         ->from('page')
+    //         ->join('categorylinks', null, 'page_id=cl_from')
+    //         ->join('category', null, 'cl_to=cat_title')
+    //         ->where(
+    //             "cl_sortkey_prefix like '%titlepage%'",
+    //             sprintf("cat_title=\"%s\"", $this->category)
+    //         )
+    //         ->caller('MakePdfBook');
 
-        $result = $query->fetchRow();
+    //     $result = $query->fetchRow();
 
-        if ($result) {
-            $pageId = $result->page_id;
-            $sortKey = $result->cl_sortkey_prefix;
+    //     if ($result) {
+    //         $pageId = $result->page_id;
+    //         $sortKey = $result->cl_sortkey_prefix;
 
-            $this->setTitlepage($pageId);
-        }
-        return $this;
-    }
+    //         $this->setTitlepage($pageId);
+    //     }
+    //     return $this;
+    // }
     public function containsChapter($title): bool
     {
         return array_key_exists($title, $this->chapters);
     }
-    public function fetchChapters(): Book
-    {
-        # TODO: This is currently bypassed, with BookSet always grabbing all
-        # chapters and titlepages, as this is getting the wrong book's 
-        # page under some circumstances, and I can't see why. 
-        $query = $this->bookSet->dbr->newSelectQueryBuilder()
-            ->select([
-                'cat_title',
-                'page_id',
-                'cl_sortkey_prefix',
-            ])
-            ->from('page')
-            ->join('categorylinks', null, 'page_id=cl_from')
-            ->join('category', null, 'cl_to=cat_title')
-            ->where(
-                "cl_sortkey_prefix not like '%titlepage%'",
-                sprintf("cat_title=\"%s\"", $this->category)
-            )
-            ->caller('MakePdfBook');
+    // public function fetchChapters(): Book
+    // {
+    //     # TODO: This is currently bypassed, with BookSet always grabbing all
+    //     # chapters and titlepages, as this is getting the wrong book's 
+    //     # page under some circumstances, and I can't see why. 
+    //     $query = $this->bookSet->dbr->newSelectQueryBuilder()
+    //         ->select([
+    //             'cat_title',
+    //             'page_id',
+    //             'cl_sortkey_prefix',
+    //         ])
+    //         ->from('page')
+    //         ->join('categorylinks', null, 'page_id=cl_from')
+    //         ->join('category', null, 'cl_to=cat_title')
+    //         ->where(
+    //             "cl_sortkey_prefix not like '%titlepage%'",
+    //             sprintf("cat_title=\"%s\"", $this->category)
+    //         )
+    //         ->caller('MakePdfBook');
 
-        $result = $query->fetchResultSet();
+    //     $result = $query->fetchResultSet();
 
-        foreach ($result as $row) {
-            $pageId = $row->page_id;
-            $sortKey = $row->cl_sortkey_prefix;
+    //     foreach ($result as $row) {
+    //         $pageId = $row->page_id;
+    //         $sortKey = $row->cl_sortkey_prefix;
 
-            $this->addChapter($pageId, $sortKey);
-        }
-        return $this;
-    }
+    //         $this->addChapter($pageId, $sortKey);
+    //     }
+    //     return $this;
+    // }
     public function getCacheHash(): string
     {
         if (empty($this->cacheHash)) {

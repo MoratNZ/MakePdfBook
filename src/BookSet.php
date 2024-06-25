@@ -117,61 +117,61 @@ class BookSet implements \JsonSerializable
         }
         return $this;
     }
-    public function fetchTitlePages(): BookSet
-    {
-        $query = $this->dbr->newSelectQueryBuilder()
-            ->select([
-                'cat_title',
-                'page_id',
-                'cl_sortkey_prefix',
-            ])
-            ->from('page')
-            ->join('categorylinks', null, 'page_id=cl_from')
-            ->join('category', null, 'cl_to=cat_title')
-            ->where("cl_sortkey_prefix like '%titlepage%'")
-            ->caller('MakePdfBook');
+    // public function fetchTitlePages(): BookSet
+    // {
+    //     $query = $this->dbr->newSelectQueryBuilder()
+    //         ->select([
+    //             'cat_title',
+    //             'page_id',
+    //             'cl_sortkey_prefix',
+    //         ])
+    //         ->from('page')
+    //         ->join('categorylinks', null, 'page_id=cl_from')
+    //         ->join('category', null, 'cl_to=cat_title')
+    //         ->where("cl_sortkey_prefix like '%titlepage%'")
+    //         ->caller('MakePdfBook');
 
-        $result = $query->fetchResultSet();
+    //     $result = $query->fetchResultSet();
 
-        foreach ($result as $row) {
-            $category = $row->cat_title;
-            $pageId = $row->page_id;
+    //     foreach ($result as $row) {
+    //         $category = $row->cat_title;
+    //         $pageId = $row->page_id;
 
-            try {
-                $this->getBook($category)->setTitlepage($pageId);
-            } catch (OutOfBoundsException $e) {
-                $this->addBook($category)->setTitlepage($pageId);
-            }
-        }
-        return $this;
-    }
-    public function fetchChapters(): BookSet
-    {
-        $query = $this->dbr->newSelectQueryBuilder()
-            ->select([
-                'cat_title',
-                'page_id',
-                'cl_sortkey_prefix',
-            ])
-            ->from('page')
-            ->join('categorylinks', null, 'page_id=cl_from')
-            ->join('category', null, 'cl_to=cat_title')
-            ->where("cl_sortkey_prefix not like '%titlepage%'")
-            ->caller('MakePdfBook');
+    //         try {
+    //             $this->getBook($category)->setTitlepage($pageId);
+    //         } catch (OutOfBoundsException $e) {
+    //             $this->addBook($category)->setTitlepage($pageId);
+    //         }
+    //     }
+    //     return $this;
+    // }
+    // public function fetchChapters(): BookSet
+    // {
+    //     $query = $this->dbr->newSelectQueryBuilder()
+    //         ->select([
+    //             'cat_title',
+    //             'page_id',
+    //             'cl_sortkey_prefix',
+    //         ])
+    //         ->from('page')
+    //         ->join('categorylinks', null, 'page_id=cl_from')
+    //         ->join('category', null, 'cl_to=cat_title')
+    //         ->where("cl_sortkey_prefix not like '%titlepage%'")
+    //         ->caller('MakePdfBook');
 
-        $result = $query->fetchResultSet();
+    //     $result = $query->fetchResultSet();
 
-        foreach ($result as $row) {
-            $category = $row->cat_title;
-            $pageId = $row->page_id;
-            $sortKey = $row->cl_sortkey_prefix;
+    //     foreach ($result as $row) {
+    //         $category = $row->cat_title;
+    //         $pageId = $row->page_id;
+    //         $sortKey = $row->cl_sortkey_prefix;
 
-            try {
-                $this->getBook($category)->addChapter($pageId, $sortKey);
-            } catch (OutOfBoundsException $e) {
-                $this->addBook($category)->addChapter($pageId, $sortKey);
-            }
-        }
-        return $this;
-    }
+    //         try {
+    //             $this->getBook($category)->addChapter($pageId, $sortKey);
+    //         } catch (OutOfBoundsException $e) {
+    //             $this->addBook($category)->addChapter($pageId, $sortKey);
+    //         }
+    //     }
+    //     return $this;
+    // }
 }
