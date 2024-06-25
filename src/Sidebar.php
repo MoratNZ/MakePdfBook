@@ -41,11 +41,16 @@ class Sidebar
 
             #TODO: this handling of marking the active book does not bring me joy
             foreach ($bookSet->getBooks() as $book) {
-                $activeBook = (
-                    $book->title->getText() == $pageRelevantTitle->getText()
-                    || $book->contentsPage->getPrefixedText() == $pageRelevantTitle->getPrefixedText()
-                    || $book->containsChapter($pageRelevantTitle->getPrefixedText())
-                );
+                $activeBook = false;
+
+                if ($book->title && $book->title->getText() == $pageRelevantTitle->getText()) {
+                    $activeBook = true;
+                } else if ($book->contentsPage && $book->contentsPage->getPrefixedText()) {
+                    $activeBook = true;
+                } else if ($book->containsChapter($pageRelevantTitle->getPrefixedText())) {
+                    $activeBook = true;
+                }
+
                 $html .= sprintf(
                     "<div class='makepdfbook-book-content%s'>",
                     $activeBook ? " makepdfbook-active-book" : ""
