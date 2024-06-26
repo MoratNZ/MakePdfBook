@@ -182,7 +182,11 @@ class Book implements \JsonSerializable
     {
         $clonedChapters = [...$this->chapters];
         usort($clonedChapters, function ($a, $b) {
-            return strcmp($a->sortKey, $b->sortKey);
+            if (is_int($a) && is_int($b)) {
+                return $a - $b;
+            } else {
+                return strcmp($a->sortKey, $b->sortKey);
+            }
         });
         return $clonedChapters;
     }
