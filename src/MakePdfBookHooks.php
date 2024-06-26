@@ -2,6 +2,8 @@
 namespace MediaWiki\Extension\MakePdfBook;
 
 use MediaWiki\Extension\MakePdfBook\Sidebar;
+use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Output\OutputPage;
 
 class MakePdfBookHooks
 {
