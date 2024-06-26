@@ -2,15 +2,14 @@
 namespace MediaWiki\Extension\MakePdfBook;
 
 use MediaWiki\Extension\MakePdfBook\BookSet;
+use MediaWiki\Title\Title;
+use MediaWiki\MediaWikiServices;
+use MediaWiki\Parser\ParserOutput;
 
 class Sidebar
 {
     public static function onSidebarBeforeOutput($skin, &$sidebar)
     {
-        $user = $skin->getUser();
-
-        // throw new \Exception(var_export($sidebar, return: true));
-
         $sidebar = [];
         $sidebar['navigation'] = [
             [
@@ -27,6 +26,7 @@ class Sidebar
                 "text" => "MakePdfBook",
                 "href" => "/index.php/Special:MakePdfBook"
             ];
+
         }
     }
     public static function onSkinAfterPortlet($skin, $portletName, &$html)
@@ -39,7 +39,6 @@ class Sidebar
             $html .= "<hr><span class = 'makepdfbook-sidebar-title'>Books</span>\n";
             $html .= "<div class = 'makepdfbook-book-list'>\n";
 
-            #TODO: this handling of marking the active book does not bring me joy
             foreach ($bookSet->getBooks() as $book) {
                 if ($book->title && $book->title->getText() == $pageRelevantTitle->getText()) {
                     $activeBook = true;
@@ -71,9 +70,58 @@ class Sidebar
                 }
                 $html .= "</div>";
             }
-            $html .= "</div>";
 
+
+            $html .= "</div>";
+            $html .= sprintf(
+                "<script> let makepdfbookLogo = '%s'</script>\n",
+                self::getNsLogoUrl($pageRelevantTitle->getNsText(), $skin->getUser())
+            );
         }
+    }
+    private static function getNsLogoUrl(string $namespace, $user): ?string
+    {
+        $nsLogoPageTitle = Title::newFromText(
+            sprintf(
+                "%s:%s",
+                $namespace,
+                "Logo" #TODO change this to referencing configured magic word
+            )
+        );
+        if ($nsLogoPageTitle->isKnown()) {
+            return self::getFirstImageUrlFromTitle($nsLogoPageTitle, $user);
+        }
+        $defaultLogoPageTitle = $nsLogoPageTitle = Title::newFromText(
+            sprintf(
+                "Mediawiki:%s",
+                "Logo" #TODO change this to referencing configured magic word
+            )
+        );
+        if ($defaultLogoPageTitle->isKnown()) {
+            return self::getFirstImageUrlFromTitle($nsLogoPageTitle, $user);
+        }
+        return null;
+    }
+    private static function getFirstImageUrlFromTitle(Title $title, $user): string
+    {
+        $logoPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle($title);
+        $logoPageText = $logoPage->getContent()->getText();
+
+        $parser = MediaWikiServices::getInstance()->getParserFactory()->create();
+
+        if ($user->isRegistered()) {
+            $parserOptions = \ParserOptions::newFromUser($user);
+        } else {
+            $parserOptions = \ParserOptions::newFromAnon();
+        }
+        $output = $parser->parse($logoPageText, $title, $parserOptions);
+        $firstImage = array_keys($output->getImages())[0];
+
+        $fileTitle = Title::newFromText(sprintf("File:%s", $firstImage));
+        $file = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileTitle);
+        $fileUrl = $file->getUrl();
+
+        return $fileUrl;
     }
     private static function generateChapterHtml($book)
     {

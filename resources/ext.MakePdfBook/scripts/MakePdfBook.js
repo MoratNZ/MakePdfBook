@@ -13,33 +13,21 @@ function showHistory() {
   document.getElementById("ca-history").style.visibility = "visible";
 }
 
-var defaultBanner = "";
-var defaultLogo = "/images/0/0d/Armored_combat_badge.svg";
+function setBannerImage() {
+  if (makepdfbookBanner) {
+    let mwHeadBaseStyle = document.getElementById("mw-head-base").style;
 
-function setBannerImage(nameSpace) {
-  var namespaceObj = ruleBooks.find(function (obj) {
-    return "namespace" in obj && obj.namespace === nameSpace;
-  });
-
-  var banner;
-  var logo;
-
-  if (namespaceObj === undefined) {
-    banner = defaultBanner;
-    logo = defaultLogo;
-  } else {
-    banner = namespaceObj.banner ? namespaceObj.banner : defaultBanner;
-    logo = namespaceObj.logo ? namespaceObj.logo : defaultLogo;
+    mwHeadBaseStyle.backgroundImage = 'url("' + makepdfbookBanner + '")';
+    mwHeadBaseStyle.backgroundRepeat = "no-repeat";
   }
-
-  document.getElementById("mw-head-base").style.backgroundImage =
-    'url("' + banner + '")';
-  document.getElementById("mw-head-base").style.backgroundRepeat = "no-repeat";
-  document.getElementsByClassName("mw-wiki-logo")[0].style.backgroundImage =
-    'url("' + logo + '")';
+}
+function setLogo() {
+  if (makepdfbookLogo) {
+    document.getElementsByClassName("mw-wiki-logo")[0].style.backgroundImage =
+      'url("' + makepdfbookLogo + '")';
+  }
   // document.getElementsByClassName("mw-wiki-logo")[0].style.backgroundRepeat = "no-repeat";
 }
-
 function buildSideMenu() {
   currentNamespace = mw.config.get("wgCanonicalNamespace");
   var navigationMenu = document.getElementById("mw-panel");
@@ -99,27 +87,9 @@ function buildSideMenu() {
 }
 
 function CustomizeModificationsOfSidebar() {
-  // var isLoggedIn;
-  // try {
-  //   isLoggedIn = mw.config.get("wgUserId");
-  //   if (isLoggedIn === null) {
-  //     isLoggedIn = false;
-  //   } else {
-  //     isLoggedIn = true;
-  //   }
-  // } catch (ReferenceError) {
-  //   isLoggedIn = false;
-  // }
-  // if (isLoggedIn) {
-  //   showToolBox();
-  //   showHistory();
-  // } else {
-  //   hideToolBox();
-  //   hideHistory();
-  // }
   // var nameSpace = mw.config.get("wgCanonicalNamespace");
   // setBannerImage(nameSpace);
-  // buildSideMenu();
+  setLogo();
 }
 
 jQuery(CustomizeModificationsOfSidebar);
