@@ -26,6 +26,15 @@ class Sidebar
                 "text" => "MakePdfBook",
                 "href" => "/index.php/Special:MakePdfBook"
             ];
+            $sidebar['navigation'][] = [
+                "text" => "File list",
+                "href" => "/index.php/Special:ListFiles"
+            ];
+            $sidebar['navigation'][] = [
+                "text" => "Upload file",
+                "href" => "/index.php/Special:Upload"
+            ];
+
 
         }
     }
