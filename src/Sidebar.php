@@ -84,21 +84,26 @@ class Sidebar
             $html .= "</div>";
             $html .= sprintf(
                 "<script>
-                document.addEventListener(\"DOMContentLoaded\",function(){
-                    document.getElementsByClassName(\"mw-wiki-logo\")[0].style.backgroundImage ='url(\"%s\")';
-                });
-                </script>",
-                self::getNsLogoUrl($pageRelevantTitle->getNsText(), 'Logo', $skin->getUser())
+    document.addEventListener(\"DOMContentLoaded\",function(){
+        document.getElementsByClassName(\"mw-wiki-logo\")[0].style.backgroundImage ='url(\"%s\")';
+        
+        let mwHeadBaseStyle = document.getElementById(\"mw-head-base\").style;
+        mwHeadBaseStyle.backgroundImage = 'url(\"%s\")';
+        mwHeadBaseStyle.backgroundRepeat = \"no-repeat\";
+    });</script>",
+                #TODO change these to referencing configured magic word
+                self::getNsNamedPageUrl($pageRelevantTitle->getNsText(), 'Logo', $skin->getUser()),
+                self::getNsNamedPageUrl($pageRelevantTitle->getNsText(), 'Banner', $skin->getUser())
             );
         }
     }
-    private static function getNsNamedPageUrl(string $namespace, $pageName, $user): ?string
+    private static function getNsNamedPageUrl(string $namespace, $imageType, $user): ?string
     {
         $nsLogoPageTitle = Title::newFromText(
             sprintf(
                 "%s:%s",
                 $namespace,
-                "Logo" #TODO change this to referencing configured magic word
+                $imageType
             )
         );
         if ($nsLogoPageTitle->isKnown()) {
@@ -107,7 +112,7 @@ class Sidebar
         $defaultLogoPageTitle = $nsLogoPageTitle = Title::newFromText(
             sprintf(
                 "Mediawiki:%s",
-                "Logo" #TODO change this to referencing configured magic word
+                $imageType
             )
         );
         if ($defaultLogoPageTitle->isKnown()) {
