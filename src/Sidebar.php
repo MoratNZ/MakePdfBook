@@ -83,12 +83,16 @@ class Sidebar
 
             $html .= "</div>";
             $html .= sprintf(
-                "<script> let makepdfbookLogo = '%s'</script>\n",
-                self::getNsLogoUrl($pageRelevantTitle->getNsText(), $skin->getUser())
+                "<script>
+                document.addEventListener(\"DOMContentLoaded\",function(){
+                    document.getElementsByClassName(\"mw-wiki-logo\")[0].style.backgroundImage ='url(\"%s\")';
+                });
+                </script>",
+                self::getNsLogoUrl($pageRelevantTitle->getNsText(), 'Logo', $skin->getUser())
             );
         }
     }
-    private static function getNsLogoUrl(string $namespace, $user): ?string
+    private static function getNsNamedPageUrl(string $namespace, $pageName, $user): ?string
     {
         $nsLogoPageTitle = Title::newFromText(
             sprintf(

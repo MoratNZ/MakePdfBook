@@ -21,13 +21,7 @@ function setBannerImage() {
     mwHeadBaseStyle.backgroundRepeat = "no-repeat";
   }
 }
-function setLogo() {
-  if (makepdfbookLogo) {
-    document.getElementsByClassName("mw-wiki-logo")[0].style.backgroundImage =
-      'url("' + makepdfbookLogo + '")';
-  }
-  // document.getElementsByClassName("mw-wiki-logo")[0].style.backgroundRepeat = "no-repeat";
-}
+
 function buildSideMenu() {
   currentNamespace = mw.config.get("wgCanonicalNamespace");
   var navigationMenu = document.getElementById("mw-panel");
@@ -89,7 +83,6 @@ function buildSideMenu() {
 function CustomizeModificationsOfSidebar() {
   // var nameSpace = mw.config.get("wgCanonicalNamespace");
   // setBannerImage(nameSpace);
-  setLogo();
 }
 
 jQuery(CustomizeModificationsOfSidebar);
