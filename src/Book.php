@@ -71,9 +71,9 @@ class Book implements \JsonSerializable
         if (is_numeric($aKey) && is_numeric($bKey)) {
             return intval($aKey) - intval($bKey);
         } else if (is_numeric($aKey)) {
-            return 1;
-        } else if (is_numeric($bKey)) {
             return -1;
+        } else if (is_numeric($bKey)) {
+            return 1;
         } else {
             return strcmp($aKey, $bKey);
         }
