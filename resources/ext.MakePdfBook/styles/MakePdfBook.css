@@ -10,7 +10,7 @@
 }
 
 /* Remove mediawiki TOC numbering, which always starts with 1*/
-span.tocnumber{
+.rulesNumbering span.tocnumber{
   display: none;
 }
 
@@ -21,28 +21,28 @@ body, div#toc+* {
 .rulesNumbering .toc ul {
   list-style-type: none;
 }
-.rulesNumbering h1:before, li.toclevel-1>a>span.toctext:before {
+.rulesNumbering h1:before, .rulesNumbering li.toclevel-1>a>span.toctext:before {
   content: counter(page) " ";
 }
 
-.rulesNumbering h2, li.toclevel-2 {
+.rulesNumbering h2, .rulesNumbering li.toclevel-2 {
   counter-reset: h3Counter h4Counter;
   counter-increment: h2Counter;
 }
-.rulesNumbering h2:before, li.toclevel-2>a>span.toctext:before {
+.rulesNumbering h2:before, .rulesNumbering li.toclevel-2>a>span.toctext:before {
   content: counter(page) "." counter(h2Counter) " ";
 }
-.rulesNumbering h3, li.toclevel-3 {
+.rulesNumbering h3, .rulesNumbering li.toclevel-3 {
   counter-reset: h4Counter;
   counter-increment: h3Counter;
 }
-.rulesNumbering h3:before, li.toclevel-3>a>span.toctext:before{
+.rulesNumbering h3:before, .rulesNumbering li.toclevel-3>a>span.toctext:before{
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) " ";
 }
-.rulesNumbering h4, li.toclevel-4{
+.rulesNumbering h4, .rulesNumbering li.toclevel-4{
   counter-increment: h4Counter;
 }
-.rulesNumbering h4:before, li.toclevel-4>a>span.toctext:before {
+.rulesNumbering h4:before, .rulesNumbering li.toclevel-4>a>span.toctext:before {
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) " ";
 }
 /* this is required to stop the 'contents' heading in the ToC from becoming '1 contents' */
