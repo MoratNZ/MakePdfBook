@@ -10,7 +10,8 @@
     "MediaWiki\\Extension\\MakePdfBook\\": "src/"
   },
   "SpecialPages": {
-    "MakePdfBook": "MediaWiki\\Extension\\MakePdfBook\\SpecialMakePdfBook"
+    "MakePdfBook": "MediaWiki\\Extension\\MakePdfBook\\SpecialMakePdfBook",
+    "NamespaceResources": "MediaWiki\\Extension\\MakePdfBook\\SpecialNamespaceResources"
   },
   "ResourceModules": {
     "ext.makePdfBook": {

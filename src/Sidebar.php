@@ -23,8 +23,12 @@ class Sidebar
                 "href" => "/index.php/Special:SpecialPages"
             ];
             $sidebar['navigation'][] = [
-                "text" => "MakePdfBook",
+                "text" => "Book assets",
                 "href" => "/index.php/Special:MakePdfBook"
+            ];
+            $sidebar['navigation'][] = [
+                "text" => "Namespace resources",
+                "href" => "/index.php/Special:NamespaceResources"
             ];
             $sidebar['navigation'][] = [
                 "text" => "File list",
