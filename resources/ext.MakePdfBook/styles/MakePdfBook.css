@@ -15,7 +15,7 @@ span.tocnumber{
 }
 
 /* Rules numbering for headings and TOC*/
-body, div#toc+h2 {
+body, div#toc+* {
   counter-reset: h2Counter h3Counter h4Counter tableCounter;
 }
 .rulesNumbering .toc ul {
