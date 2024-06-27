@@ -16,6 +16,9 @@ body {
 .rulesNumbering .toc ul {
   list-style-type: none;
 }
+.rulesNumbering h1:before {
+  content: counter(page) " "
+}
 .rulesNumbering h2 {
   counter-reset: h3Counter h4Counter;
   counter-increment: h2Counter;
