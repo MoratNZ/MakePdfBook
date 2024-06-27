@@ -9,14 +9,19 @@
   background:#00FF00;
 }
 
-/* Rules numbering for headings */
+/* Remove mediawiki TOC numbering, which always starts with 1*/
+span.tocnumber{
+  display: none;
+}
+
+/* Rules numbering for headings and TOC*/
 body {
   counter-reset: h2Counter h3Counter h4Counter tableCounter;
 }
 .rulesNumbering .toc ul {
   list-style-type: none;
 }
-.rulesNumbering h1:before, li.toclevel-1>a>span.tocnumber {
+.rulesNumbering h1:before, li.toclevel-1>a>span.toctext:before {
   content: counter(page) " ";
 }
 
@@ -24,20 +29,20 @@ body {
   counter-reset: h3Counter h4Counter;
   counter-increment: h2Counter;
 }
-.rulesNumbering h2:before {
+.rulesNumbering h2:before, li.toclevel-1>a>span.toctext:before {
   content: counter(page) "." counter(h2Counter) " ";
 }
 .rulesNumbering h3 {
   counter-reset: h4Counter;
   counter-increment: h3Counter;
 }
-.rulesNumbering h3:before {
+.rulesNumbering h3:before, li.toclevel-3>a>span.toctext:before{
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) " ";
 }
 .rulesNumbering h4 {
   counter-increment: h4Counter;
 }
-.rulesNumbering h4:before {
+.rulesNumbering h4:before, li.toclevel-4>a>span.toctext:before {
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) " ";
 }
 /* this is required to stop the 'contents' heading in the ToC from becoming '1 contents' */
