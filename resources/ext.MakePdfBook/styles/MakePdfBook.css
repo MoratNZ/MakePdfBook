@@ -82,6 +82,11 @@ table.withBorders {
 div.vector-main-menu-action {
   display:none;
 }
+/* Hide the display title, so the H1 can do its job */
+h1#firstHeading{
+  display:none;
+}
+
 
 /* Sidebar text */
 div.makepdfbook-sidebar-title{
