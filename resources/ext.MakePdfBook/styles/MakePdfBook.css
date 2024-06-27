@@ -67,7 +67,7 @@ body {
 }
 caption:before {
   counter-increment: tableCounter;
-  content: "Table " counter(page) "." counter(tableCounter);
+  content: "Table " counter(page) "." counter(tableCounter) " ";
 }
 
 /* Giving table borders */
