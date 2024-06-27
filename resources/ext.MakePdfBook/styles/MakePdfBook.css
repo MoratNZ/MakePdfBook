@@ -16,7 +16,7 @@
 
 /* Rules numbering for headings and TOC*/
 body, div#toc+* {
-  counter-reset: h2Counter h3Counter h4Counter tableCounter;
+  counter-reset: h2Counter h3Counter h4Counter tableCounter figureCounter;
 }
 .rulesNumbering .toc ul {
   list-style-type: none;
@@ -77,6 +77,10 @@ body, div#toc+* {
 caption:before {
   counter-increment: tableCounter;
   content: "Table " counter(page) "." counter(tableCounter) " ";
+}
+figcaption:before{
+  counter-increment: figureCounter;
+  content: "Figure " counter(page) "." counter(figureCounter) " ";
 }
 
 /* Giving table borders */
