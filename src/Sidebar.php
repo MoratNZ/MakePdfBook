@@ -153,8 +153,8 @@ class Sidebar
         }
         $output = $parser->parse($logoPageText, $title, $parserOptions);
 
-
         $pageImages = array_keys($output->getImages());
+
         if (key_exists(0, $pageImages)) {
             $firstImage = $pageImages[0];
             $fileTitle = Title::newFromText(sprintf("File:%s", $firstImage));
