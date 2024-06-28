@@ -58,7 +58,7 @@ class SpecialMakePdfBook extends SpecialPage
 	}
 	public function getDescription()
 	{
-		return wfMessage("makePdfBook");
+		return wfMessage("Book assets");
 	}
 	private function getUrlSuffix(): string
 	{
@@ -112,7 +112,6 @@ class SpecialMakePdfBook extends SpecialPage
 	}
 	private function buildJsonResponse($category, $params)
 	{
-		$jsonText = json_encode(['hello', "world"]);
 		if ($category) {
 			try {
 				$jsonText = json_encode(
@@ -145,11 +144,12 @@ class SpecialMakePdfBook extends SpecialPage
 	}
 	private function buildSpecialPage(): void
 	{
-		$textString = "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!Titlepage\n!Contents page\n";
+		$textString = "<h1>Book assets</h1>\n";
+		$textString .= "{| class=\"wikitable\"\n|-\n!Category\n!Pdf handbook\n!Titlepage\n!Contents page\n";
 
 		foreach ($this->bookSet->getBooks(sorted: true) as $book) {
 			$textString .= sprintf(
-				"|-\n|[%s %s]\n|[%s   pdf]\n",
+				"|-\n![%s %s]\n|[%s   pdf]\n",
 				$book->title->getFullUrlForRedirect(),
 				$book->title->getText(),
 				$book->getPdfLink()

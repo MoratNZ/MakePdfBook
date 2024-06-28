@@ -37,6 +37,10 @@ class Book implements \JsonSerializable
         $this->contentsPage = Title::newFromID($pageId);
         return $this;
     }
+    public function containsChapter($title): bool
+    {
+        return array_key_exists($title, $this->chapters);
+    }
     public function addChapter(int $pageId, string $sortKey): Book
     {
         $title = Title::newFromID($pageId);
@@ -52,6 +56,26 @@ class Book implements \JsonSerializable
             return $this->chapters[$title];
         } else {
             throw new OutOfBoundsException(sprintf("No chapter called '%s' in %s", $title, $this->category));
+        }
+    }
+    public function getChapters()
+    {
+        $clonedChapters = [...$this->chapters];
+        usort($clonedChapters, self::chapterSort(...));
+        return $clonedChapters;
+    }
+    private static function chapterSort($a, $b): int
+    {
+        $aKey = $a->sortKey;
+        $bKey = $b->sortKey;
+        if (is_numeric($aKey) && is_numeric($bKey)) {
+            return intval($aKey) - intval($bKey);
+        } else if (is_numeric($aKey)) {
+            return -1;
+        } else if (is_numeric($bKey)) {
+            return 1;
+        } else {
+            return strcmp($aKey, $bKey);
         }
     }
     public function getFullUrl(): string
@@ -102,10 +126,7 @@ class Book implements \JsonSerializable
     //     }
     //     return $this;
     // }
-    public function containsChapter($title): bool
-    {
-        return array_key_exists($title, $this->chapters);
-    }
+
     // public function fetchChapters(): Book
     // {
     //     # TODO: This is currently bypassed, with BookSet always grabbing all
@@ -178,14 +199,7 @@ class Book implements \JsonSerializable
         }
         return $this->cacheHash;
     }
-    public function getChapters()
-    {
-        $clonedChapters = [...$this->chapters];
-        usort($clonedChapters, function ($a, $b) {
-            return strcmp($a->sortKey, $b->sortKey);
-        });
-        return $clonedChapters;
-    }
+
     public function writeContent($directory)
     {
         if (!empty($this->titlepage)) {
