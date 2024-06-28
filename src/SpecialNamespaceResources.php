@@ -23,7 +23,9 @@ class SpecialNamespaceResources extends SpecialPage
         $textString .= $this->drawNamespaceTable($this->getNamespaces());
         $textString .= "==Notes==\n";
         $textString .= "Logo and Banner pages are used to provide dynamic logos and banners for namespaces.\n\n";
-        $textString .= "The first image in the page will be used for this purpose, so the page can consist of just a single image tag.\n";
+        $textString .= "The first image in the page will be used for this purpose, so the page can consist of just a single image tag.\n\n";
+        $textString .= "Logo images should be SVGs, or otherwise should be 300x300 pixels.\n\n";
+        $textString .= "Banner images should be 300px high, by 1800-200 pixels wide, with the focus on the mid to left of the image, and nothing important beyond about 1500px right.\n";
 
         $this->getOutput()->addWikiTextAsInterface($textString);
     }
