@@ -53,7 +53,7 @@ class SpecialNamespaceResources extends SpecialPage
     public function drawNamespaceTable(array $namespaces): string
     {
         $textString = "{| class=\"wikitable\"\n|-\n!Namespace\n!Logo page\n!Banner page\n";
-        $textString .= "|-\n!Default\n|[Mediawiki:Logo|logo]]\n|[[Mediawiki:Banner|banner]]\n";
+        $textString .= "|-\n!Default\n|[Mediawiki:Logo|logo]\n|[[Mediawiki:Banner|banner]]\n";
 
         foreach ($namespaces as $namespace => $namespaceIndex) {
             $textString .= sprintf(
