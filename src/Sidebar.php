@@ -152,7 +152,12 @@ class Sidebar
             $parserOptions = \ParserOptions::newFromAnon();
         }
         $output = $parser->parse($logoPageText, $title, $parserOptions);
-        $firstImage = array_keys($output->getImages())[0];
+
+        $firstImage = "";
+        $pageImages = array_keys($output->getImages());
+        if (key_exists(0, $pageImages)) {
+            $firstImage = $pageImages[0];
+        }
 
         $fileTitle = Title::newFromText(sprintf("File:%s", $firstImage));
         $file = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileTitle);
