@@ -88,9 +88,6 @@ class Sidebar
 
             $html .= "</div>";
 
-        } else {
-            $html .= sprintf('<h2>&gt;&gt;%s&lt;&lt;</h2>', $portletName);
-            $html .= sprintf('<h2>%s</h2>', $portletName);
         }
     }
     private static function getLogoAndBannerSetJs($skin)
