@@ -167,3 +167,9 @@ div#p-logo {
 div#mw-panel div.portal div.body ul li {
   font-size: 0.875em;
 } 
+/* Keep the user menu content visible */
+ul.vector-menu-content-list>li{
+  background-color: #f6f6f6;
+  margin-left:0px;
+  padding-right:9px;
+}
