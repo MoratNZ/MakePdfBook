@@ -38,8 +38,6 @@ class Sidebar
                 "text" => "Upload file",
                 "href" => "/index.php/Special:Upload"
             ];
-
-
         }
     }
     public static function onSkinAfterPortlet($skin, $portletName, &$html)
@@ -83,11 +81,23 @@ class Sidebar
                 }
                 $html .= "</div>";
             }
-
+            $html .= self::getLogoAndBannerSetJs($skin);
+            if (!$skin->getUser()->isRegistered()) {
+                $html .= self::getHideRightNavJs($skin);
+            }
 
             $html .= "</div>";
-            $html .= sprintf(
-                "<script>
+
+        } else {
+            $html .= sprintf('<h2>&gt;&gt;%s&lt;&lt;</h2>', $portletName);
+            $html .= sprintf('<h2>%s</h2>', $portletName);
+        }
+    }
+    private static function getLogoAndBannerSetJs($skin)
+    {
+        $pageRelevantTitle = $skin->getRelevantTitle();
+        return sprintf(
+            "<script>
     document.addEventListener(\"DOMContentLoaded\",function(){
         document.getElementsByClassName(\"mw-wiki-logo\")[0].style.backgroundImage ='url(\"%s\")';
         
@@ -95,11 +105,19 @@ class Sidebar
         mwHeadBaseStyle.backgroundImage = 'url(\"%s\")';
         mwHeadBaseStyle.backgroundRepeat = \"no-repeat\";
     });</script>",
-                #TODO change these to referencing configured magic word
-                self::getNsNamedPageUrl($pageRelevantTitle->getNsText(), 'Logo', $skin->getUser()),
-                self::getNsNamedPageUrl($pageRelevantTitle->getNsText(), 'Banner', $skin->getUser())
-            );
-        }
+            #TODO change these to referencing configured magic word
+            self::getNsNamedPageUrl($pageRelevantTitle->getNsText(), 'Logo', $skin->getUser()),
+            self::getNsNamedPageUrl($pageRelevantTitle->getNsText(), 'Banner', $skin->getUser())
+        );
+    }
+    private static function getHideRightNavJs()
+    {
+        return "<script>
+    document.addEventListener(\"DOMContentLoaded\",function(){
+        ['p-views', 'p-cactions'].forEach(
+            (tag)=> document.getElementById(tag).style.display='none'
+        );
+    });</script>\n";
     }
     private static function getNsNamedPageUrl(string $namespace, $imageType, $user): ?string
     {
