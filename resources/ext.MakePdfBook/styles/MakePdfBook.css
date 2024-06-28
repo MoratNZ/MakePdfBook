@@ -74,11 +74,11 @@ body, div#toc+* {
   text-indent: 0px;
   list-style-type: circle;
 }
-caption:before {
+.rulesNumbering caption:before {
   counter-increment: tableCounter;
   content: "Table " counter(page) "." counter(tableCounter) " ";
 }
-figcaption:before{
+.rulesNumbering figcaption:before{
   counter-increment: figureCounter;
   content: "Figure " counter(page) "." counter(figureCounter) " ";
 }
