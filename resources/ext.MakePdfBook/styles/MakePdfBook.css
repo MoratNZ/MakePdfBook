@@ -128,7 +128,6 @@ div.makepdfbook-active-book{
 ul.makepdfbook-book-list{
 
 }
-
 /* widen the left panel */
 div#mw-panel{
   margin-top:300px; 
@@ -154,13 +153,14 @@ div#mw-panel{
   height:300px;
 }
 div#p-logo {
-  width: 15em;
+  width: 300px;
   height: 300px;
-  top: --300px; 
+  margin-top: -300px; 
 }
 .mw-wiki-logo{
-    width: 300px !important;
-    height: 300px !important; 
+    width: 280px !important;
+    height: 280px !important; 
+    background-size: 280px;
 }
 div#mw-panel div.portal div.body ul li {
   font-size: 0.875em;
