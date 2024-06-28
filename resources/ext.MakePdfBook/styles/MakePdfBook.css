@@ -156,11 +156,13 @@ div#p-logo {
   width: 300px;
   height: 300px;
   margin-top: -300px; 
+  margin-bottom: 0;
 }
 .mw-wiki-logo{
-    width: 280px !important;
-    height: 280px !important; 
-    background-size: 280px;
+    width: 300px !important;
+    height: 300px !important; 
+    background-size: 300px;
+    margin-bottom: 0px;
 }
 div#mw-panel div.portal div.body ul li {
   font-size: 0.875em;
