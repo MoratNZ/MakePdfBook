@@ -20,7 +20,7 @@ class BookSet implements \JsonSerializable
         global $makepdfTitlepageSortKey, $makepdfContentsSortKey, $makepdfCopyrightSortKey;
         $this->titlepageSortKey = $makepdfTitlepageSortKey ? $makepdfTitlepageSortKey : 'titlepage';
         $this->contentsSortKey = $makepdfContentsSortKey ? $makepdfContentsSortKey : 'contents';
-        $this->copyrightSortKey = $makepdfCopyrightSortKey ? $makepdfCopyrightSortKey : 'copright';
+        $this->copyrightSortKey = $makepdfCopyrightSortKey ? $makepdfCopyrightSortKey : 'copyright';
 
         $instance = MediaWikiServices::getInstance();
         $lb = $instance->getDBLoadBalancer();
