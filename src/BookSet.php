@@ -12,12 +12,15 @@ class BookSet implements \JsonSerializable
     private array $books = [];
     public string $titlepageSortKey;
     public string $contentsSortKey;
+    public string $copyrightSortKey;
+
     public DBConnRef $dbr;
     public function __construct()
     {
-        global $makepdfTitlepageSortKey, $makepdfContentsSortKey;
+        global $makepdfTitlepageSortKey, $makepdfContentsSortKey, $makepdfCopyrightSortKey;
         $this->titlepageSortKey = $makepdfTitlepageSortKey ? $makepdfTitlepageSortKey : 'titlepage';
         $this->contentsSortKey = $makepdfContentsSortKey ? $makepdfContentsSortKey : 'contents';
+        $this->copyrightSortKey = $makepdfCopyrightSortKey ? $makepdfCopyrightSortKey : 'copright';
 
         $instance = MediaWikiServices::getInstance();
         $lb = $instance->getDBLoadBalancer();
@@ -111,6 +114,9 @@ class BookSet implements \JsonSerializable
                     break;
                 case $this->contentsSortKey:
                     $book->setContentsPage($pageId);
+                    break;
+                case $this->copyrightSortKey:
+                    # we don't care about this, as this will be transcluded into the title page
                     break;
                 default:
                     $book->addChapter($pageId, $sortKey);
