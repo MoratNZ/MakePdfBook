@@ -21,8 +21,11 @@ body, div#toc+* {
 .rulesNumbering ~ div#toc ul {
   list-style-type: none;
 }
-.rulesNumbering ~ h1:before, .rulesNumbering ~ * li.toclevel-1>a>span.toctext:before {
+.rulesNumbering ~ h1:before {
   content: counter(page) " ";
+}
+.rulesNumbering ~ * li.toclevel-1>a{
+  display: none;
 }
 
 .rulesNumbering ~ h2, .rulesNumbering ~ * li.toclevel-2 {
