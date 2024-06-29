@@ -10,75 +10,82 @@
 }
 
 /* Remove mediawiki TOC numbering, which always starts with 1*/
-.rulesNumbering span.tocnumber{
+.rulesNumbering ~ div#toc span.tocnumber{
   display: none;
 }
 
 /* Rules numbering for headings and TOC*/
 body, div#toc+* {
-  counter-reset: h2Counter h3Counter h4Counter tableCounter figureCounter;
+  counter-reset: h2Counter h3Counter h4Counter h5Counter tableCounter figureCounter;
 }
-.rulesNumbering .toc ul {
+.rulesNumbering ~ div#toc ul {
   list-style-type: none;
 }
-.rulesNumbering h1:before, .rulesNumbering li.toclevel-1>a>span.toctext:before {
+.rulesNumbering ~ h1:before, .rulesNumbering ~ * li.toclevel-1>a>span.toctext:before {
   content: counter(page) " ";
 }
 
-.rulesNumbering h2, .rulesNumbering li.toclevel-2 {
-  counter-reset: h3Counter h4Counter;
+.rulesNumbering ~ h2, .rulesNumbering ~ * li.toclevel-2 {
+  counter-reset: h3Counter h4Counter h5Counter;
   counter-increment: h2Counter;
 }
-.rulesNumbering h2:before, .rulesNumbering li.toclevel-2>a>span.toctext:before {
+.rulesNumbering ~ h2:before, .rulesNumbering ~ * li.toclevel-2>a>span.toctext:before {
   content: counter(page) "." counter(h2Counter) " ";
 }
-.rulesNumbering h3, .rulesNumbering li.toclevel-3 {
-  counter-reset: h4Counter;
+.rulesNumbering ~ h3, .rulesNumbering ~ * li.toclevel-3 {
+  counter-reset: h4Counter h5Counter;
   counter-increment: h3Counter;
 }
-.rulesNumbering h3:before, .rulesNumbering li.toclevel-3>a>span.toctext:before{
+.rulesNumbering ~ h3:before, .rulesNumbering ~ * li.toclevel-3>a>span.toctext:before{
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) " ";
 }
-.rulesNumbering h4, .rulesNumbering li.toclevel-4{
+.rulesNumbering ~ h4, .rulesNumbering ~ * li.toclevel-4{
+  counter-reset: h5Counter;
   counter-increment: h4Counter;
 }
-.rulesNumbering h4:before, .rulesNumbering li.toclevel-4>a>span.toctext:before {
+.rulesNumbering ~ h4:before, .rulesNumbering ~ * li.toclevel-4>a>span.toctext:before {
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) " ";
 }
+.rulesNumbering ~ h5, .rulesNumbering ~ * li.toclevel-5{
+  counter-increment: h5Counter;
+}
+.rulesNumbering ~ h5:before, .rulesNumbering ~ * li.toclevel-5>a>span.toctext:before {
+  content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) "." counter(h5Counter) " ";
+}
 /* this is required to stop the 'contents' heading in the ToC from becoming '1 contents' */
-.rulesNumbering .toctitle h2 {
+.rulesNumbering ~ * .toctitle h2 {
   counter-increment: none;
 }
-.rulesNumbering .toctitle h2:before {
+.rulesNumbering ~ * .toctitle h2:before {
   content: none;
 }
 /* styling for ordered lists */
-.rulesNumbering ol {
+.rulesNumbering ~ ol {
   list-style-type: decimal;
 }
-.rulesNumbering ol>li>ol{
+.rulesNumbering ~ ol>li>ol{
   list-style-type: lower-alpha;
 }
-.rulesNumbering ol>li>ol>li>ol{
+.rulesNumbering ~ ol>li>ol>li>ol{
   list-style-type: lower-roman;
 }
-.rulesNumbering ul{
+.rulesNumbering ~ ul{
   text-indent: 0px;
   list-style-type: circle;
 }
-.rulesNumbering ul>li>ul {
+.rulesNumbering ~ ul>li>ul {
   text-indent: 0px;
   list-style-type: circle;
 }
-.rulesNumbering ul>li>ul>li>ul {
+.rulesNumbering ~ ul>li>ul>li>ul {
   text-indent: 0px;
   list-style-type: circle;
 }
-.rulesNumbering caption:before {
+.rulesNumbering ~ caption:before, .rulesNumbering ~ * caption:before {
   counter-increment: tableCounter;
   content: "Table " counter(page) "." counter(tableCounter) " ";
 }
-.rulesNumbering figcaption:before{
+.rulesNumbering ~ figcaption:before, .rulesNumbering ~ * figcaption:before{
   counter-increment: figureCounter;
   content: "Figure " counter(page) "." counter(figureCounter) " ";
 }
