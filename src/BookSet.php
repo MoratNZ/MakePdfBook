@@ -52,6 +52,8 @@ class BookSet implements \JsonSerializable
             # columns in the database means that the WHERE/LIKE statement isnt' working correctly
             if (str_contains($category, $this->bookTag)) {
                 $this->addBook($category);
+            } else {
+                var_dump(sprintf("This category shouldn't appear in the sidebar: %s", $category));
             }
         }
         return $this;
