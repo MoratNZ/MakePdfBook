@@ -13,6 +13,7 @@ class BookSet implements \JsonSerializable
     public string $titlepageSortKey;
     public string $contentsSortKey;
     public string $copyrightSortKey;
+    private string $bookTag = 'book';
 
     public DBConnRef $dbr;
     public function __construct()
@@ -46,7 +47,12 @@ class BookSet implements \JsonSerializable
 
         foreach ($result as $row) {
             $category = $row->cat_title;
-            $this->addBook($category);
+            # This if check shouldn't be necessary, given the WHERE/LIKE statement in the query above
+            # Unfortunately at the moment some combination of MediaWiki's RDBMS layer and the varbinary
+            # columns in the database means that the WHERE/LIKE statement isnt' working correctly
+            if (str_contains($category, $this->bookTag)) {
+                $this->addBook($category);
+            }
         }
         return $this;
     }
