@@ -46,23 +46,20 @@ class BookSet implements \JsonSerializable
 
         foreach ($result as $row) {
             $category = $row->cat_title;
-            # This if check shouldn't be necessary, given the WHERE/LIKE statement in the query above
-            # Unfortunately at the moment some combination of MediaWiki's RDBMS layer and the varbinary
-            # columns in the database means that the WHERE/LIKE statement isnt' working correctly
-            if (str_contains($category, $this->bookTag)) {
-                $this->addBook($category);
-            } else {
-                # we ignore it
-            }
+            $this->addBook($category);
         }
         return $this;
     }
-    private function addBook(string $category): Book
+    private function addBook(string $category, bool $force = false): ?Book
     {
-        $newBook = new Book($category);
-        $newBook->bookSet = $this;
-        $this->books[$category] = $newBook;
-        return $newBook;
+        if (str_contains($category, $this->bookTag) || $force) {
+            $newBook = new Book($category);
+            $newBook->bookSet = $this;
+            $this->books[$category] = $newBook;
+            return $newBook;
+        } else {
+            return null;
+        }
     }
     public function getBook(string $category): Book
     {
@@ -115,18 +112,20 @@ class BookSet implements \JsonSerializable
             } catch (OutOfBoundsException $e) {
                 $book = $this->addBook($category);
             }
-            switch ($sortKey) {
-                case $this->titlepageSortKey:
-                    $book->setTitlepage($pageId);
-                    break;
-                case $this->contentsSortKey:
-                    $book->setContentsPage($pageId);
-                    break;
-                case $this->copyrightSortKey:
-                    # we don't care about this, as this will be transcluded into the title page
-                    break;
-                default:
-                    $book->addChapter($pageId, $sortKey);
+            if (!empty($book)) { # $book will be empty if $category wasn't a valid book category
+                switch ($sortKey) {
+                    case $this->titlepageSortKey:
+                        $book->setTitlepage($pageId);
+                        break;
+                    case $this->contentsSortKey:
+                        $book->setContentsPage($pageId);
+                        break;
+                    case $this->copyrightSortKey:
+                        # we don't care about this, as this will be transcluded into the title page
+                        break;
+                    default:
+                        $book->addChapter($pageId, $sortKey);
+                }
             }
         }
         return $this;
