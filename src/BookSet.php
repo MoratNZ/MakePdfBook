@@ -41,7 +41,6 @@ class BookSet implements \JsonSerializable
         $query = $this->dbr->newSelectQueryBuilder()
             ->select(['cat_title'])
             ->from('category')
-            ->where("cat_title like '%book%'")
             ->caller('MakePdfBook');
         $result = $query->fetchResultSet();
 
@@ -53,7 +52,7 @@ class BookSet implements \JsonSerializable
             if (str_contains($category, $this->bookTag)) {
                 $this->addBook($category);
             } else {
-                var_dump(sprintf("This category shouldn't appear in the sidebar: %s", $category));
+                # we ignore it
             }
         }
         return $this;
