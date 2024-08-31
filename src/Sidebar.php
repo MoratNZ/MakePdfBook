@@ -208,7 +208,6 @@ class Sidebar
                     $sectionTitle,
                     $childHtml
                 );
-                $html .= "</div>";
 
             } else {
                 $html .= sprintf(
