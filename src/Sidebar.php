@@ -213,7 +213,7 @@ class Sidebar
                 $html .= sprintf(
                     "<div class='makepdfbook-chapter-title'><a href = '%s'>%s</a></div>\n",
                     $chapters->title->getLocalURL(),
-                    $chapters->title->getPrefixedText()
+                    $chapters->title->getText()
                 );
             }
         }
