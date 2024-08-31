@@ -50,12 +50,14 @@ class Sidebar
             $html .= "<hr><span class = 'makepdfbook-sidebar-title'>Books</span>\n";
             $html .= "<div class = 'makepdfbook-book-list'>\n";
 
+            $activeChapter = $pageRelevantTitle->getPrefixedText();
+
             foreach ($bookSet->getBooks() as $book) {
                 if ($book->title && $book->title->getText() == $pageRelevantTitle->getText()) {
                     $activeBook = true;
-                } else if ($book->contentsPage && $book->contentsPage->getPrefixedText() == $pageRelevantTitle->getPrefixedText()) {
+                } else if ($book->contentsPage && $book->contentsPage->getPrefixedText() == $activeChapter) {
                     $activeBook = true;
-                } else if ($book->containsChapter($pageRelevantTitle->getPrefixedText())) {
+                } else if ($book->containsChapter($activeChapter)) {
                     $activeBook = true;
                 } else {
                     $activeBook = false;
@@ -74,10 +76,10 @@ class Sidebar
                     "<div class='makepdfbook-pdf-icon' ><a href = '%s' ><img src='%s' %s/></a></div>\n",
                     $book->getPdfLink(),
                     "https://upload.wikimedia.org/wikipedia/commons/6/6c/PDF_icon.svg",
-                    "width='18' height='18'" #This is filithy - need to find a better way of avoiding FOUT - probably including and resizing the svg
+                    "width='18' height='18'" #This is filthy - need to find a better way of avoiding FOUT - probably including and resizing the svg
                 );
                 if ($activeBook) {
-                    $html .= self::generateChapterHtml($book);
+                    $html .= self::generateChapterHtml($book, $activeChapter);
                 }
                 $html .= "</div>";
             }
@@ -166,7 +168,7 @@ class Sidebar
 
         return $fileUrl;
     }
-    private static function generateChapterHtml($book)
+    private static function generateChapterHtml($book, $activeChapter)
     {
         $sectionList = [];
 
@@ -187,24 +189,32 @@ class Sidebar
 
         foreach ($sectionList as $sectionTitle => $chapters) {
             if (is_array($chapters)) {
-                $html .= sprintf(
-                    "<div class='makepdfbook-chapter-title makepdfbook-has-children'><a>%s</a>\n",
-                    $sectionTitle
-                );
+                $childHtml = "";
+                $isActive = false;
+
                 foreach ($chapters as $chapterTitle => $chapter) {
-                    $html .= sprintf(
+                    if ($chapter->title->getPrefixedText() == $activeChapter) {
+                        $isActive = true;
+                    }
+                    $childHtml .= sprintf(
                         "<div class='makepdfbook-chapter-in-section'><a href = '%s'>%s</a></div>\n",
                         $chapter->title->getLocalURL(),
                         $chapterTitle
                     );
                 }
+                $html .= sprintf(
+                    "<div class='makepdfbook-chapter-title makepdfbook-has-children%s'><a>%s</a>\n%s</div>",
+                    $isActive ? " makepdfbook-active-section" : "",
+                    $sectionTitle,
+                    $childHtml
+                );
                 $html .= "</div>";
 
             } else {
                 $html .= sprintf(
                     "<div class='makepdfbook-chapter-title'><a href = '%s'>%s</a></div>\n",
                     $chapters->title->getLocalURL(),
-                    $chapters->title->getText()
+                    $chapters->title->getPrefixedText()
                 );
             }
         }
@@ -215,13 +225,10 @@ class Sidebar
             for (const parent of document.querySelectorAll('.makepdfbook-has-children')) {
                 parent.addEventListener('click', function(clickEvent) {
                     if (clickEvent.target === parent.querySelector('a') ){
-                        for(const child of parent.querySelectorAll('.makepdfbook-chapter-in-section')){
-                            console.log(child.style.display);
-                            if(child.style.display === 'block'){
-                                child.style.display = 'none';
-                            } else {
-                                child.style.display = 'block';
-                            }
+                        if(parent.classList.contains('makepdfbook-active-section')){
+                            parent.classList.remove('makepdfbook-active-section');
+                        } else {
+                            parent.classList.add('makepdfbook-active-section');
                         }
                     } 
                 })

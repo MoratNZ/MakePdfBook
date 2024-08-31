@@ -129,6 +129,18 @@ div.makepdfbook-book-chapters{
 div.makepdfbook-chapter-title{
   font-size: 14px;
 }
+div.makepdfbook-has-children>a:after{
+  content: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8' standalone='no'%3F%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg width='14' height='14' viewBox='0 0 14 14' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' xmlns:serif='http://www.serif.com/' style='fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;'%3E%3Cg transform='matrix(8.62082e-17,-1.39961,1.44594,8.90285e-17,-1.04065,15.6648)'%3E%3Cpath d='M6.191,2.794L9.763,8.327L2.618,8.327L6.191,2.794Z'/%3E%3Cpath d='M6.494,2.611C6.429,2.51 6.314,2.449 6.191,2.449C6.068,2.449 5.953,2.51 5.888,2.611L2.316,8.144C2.247,8.251 2.243,8.385 2.306,8.495C2.369,8.605 2.489,8.673 2.618,8.673L9.763,8.673C9.893,8.673 10.013,8.605 10.076,8.495C10.139,8.385 10.135,8.251 10.066,8.144L6.494,2.611ZM6.191,2.794L9.763,8.327L2.618,8.327L6.191,2.794Z'/%3E%3C/g%3E%3C/svg%3E ");
+}
+div.makepdfbook-has-children.makepdfbook-active-section>a:after{
+  content: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8' standalone='no'%3F%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg width='14' height='14' viewBox='0 0 14 14' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' xmlns:serif='http://www.serif.com/' style='fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;'%3E%3Cg transform='matrix(-1.39961,1.71738e-16,-1.76942e-16,-1.44594,15.698,14.9989)'%3E%3Cpath d='M6.191,2.794L9.763,8.327L2.618,8.327L6.191,2.794Z'/%3E%3Cpath d='M6.494,2.611C6.429,2.51 6.314,2.449 6.191,2.449C6.068,2.449 5.953,2.51 5.888,2.611L2.316,8.144C2.247,8.251 2.243,8.385 2.306,8.495C2.369,8.605 2.489,8.673 2.618,8.673L9.763,8.673C9.893,8.673 10.013,8.605 10.076,8.495C10.139,8.385 10.135,8.251 10.066,8.144L6.494,2.611ZM6.191,2.794L9.763,8.327L2.618,8.327L6.191,2.794Z'/%3E%3C/g%3E%3C/svg%3E%0A");
+}
+div.makepdfbook-has-children>div.makepdfbook-chapter-in-section{
+  display: none;
+}
+div.makepdfbook-has-children.makepdfbook-active-section>div.makepdfbook-chapter-in-section{
+  display: block;
+}
 div.makepdfbook-chapter-in-section{
   margin-left:1em;
   display:none;
