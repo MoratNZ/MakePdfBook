@@ -129,6 +129,10 @@ div.makepdfbook-book-chapters{
 div.makepdfbook-chapter-title{
   font-size: 14px;
 }
+div.makepdfbook-chapter-in-section{
+  margin-left:1em;
+  display:none;
+}
 div.makepdfbook-book-content{
   border-top: 2px solid #f0f0f0;
 }

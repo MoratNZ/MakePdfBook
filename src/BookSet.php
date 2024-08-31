@@ -12,12 +12,16 @@ class BookSet implements \JsonSerializable
     private array $books = [];
     public string $titlepageSortKey;
     public string $contentsSortKey;
+    public string $copyrightSortKey;
+    private string $bookTag = 'book';
+
     public DBConnRef $dbr;
     public function __construct()
     {
-        global $makepdfTitlepageSortKey, $makepdfContentsSortKey;
+        global $makepdfTitlepageSortKey, $makepdfContentsSortKey, $makepdfCopyrightSortKey;
         $this->titlepageSortKey = $makepdfTitlepageSortKey ? $makepdfTitlepageSortKey : 'titlepage';
         $this->contentsSortKey = $makepdfContentsSortKey ? $makepdfContentsSortKey : 'contents';
+        $this->copyrightSortKey = $makepdfCopyrightSortKey ? $makepdfCopyrightSortKey : 'copyright';
 
         $instance = MediaWikiServices::getInstance();
         $lb = $instance->getDBLoadBalancer();
@@ -37,7 +41,6 @@ class BookSet implements \JsonSerializable
         $query = $this->dbr->newSelectQueryBuilder()
             ->select(['cat_title'])
             ->from('category')
-            ->where("cat_title like '%book%'")
             ->caller('MakePdfBook');
         $result = $query->fetchResultSet();
 
@@ -47,12 +50,16 @@ class BookSet implements \JsonSerializable
         }
         return $this;
     }
-    private function addBook(string $category): Book
+    private function addBook(string $category, bool $force = false): ?Book
     {
-        $newBook = new Book($category);
-        $newBook->bookSet = $this;
-        $this->books[$category] = $newBook;
-        return $newBook;
+        if (str_contains($category, $this->bookTag) || $force) {
+            $newBook = new Book($category);
+            $newBook->bookSet = $this;
+            $this->books[$category] = $newBook;
+            return $newBook;
+        } else {
+            return null;
+        }
     }
     public function getBook(string $category): Book
     {
@@ -105,15 +112,20 @@ class BookSet implements \JsonSerializable
             } catch (OutOfBoundsException $e) {
                 $book = $this->addBook($category);
             }
-            switch ($sortKey) {
-                case $this->titlepageSortKey:
-                    $book->setTitlepage($pageId);
-                    break;
-                case $this->contentsSortKey:
-                    $book->setContentsPage($pageId);
-                    break;
-                default:
-                    $book->addChapter($pageId, $sortKey);
+            if (!empty($book)) { # $book will be empty if $category wasn't a valid book category
+                switch ($sortKey) {
+                    case $this->titlepageSortKey:
+                        $book->setTitlepage($pageId);
+                        break;
+                    case $this->contentsSortKey:
+                        $book->setContentsPage($pageId);
+                        break;
+                    case $this->copyrightSortKey:
+                        # we don't care about this, as this will be transcluded into the title page
+                        break;
+                    default:
+                        $book->addChapter($pageId, $sortKey);
+                }
             }
         }
         return $this;
