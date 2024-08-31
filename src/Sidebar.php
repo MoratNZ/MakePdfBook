@@ -66,7 +66,7 @@ class Sidebar
                     $activeBook ? " makepdfbook-active-book" : ""
                 );
                 $html .= sprintf(
-                    "<div class='makepdfbook-book-title' ><a href = '%s'>%s</a></div>\n",
+                    "<div class='makepdfbook-book-title'><a href = '%s'>%s</a></div>\n",
                     $book->getUrl(),
                     $book->title->getText()
                 );
@@ -164,22 +164,69 @@ class Sidebar
             $fileUrl = "";
         }
 
-
-
         return $fileUrl;
     }
     private static function generateChapterHtml($book)
     {
+        $sectionList = [];
+
         $html = "<div class='makepdfbook-book-chapters'>\n";
         foreach ($book->getChapters() as $chapter) {
-            $html .= sprintf(
-                "<div class='makepdfbook-chapter-title'><a href = '%s'>%s</a></div>\n",
-                $chapter->title->getLocalURL(),
-                $chapter->title->getText()
-            );
+            $chapterTitle = $chapter->title->getText();
+
+            if (str_contains($chapterTitle, "-")) {
+                [$sectionName, $chapterTitle] = explode("-", $chapterTitle);
+                if (!array_key_exists($sectionName, $sectionList)) {
+                    $sectionList[$sectionName] = [];
+                }
+                $sectionList[$sectionName][$chapterTitle] = $chapter;
+            } else {
+                $sectionList[$chapterTitle] = $chapter;
+            }
+        }
+
+        foreach ($sectionList as $sectionTitle => $chapters) {
+            if (is_array($chapters)) {
+                $html .= sprintf(
+                    "<div class='makepdfbook-chapter-title makepdfbook-has-children'><a>%s</a>\n",
+                    $sectionTitle
+                );
+                foreach ($chapters as $chapterTitle => $chapter) {
+                    $html .= sprintf(
+                        "<div class='makepdfbook-chapter-in-section'><a href = '%s'>%s</a></div>\n",
+                        $chapter->title->getLocalURL(),
+                        $chapterTitle
+                    );
+                }
+                $html .= "</div>";
+
+            } else {
+                $html .= sprintf(
+                    "<div class='makepdfbook-chapter-title'><a href = '%s'>%s</a></div>\n",
+                    $chapters->title->getLocalURL(),
+                    $chapters->title->getText()
+                );
+            }
         }
         $html .= "</div>";
-
+        $html .= "<script>
+        document.addEventListener(\"DOMContentLoaded\",function(){
+            console.log('bong');
+            for (const parent of document.querySelectorAll('.makepdfbook-has-children')) {
+                parent.addEventListener('click', function(clickEvent) {
+                    if (clickEvent.target === parent.querySelector('a') ){
+                        for(const child of parent.querySelectorAll('.makepdfbook-chapter-in-section')){
+                            console.log(child.style.display);
+                            if(child.style.display === 'block'){
+                                child.style.display = 'none';
+                            } else {
+                                child.style.display = 'block';
+                            }
+                        }
+                    } 
+                })
+            }
+        });</script>";
         return $html;
     }
 }
