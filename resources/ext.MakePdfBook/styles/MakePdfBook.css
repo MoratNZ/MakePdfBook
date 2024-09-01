@@ -21,38 +21,38 @@ body, div#toc+* {
 .rulesNumbering ~ div#toc ul {
   list-style-type: none;
 }
-.rulesNumbering ~ h1:before, .rulesNumbering ~ div.ve-ce-mwTransclusionNode>h1:before {
+.rulesNumbering ~ h1:before, .rulesNumbering ~ div.globalContent>h1:before {
   content: counter(page) " ";
 }
 .rulesNumbering ~ * li.toclevel-1>a{
   display: none;
 }
 
-.rulesNumbering ~ h2, .rulesNumbering ~ div.ve-ce-mwTransclusionNode>h2,.rulesNumbering ~ * li.toclevel-2 {
+.rulesNumbering ~ h2, .rulesNumbering ~ div.globalContent>h2,.rulesNumbering ~ * li.toclevel-2 {
   counter-reset: h3Counter h4Counter h5Counter;
   counter-increment: h2Counter;
 }
-.rulesNumbering ~ h2:before, .rulesNumbering ~ div.ve-ce-mwTransclusionNode>h2:before, .rulesNumbering ~ * li.toclevel-2>a>span.toctext:before {
+.rulesNumbering ~ h2:before, .rulesNumbering ~ div.globalContent>h2:before, .rulesNumbering ~ * li.toclevel-2>a>span.toctext:before {
   content: counter(page) "." counter(h2Counter) " ";
 }
-.rulesNumbering ~ h3,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>h3,.rulesNumbering ~ * li.toclevel-3 {
+.rulesNumbering ~ h3,.rulesNumbering ~ div.globalContent>h3,.rulesNumbering ~ * li.toclevel-3 {
   counter-reset: h4Counter h5Counter;
   counter-increment: h3Counter;
 }
-.rulesNumbering ~ h3:before,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>h3:before,.rulesNumbering ~ * li.toclevel-3>a>span.toctext:before{
+.rulesNumbering ~ h3:before,.rulesNumbering ~ div.globalContent>h3:before,.rulesNumbering ~ * li.toclevel-3>a>span.toctext:before{
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) " ";
 }
-.rulesNumbering ~ h4,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>h4, .rulesNumbering ~ * li.toclevel-4{
+.rulesNumbering ~ h4,.rulesNumbering ~ div.globalContent>h4, .rulesNumbering ~ * li.toclevel-4{
   counter-reset: h5Counter;
   counter-increment: h4Counter;
 }
-.rulesNumbering ~ h4:before,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>h4:before, .rulesNumbering ~ * li.toclevel-4>a>span.toctext:before {
+.rulesNumbering ~ h4:before,.rulesNumbering ~ div.globalContent>h4:before, .rulesNumbering ~ * li.toclevel-4>a>span.toctext:before {
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) " ";
 }
-.rulesNumbering ~ h5,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>h5, .rulesNumbering ~ * li.toclevel-5{
+.rulesNumbering ~ h5,.rulesNumbering ~ div.globalContent>h5, .rulesNumbering ~ * li.toclevel-5{
   counter-increment: h5Counter;
 }
-.rulesNumbering ~ h5:before,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>h5:before, .rulesNumbering ~ * li.toclevel-5>a>span.toctext:before {
+.rulesNumbering ~ h5:before,.rulesNumbering ~ div.globalContent>h5:before, .rulesNumbering ~ * li.toclevel-5>a>span.toctext:before {
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) "." counter(h5Counter) " ";
 }
 /* this is required to stop the 'contents' heading in the ToC from becoming '1 contents' */
@@ -63,32 +63,32 @@ body, div#toc+* {
   content: none;
 }
 /* styling for ordered lists */
-.rulesNumbering ~ ol,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>ol {
+.rulesNumbering ~ ol,.rulesNumbering ~ div.globalContent>ol {
   list-style-type: decimal;
 }
-.rulesNumbering ~ ol>li>ol,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>ol>li>ol{
+.rulesNumbering ~ ol>li>ol,.rulesNumbering ~ div.globalContent>ol>li>ol{
   list-style-type: lower-alpha;
 }
-.rulesNumbering ~ ol>li>ol>li>ol,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>ol>li>ol>li>ol{
+.rulesNumbering ~ ol>li>ol>li>ol,.rulesNumbering ~ div.globalContent>ol>li>ol>li>ol{
   list-style-type: lower-roman;
 }
-.rulesNumbering ~ ul,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>ul{
+.rulesNumbering ~ ul,.rulesNumbering ~ div.globalContent>ul{
   text-indent: 0px;
   list-style-type: circle;
 }
-.rulesNumbering ~ ul>li>ul,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>ul>li>ul {
+.rulesNumbering ~ ul>li>ul,.rulesNumbering ~ div.globalContent>ul>li>ul {
   text-indent: 0px;
   list-style-type: circle;
 }
-.rulesNumbering ~ ul>li>ul>li>ul,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>ul>li>ul>li>ul {
+.rulesNumbering ~ ul>li>ul>li>ul,.rulesNumbering ~ div.globalContent>ul>li>ul>li>ul {
   text-indent: 0px;
   list-style-type: circle;
 }
-.rulesNumbering ~ caption:before, .rulesNumbering ~ * caption:before,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>caption:before,.rulesNumbering ~ div.ve-ce-mwTransclusionNode> * caption:before{
+.rulesNumbering ~ caption:before, .rulesNumbering ~ * caption:before,.rulesNumbering ~ div.globalContent>caption:before,.rulesNumbering ~ div.globalContent> * caption:before{
   counter-increment: tableCounter;
   content: "Table " counter(page) "." counter(tableCounter) " ";
 }
-.rulesNumbering ~ figcaption:before, .rulesNumbering ~ * figcaption:before,.rulesNumbering ~ div.ve-ce-mwTransclusionNode>figcaption:before,.rulesNumbering ~ div.ve-ce-mwTransclusionNode> * figcaption:before{
+.rulesNumbering ~ figcaption:before, .rulesNumbering ~ * figcaption:before,.rulesNumbering ~ div.globalContent>figcaption:before,.rulesNumbering ~ div.globalContent> * figcaption:before{
   counter-increment: figureCounter;
   content: "Figure " counter(page) "." counter(figureCounter) " ";
 }
