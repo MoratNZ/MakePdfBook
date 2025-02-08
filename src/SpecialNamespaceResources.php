@@ -7,8 +7,8 @@ use \OutOfBoundsException;
 
 class SpecialNamespaceResources extends SpecialPage
 {
-    const NAMESPACE_INDEX_MIN = 1000; # lowest namespace index we care about
-    const NAMESPACE_INDEX_MAX = 1100; # highest namespace index we care about
+    const NAMESPACE_INDEX_MIN = 500; # lowest namespace index we care about
+    const NAMESPACE_INDEX_MAX = 3000; # highest namespace index we care about
     private $config;
     private $parser;
     public function __construct()
