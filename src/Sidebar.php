@@ -176,8 +176,8 @@ class Sidebar
         foreach ($book->getChapters() as $chapter) {
             $chapterTitle = $chapter->title->getText();
 
-            if (str_contains($chapterTitle, "-")) {
-                [$sectionName, $chapterTitle] = explode(" - ", $chapterTitle);
+            if (str_contains($chapterTitle, " - " )) {
+                [$sectionName, $chapterTitle] = explode("-", $chapterTitle);
                 if (!array_key_exists($sectionName, $sectionList)) {
                     $sectionList[$sectionName] = [];
                 }
