@@ -177,7 +177,7 @@ class Sidebar
             $chapterTitle = $chapter->title->getText();
 
             if (str_contains($chapterTitle, "-")) {
-                [$sectionName, $chapterTitle] = explode("-", $chapterTitle);
+                [$sectionName, $chapterTitle] = explode(" - ", $chapterTitle);
                 if (!array_key_exists($sectionName, $sectionList)) {
                     $sectionList[$sectionName] = [];
                 }
