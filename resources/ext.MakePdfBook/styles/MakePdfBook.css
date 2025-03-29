@@ -3,92 +3,173 @@
 
 /* Highlight colours for edits etc. */
 .revision {
-  background:#00ffff;
+  background: #00ffff;
 }
-.note{
-  background:#00FF00;
+
+.note {
+  background: #00FF00;
 }
 
 /* Remove mediawiki TOC numbering, which always starts with 1*/
-.rulesNumbering ~ div#toc span.tocnumber{
+.rulesNumbering~div#toc span.tocnumber {
   display: none;
 }
 
 /* Rules numbering for headings and TOC*/
-body, div#toc+* {
-  counter-reset: h2Counter h3Counter h4Counter h5Counter tableCounter figureCounter;
+/* counters are duplicated for body and table of contents to deal with a chrome bug where it isn't handling counter
+resets correctly, leading to wacky numbering */
+body {
+  counter-reset: h2Counter h3Counter h4Counter h5Counter tableCounter figureCounter tocH2Counter tocH3Counter tocH3Counter tocH3Counter;
 }
-.rulesNumbering ~ div#toc ul {
+
+.rulesNumbering~div#toc ul {
   list-style-type: none;
 }
-.rulesNumbering ~ h1:before, .rulesNumbering ~ div.globalContent>h1:before {
+
+.rulesNumbering~h1:before,
+.rulesNumbering~div.globalContent>h1:before {
   content: counter(page) " ";
 }
-.rulesNumbering ~ * li.toclevel-1>a{
+
+.rulesNumbering~* li.toclevel-1>a {
   display: none;
 }
 
-.rulesNumbering ~ h2, .rulesNumbering ~ div.globalContent>h2,.rulesNumbering ~ * li.toclevel-2 {
+.rulesNumbering~h2,
+.rulesNumbering~div.globalContent>h2 {
   counter-reset: h3Counter h4Counter h5Counter;
   counter-increment: h2Counter;
 }
-.rulesNumbering ~ h2:before, .rulesNumbering ~ div.globalContent>h2:before, .rulesNumbering ~ * li.toclevel-2>a>span.toctext:before {
+
+.rulesNumbering~* li.toclevel-2 {
+  counter-reset: tocH3Counter tocH4Counter tocH5Counter;
+  counter-increment: tocH2Counter;
+}
+
+.rulesNumbering~h2:before,
+.rulesNumbering~div.globalContent>h2:before {
   content: counter(page) "." counter(h2Counter) " ";
 }
-.rulesNumbering ~ h3,.rulesNumbering ~ div.globalContent>h3,.rulesNumbering ~ * li.toclevel-3 {
+
+.rulesNumbering~* li.toclevel-2>a>span.toctext:before {
+  content: counter(page) "." counter(tocH2Counter) " ";
+}
+
+
+.rulesNumbering~h3,
+.rulesNumbering~div.globalContent>h3 {
   counter-reset: h4Counter h5Counter;
   counter-increment: h3Counter;
 }
-.rulesNumbering ~ h3:before,.rulesNumbering ~ div.globalContent>h3:before,.rulesNumbering ~ * li.toclevel-3>a>span.toctext:before{
+
+.rulesNumbering~* li.toclevel-3 {
+  counter-reset: tocH4Counter tocH5Counter;
+  counter-increment: tocH3Counter;
+}
+
+.rulesNumbering~h3:before,
+.rulesNumbering~div.globalContent>h3:before {
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) " ";
 }
-.rulesNumbering ~ h4,.rulesNumbering ~ div.globalContent>h4, .rulesNumbering ~ * li.toclevel-4{
+
+.rulesNumbering~* li.toclevel-3>a>span.toctext:before {
+  content: counter(page) "." counter(tocH2Counter) "." counter(tocH3Counter) " ";
+}
+
+.rulesNumbering~h4,
+.rulesNumbering~div.globalContent>h4 {
   counter-reset: h5Counter;
   counter-increment: h4Counter;
 }
-.rulesNumbering ~ h4:before,.rulesNumbering ~ div.globalContent>h4:before, .rulesNumbering ~ * li.toclevel-4>a>span.toctext:before {
+
+.rulesNumbering~* li.toclevel-4 {
+  counter-reset: tocH5Counter;
+  counter-increment: tocH4Counter;
+}
+
+
+.rulesNumbering~h4:before,
+.rulesNumbering~div.globalContent>h4:before {
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) " ";
 }
-.rulesNumbering ~ h5,.rulesNumbering ~ div.globalContent>h5, .rulesNumbering ~ * li.toclevel-5{
+
+.rulesNumbering~* li.toclevel-4>a>span.toctext:before {
+  content: counter(page) "." counter(tocH2Counter) "." counter(tocH3Counter) "." counter(tocH4Counter) " ";
+}
+
+.rulesNumbering~h5,
+.rulesNumbering~div.globalContent>h5 {
   counter-increment: h5Counter;
 }
-.rulesNumbering ~ h5:before,.rulesNumbering ~ div.globalContent>h5:before, .rulesNumbering ~ * li.toclevel-5>a>span.toctext:before {
+
+.rulesNumbering~* li.toclevel-5 {
+  counter-increment: tocH5Counter;
+}
+
+.rulesNumbering~h5:before,
+.rulesNumbering~div.globalContent>h5:before {
   content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) "." counter(h5Counter) " ";
 }
+
+.rulesNumbering~* li.toclevel-5>a>span.toctext:before {
+  content: counter(page) "." counter(tocH2Counter) "." counter(tocH3Counter) "." counter(tocH4Counter) "." counter(tocH5Counter) " ";
+}
+
 /* this is required to stop the 'contents' heading in the ToC from becoming '1 contents' */
-.rulesNumbering ~ * .toctitle h2 {
+.rulesNumbering~* .toctitle h2 {
   counter-increment: none;
 }
-.rulesNumbering ~ * .toctitle h2:before {
+
+.rulesNumbering~* .toctitle h2:before {
   content: none;
 }
+
 /* styling for ordered lists */
-.rulesNumbering ~ ol,.rulesNumbering ~ div.globalContent>ol {
+.rulesNumbering~ol,
+.rulesNumbering~div.globalContent>ol {
   list-style-type: decimal;
 }
-.rulesNumbering ~ ol>li>ol,.rulesNumbering ~ div.globalContent>ol>li>ol{
+
+.rulesNumbering~ol>li>ol,
+.rulesNumbering~div.globalContent>ol>li>ol {
   list-style-type: lower-alpha;
 }
-.rulesNumbering ~ ol>li>ol>li>ol,.rulesNumbering ~ div.globalContent>ol>li>ol>li>ol{
+
+.rulesNumbering~ol>li>ol>li>ol,
+.rulesNumbering~div.globalContent>ol>li>ol>li>ol {
   list-style-type: lower-roman;
 }
-.rulesNumbering ~ ul,.rulesNumbering ~ div.globalContent>ul{
+
+.rulesNumbering~ul,
+.rulesNumbering~div.globalContent>ul {
   text-indent: 0px;
   list-style-type: circle;
 }
-.rulesNumbering ~ ul>li>ul,.rulesNumbering ~ div.globalContent>ul>li>ul {
+
+.rulesNumbering~ul>li>ul,
+.rulesNumbering~div.globalContent>ul>li>ul {
   text-indent: 0px;
   list-style-type: circle;
 }
-.rulesNumbering ~ ul>li>ul>li>ul,.rulesNumbering ~ div.globalContent>ul>li>ul>li>ul {
+
+.rulesNumbering~ul>li>ul>li>ul,
+.rulesNumbering~div.globalContent>ul>li>ul>li>ul {
   text-indent: 0px;
   list-style-type: circle;
 }
-.rulesNumbering ~ caption:before, .rulesNumbering ~ * caption:before,.rulesNumbering ~ div.globalContent>caption:before,.rulesNumbering ~ div.globalContent> * caption:before{
+
+.rulesNumbering~caption:before,
+.rulesNumbering~* caption:before,
+.rulesNumbering~div.globalContent>caption:before,
+.rulesNumbering~div.globalContent>* caption:before {
   counter-increment: tableCounter;
   content: "Table " counter(page) "." counter(tableCounter) " ";
 }
-.rulesNumbering ~ figcaption:before, .rulesNumbering ~ * figcaption:before,.rulesNumbering ~ div.globalContent>figcaption:before,.rulesNumbering ~ div.globalContent> * figcaption:before{
+
+.rulesNumbering~figcaption:before,
+.rulesNumbering~* figcaption:before,
+.rulesNumbering~div.globalContent>figcaption:before,
+.rulesNumbering~div.globalContent>* figcaption:before {
   counter-increment: figureCounter;
   content: "Figure " counter(page) "." counter(figureCounter) " ";
 }
@@ -97,105 +178,131 @@ body, div#toc+* {
 table.withBorders {
   border-collapse: collapse;
 }
-.withBorders, .withBorders th, .withBorders td {
+
+.withBorders,
+.withBorders th,
+.withBorders td {
   border: 2px solid black;
 }
 
 /* Disable 'Switch to old look' menu item */
 div.vector-main-menu-action {
-  display:none;
+  display: none;
 }
+
 /* Hide the display title, so the H1 can do its job */
-h1#firstHeading{
-  display:none;
+h1#firstHeading {
+  display: none;
 }
 
 
 /* Sidebar text */
-div.makepdfbook-sidebar-title{
+div.makepdfbook-sidebar-title {
   font-size: 18px;
 }
-div.makepdfbook-book-title{
+
+div.makepdfbook-book-title {
   font-size: 16px;
   display: inline-block;
 }
+
 div.makepdfbook-pdf-icon {
   display: inline-block;
 }
-div.makepdfbook-book-chapters{
+
+div.makepdfbook-book-chapters {
   border-top: 1px solid #888888;
   margin-left: 1em;
 }
-div.makepdfbook-chapter-title{
+
+div.makepdfbook-chapter-title {
   font-size: 14px;
 }
-div.makepdfbook-has-children>a:after{
+
+div.makepdfbook-has-children>a:after {
   content: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8' standalone='no'%3F%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg width='14' height='14' viewBox='0 0 14 14' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' xmlns:serif='http://www.serif.com/' style='fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;'%3E%3Cg transform='matrix(8.62082e-17,-1.39961,1.44594,8.90285e-17,-1.04065,16.6648)'%3E%3Cpath d='M6.191,2.794L9.763,8.327L2.618,8.327L6.191,2.794Z'/%3E%3Cpath d='M6.494,2.611C6.429,2.51 6.314,2.449 6.191,2.449C6.068,2.449 5.953,2.51 5.888,2.611L2.316,8.144C2.247,8.251 2.243,8.385 2.306,8.495C2.369,8.605 2.489,8.673 2.618,8.673L9.763,8.673C9.893,8.673 10.013,8.605 10.076,8.495C10.139,8.385 10.135,8.251 10.066,8.144L6.494,2.611ZM6.191,2.794L9.763,8.327L2.618,8.327L6.191,2.794Z'/%3E%3C/g%3E%3C/svg%3E%0A");
 }
-div.makepdfbook-has-children.makepdfbook-active-section>a:after, div.makepdfbook-has-children:hover>a:after{
+
+div.makepdfbook-has-children.makepdfbook-active-section>a:after,
+div.makepdfbook-has-children:hover>a:after {
   content: url("data:image/svg+xml,%3C%3Fxml version='1.0' encoding='UTF-8' standalone='no'%3F%3E%3C!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.1//EN' 'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'%3E%3Csvg width='14' height='14' viewBox='0 0 14 14' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' xmlns:serif='http://www.serif.com/' style='fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;'%3E%3Cg transform='matrix(-1.39961,1.71738e-16,-1.76942e-16,-1.44594,15.7134,16.0406)'%3E%3Cpath d='M6.191,2.794L9.763,8.327L2.618,8.327L6.191,2.794Z'/%3E%3Cpath d='M6.494,2.611C6.429,2.51 6.314,2.449 6.191,2.449C6.068,2.449 5.953,2.51 5.888,2.611L2.316,8.144C2.247,8.251 2.243,8.385 2.306,8.495C2.369,8.605 2.489,8.673 2.618,8.673L9.763,8.673C9.893,8.673 10.013,8.605 10.076,8.495C10.139,8.385 10.135,8.251 10.066,8.144L6.494,2.611ZM6.191,2.794L9.763,8.327L2.618,8.327L6.191,2.794Z'/%3E%3C/g%3E%3C/svg%3E%0A");
 }
-div.makepdfbook-has-children>div.makepdfbook-chapter-in-section{
+
+div.makepdfbook-has-children>div.makepdfbook-chapter-in-section {
   display: none;
 }
-div.makepdfbook-has-children.makepdfbook-active-section>div.makepdfbook-chapter-in-section, div.makepdfbook-has-children:hover>div.makepdfbook-chapter-in-section{
+
+div.makepdfbook-has-children.makepdfbook-active-section>div.makepdfbook-chapter-in-section,
+div.makepdfbook-has-children:hover>div.makepdfbook-chapter-in-section {
   display: block;
 }
-div.makepdfbook-chapter-in-section{
-  margin-left:1em;
-  display:none;
+
+div.makepdfbook-chapter-in-section {
+  margin-left: 1em;
+  display: none;
 }
-div.makepdfbook-book-content{
+
+div.makepdfbook-book-content {
   border-top: 2px solid #f0f0f0;
 }
-div.makepdfbook-active-book{
+
+div.makepdfbook-active-book {
   background-color: lightgrey;
 }
-ul.makepdfbook-book-list{
 
-}
+ul.makepdfbook-book-list {}
+
 /* widen the left panel */
-div#mw-panel{
-  margin-top:300px; 
-  width:300px;
+div#mw-panel {
+  margin-top: 300px;
+  width: 300px;
   font-size: 1em;
 }
-#content{
+
+#content {
   margin-left: 300px;
   min-height: 75vh;
 }
-#left-navigation{
+
+#left-navigation {
   margin-left: 300px;
-  margin-top: 300px; 
+  margin-top: 300px;
 }
-#right-navigation{
-  margin-top: 300px; 
+
+#right-navigation {
+  margin-top: 300px;
 }
-#footer{
+
+#footer {
   margin-left: 300px;
 }
+
 #mw-head-base {
   margin-left: 300px;
-  height:300px;
+  height: 300px;
 }
+
 div#p-logo {
   width: 300px;
   height: 300px;
-  margin-top: -300px; 
+  margin-top: -300px;
   margin-bottom: 0;
 }
-.mw-wiki-logo{
-    width: 300px !important;
-    height: 300px !important; 
-    background-size: 300px;
-    margin-bottom: 0px;
+
+.mw-wiki-logo {
+  width: 300px !important;
+  height: 300px !important;
+  background-size: 300px;
+  margin-bottom: 0px;
 }
+
 div#mw-panel div.portal div.body ul li {
   font-size: 0.875em;
-} 
+}
+
 /* Keep the user menu content visible */
-ul.vector-menu-content-list>li{
-  background-color: rgba(246,246,246,0.4);
-  margin-left:0px;
-  padding-right:9px;
+ul.vector-menu-content-list>li {
+  background-color: rgba(246, 246, 246, 0.4);
+  margin-left: 0px;
+  padding-right: 9px;
 }
