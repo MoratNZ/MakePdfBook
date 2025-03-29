@@ -16,10 +16,8 @@
 }
 
 /* Rules numbering for headings and TOC*/
-/* counters are duplicated for body and table of contents to deal with a chrome bug where it isn't handling counter
-resets correctly, leading to wacky numbering */
 body {
-  counter-reset: h2Counter h3Counter h4Counter h5Counter tableCounter figureCounter tocH2Counter tocH3Counter tocH3Counter tocH3Counter;
+  counter-reset: h2 h3 h4 h5 tableCounter figureCounter;
 }
 
 .rulesNumbering~div#toc ul {
@@ -36,83 +34,54 @@ body {
 }
 
 .rulesNumbering~h2,
-.rulesNumbering~div.globalContent>h2 {
-  counter-reset: h3Counter h4Counter h5Counter;
-  counter-increment: h2Counter;
-}
-
+.rulesNumbering~div.globalContent>h2,
 .rulesNumbering~* li.toclevel-2 {
-  counter-reset: tocH3Counter tocH4Counter tocH5Counter;
-  counter-increment: tocH2Counter;
+  counter-set: h3 0 h4 0 h5 0;
+  counter-increment: h2;
 }
 
 .rulesNumbering~h2:before,
-.rulesNumbering~div.globalContent>h2:before {
-  content: counter(page) "." counter(h2Counter) " ";
-}
-
+.rulesNumbering~div.globalContent>h2:before,
 .rulesNumbering~* li.toclevel-2>a>span.toctext:before {
-  content: counter(page) "." counter(tocH2Counter) " ";
+  content: counter(page) "." counter(h2) " ";
 }
-
 
 .rulesNumbering~h3,
-.rulesNumbering~div.globalContent>h3 {
-  counter-reset: h4Counter h5Counter;
-  counter-increment: h3Counter;
-}
-
+.rulesNumbering~div.globalContent>h3,
 .rulesNumbering~* li.toclevel-3 {
-  counter-reset: tocH4Counter tocH5Counter;
-  counter-increment: tocH3Counter;
+  counter-set: h4 0 h5 0;
+  counter-increment: h3;
 }
 
 .rulesNumbering~h3:before,
-.rulesNumbering~div.globalContent>h3:before {
-  content: counter(page) "." counter(h2Counter) "." counter(h3Counter) " ";
-}
-
+.rulesNumbering~div.globalContent>h3:before,
 .rulesNumbering~* li.toclevel-3>a>span.toctext:before {
-  content: counter(page) "." counter(tocH2Counter) "." counter(tocH3Counter) " ";
+  content: counter(page) "." counter(h2) "." counter(h3) " ";
 }
 
 .rulesNumbering~h4,
-.rulesNumbering~div.globalContent>h4 {
-  counter-reset: h5Counter;
-  counter-increment: h4Counter;
-}
-
+.rulesNumbering~div.globalContent>h4,
 .rulesNumbering~* li.toclevel-4 {
-  counter-reset: tocH5Counter;
-  counter-increment: tocH4Counter;
+  counter-set: h5 0;
 }
-
 
 .rulesNumbering~h4:before,
-.rulesNumbering~div.globalContent>h4:before {
-  content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) " ";
-}
-
+.rulesNumbering~div.globalContent>h4:before,
 .rulesNumbering~* li.toclevel-4>a>span.toctext:before {
-  content: counter(page) "." counter(tocH2Counter) "." counter(tocH3Counter) "." counter(tocH4Counter) " ";
+  counter-increment: h4;
+  content: counter(page) "." counter(h2) "." counter(h3) "." counter(h4) " ";
 }
 
 .rulesNumbering~h5,
-.rulesNumbering~div.globalContent>h5 {
-  counter-increment: h5Counter;
-}
-
+.rulesNumbering~div.globalContent>h5,
 .rulesNumbering~* li.toclevel-5 {
-  counter-increment: tocH5Counter;
+  counter-increment: h5;
 }
 
 .rulesNumbering~h5:before,
-.rulesNumbering~div.globalContent>h5:before {
-  content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) "." counter(h5Counter) " ";
-}
-
+.rulesNumbering~div.globalContent>h5:before,
 .rulesNumbering~* li.toclevel-5>a>span.toctext:before {
-  content: counter(page) "." counter(tocH2Counter) "." counter(tocH3Counter) "." counter(tocH4Counter) "." counter(tocH5Counter) " ";
+  content: counter(page) "." counter(h2) "." counter(h3) "." counter(h4) "." counter(h5) " ";
 }
 
 /* this is required to stop the 'contents' heading in the ToC from becoming '1 contents' */
