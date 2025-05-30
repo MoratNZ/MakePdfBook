@@ -243,6 +243,8 @@ my @lines = <$in>;
 close $in;
 
 my $lineCount = scalar(@lines);
+my $inTable = 0;
+my $tableType = "";
 
 for(my $i = 0; $i < $lineCount; $i++){
     my $line = $lines[$i];
@@ -273,11 +275,13 @@ for(my $i = 0; $i < $lineCount; $i++){
         }
         my $width = 1/$count;
        
-        my @lineArray;
+        my @columnDefinitionArray;
         my $textwidth = 160; # A4 paper width of 210mm less 2x 25mm margin
         my $columnMargins = 4;
+        
+
         for(my $j = 0; $j<$count; $j++){
-            push @lineArray, sprintf("m{%.1f"."mm}", ($width*$textwidth - $columnMargins));
+            push @columnDefinitionArray, sprintf("m{%.1f"."mm}", ($width*$textwidth - $columnMargins));
         }
 
         if($lines[$i + $offset ] =~ /caption/){ # The next line is a caption
@@ -289,9 +293,15 @@ for(my $i = 0; $i < $lineCount; $i++){
                 $lines[$i + $offset] = "";
                 $offset++;
             }
-            $line = sprintf "\\begin{table}[hbt!]\n%s\\begin{tabular}{|%s|}\n", $captionLine, join("|",  @lineArray);
+            $line = sprintf "\\begin{table}[hbt!]\n%s\\begin{tabular}{|%s|}\n", $captionLine, join("|",  @columnDefinitionArray);
+
+            if($captionLine =~ /Table/i){
+                $tableType = "table";
+            } elsif($captionLine =~ /Figure/i){
+                $tableType = "figure";
+            }
         } else {
-            $line = sprintf("\\begin{table}[hbt!]\n\\begin{tabular}{|%s|}\n", join("|", @lineArray));
+            $line = sprintf("\\begin{table}[hbt!]\n\\begin{tabular}{|%s|}\n", join("|", @columnDefinitionArray));
         }
     } elsif ($line =~ /\\tabularnewline/){
         $line =~ s/\\tabularnewline/\\tabularnewline \\hline/;
@@ -299,6 +309,7 @@ for(my $i = 0; $i < $lineCount; $i++){
         $lines[$i - 1] =~ s/\\hline//;
     } elsif ($line =~ /\\end\{longtable\}/){
         $line = "\\end{tabular}\n\\end{table}\n";
+        $inTable = 0;
     } elsif ($line =~ /\\endfirsthead/){
         $lines[$i] = "";
         until($line =~ /\\endhead/){
@@ -307,8 +318,10 @@ for(my $i = 0; $i < $lineCount; $i++){
             $line = $lines[$i]
         }
         $line = "";
+        $inTable = 1;
     } elsif ($line =~ /endhead/){
         $line = "";
+        $inTable = 1;
     } elsif ($line =~ /includegraphics(?:\[\S+\])?\{(\S+.svg)\}/){
         my $img_file = $1;
 
@@ -340,7 +353,12 @@ for(my $i = 0; $i < $lineCount; $i++){
     $line =~ s/^.subsection/\\section/;
     $line =~ s/^.subsubsection/\\subsection/;
 
-    $lines[$i] = $line;
+    if($inTable and $line =~ /\\$/){
+        $lines[$i] = $line."\\hline\n";
+    } else {
+        $lines[$i] = $line;
+    }
+    
 }
 
 # dump content array into a single string
