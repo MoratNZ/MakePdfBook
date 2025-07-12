@@ -143,10 +143,10 @@ foreach my $chapter (@chapters){
     close $in;
     
     my @output;
+    foreach my $line (@lines){   
 
-    foreach my $line (@lines){
         $line =~s/&#8804;/SYMBOLlessThanOrEqualToSYMBOL/g;
-        $line =~ s/<div class="thumbinner".*?(<img src=.*?\/>).*?<div class="thumbcaption"><div.*?<a.*?<\/a><\/div>(.*?)<\/div>/<figure>\1<figcaption>\2<\/figcaption><\/figure>/;
+        # $line =~ s/<div class="thumbinner".*?(<img src=.*?\/>).*?<div class="thumbcaption"><div.*?<a.*?<\/a><\/div>(.*?)<\/div>/<figure>\1<figcaption>\2<\/figcaption><\/figure>/;
 #<div class="thumbinner" style="width:302px;"><a href="/mediawiki/index.php/File:Fencing_Handbook_2020_Figure_1.png" class="image"><img src="/var/lib/mediawiki-1.34.0/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/300px-Fencing_Handbook_2020_Figure_1.png" decoding="async" width="300" height="291" class="thumbimage" srcset="/mediawiki/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/450px-Fencing_Handbook_2020_Figure_1.png 1.5x, /mediawiki/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/600px-Fencing_Handbook_2020_Figure_1.png 2x" /></a>  <div class="thumbcaption"><div class="magnify"><a href="/mediawiki/index.php/File:Fencing_Handbook_2020_Figure_1.png" class="internal" title="Enlarge"></a></div>Figure 1. With the handle vertical, the tip must touch the ground. In this example, the sword on the left is allowed, the sword on the right is not.</div></div><
         
         # Translation to preserve revision marking
@@ -360,6 +360,7 @@ print $out $content;
 close $out;
 
 # Generate the PDF from the modified tex 
+my $pdf_generation_error = 0;
 $cmd = "PATH=/usr/bin/: pdflatex -halt-on-error -jobname temp book.tex";
 
 for(my $i = 0; $i<3; $i++){
@@ -370,9 +371,71 @@ for(my $i = 0; $i<3; $i++){
 
     $result = `$cmd`;
     if($result =~ /Fatal error occurred/){
-        print $result;
+        $pdf_generation_error = 1;
         last;
     }
+}
+
+# Attempt to localise the problematic part of the tex file, if there was an error
+
+if($pdf_generation_error){
+    my @error_lines = split("\n", $result);
+    my $error_marked = 0;
+    my $found_line = 0;
+    my $error_line = "";
+    my $error_text = "";
+
+    # Find the last line number mentioned before the fatal error:
+    # e.g.,:
+    # l.1733 \centering
+    #
+    # !  ==> Fatal error occurred, no output PDF file produced!
+
+    for(my $i = scalar(@error_lines); $i >= 0; $i--){
+        if( $error_marked ){
+            if($found_line){
+                if($error_lines[$i] =~ /! (LaTeX Error: .*)/){
+                    $error_text = $1;
+                    last;
+                }
+            } elsif( $error_lines[$i] =~ /l\.(\d+)/){
+                $error_line = $1;
+                $found_line = 1;
+            }
+        } elsif($error_lines[$i] =~ /!  ==> Fatal error occurred, no output PDF file produced!/){
+            $error_marked = 1;
+        }
+    }
+
+    if ($error_line){
+        my $context_amount = 5;
+        my @content_lines = split("\n", $content);
+
+        my @sample = splice(@content_lines, $error_line - ($context_amount + 1), 2*$context_amount + 1);
+
+        my $sample_text = "";
+
+        # Add a marker to the line that caused the error
+        # and indent the rest of the line
+        for(my $i = 0; $i < scalar(@sample); $i++){
+            if ($i == $context_amount){
+                $sample_text .= sprintf(">>> %s\n", $sample[$i]);
+            }else {
+                $sample_text .= sprintf("    %s\n", $sample[$i]);
+            }
+        }
+
+        my $error_line_content = $content_lines[$error_line - 1];
+        print "\n\nWe encountered a problem generating the PDF file.\n\n";
+        print "The error occured on line $error_line\nThe error was: '$error_text'\n\n";
+        print "The problematic tex was:\n----------\n$sample_text\n-----------\n\n";
+        print "The full error was:\n$result\n";
+
+
+    } else {
+        print "\n\nWe encountered a problem generating the PDF file.\n\nThe error line couldn't be localised,sorry.\n\nDetails:\n$result\n";
+    }
+     exit 1;
 }
 
 # Move the generated PDF to the output location
