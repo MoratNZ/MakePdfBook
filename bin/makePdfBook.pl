@@ -273,11 +273,11 @@ for(my $i = 0; $i < $lineCount; $i++){
         }
         my $width = 1/$count;
        
-        my @lineArray;
+        my @columnDefinitionArray;
         my $textwidth = 160; # A4 paper width of 210mm less 2x 25mm margin
         my $columnMargins = 4;
         for(my $j = 0; $j<$count; $j++){
-            push @lineArray, sprintf("m{%.1f"."mm}", ($width*$textwidth - $columnMargins));
+            push @columnDefinitionArray, sprintf("m{%.1f"."mm}", ($width*$textwidth - $columnMargins));
         }
 
         if($lines[$i + $offset ] =~ /caption/){ # The next line is a caption
@@ -289,9 +289,9 @@ for(my $i = 0; $i < $lineCount; $i++){
                 $lines[$i + $offset] = "";
                 $offset++;
             }
-            $line = sprintf "\\begin{table}[hbt!]\n%s\\begin{tabular}{|%s|}\n", $captionLine, join("|",  @lineArray);
+            $line = sprintf "\\begin{table}[hbt!]\n%s\\begin{tabular}{|%s|}\n", $captionLine, join("|",  @columnDefinitionArray);
         } else {
-            $line = sprintf("\\begin{table}[hbt!]\n\\begin{tabular}{|%s|}\n", join("|", @lineArray));
+            $line = sprintf("\\begin{table}[hbt!]\n\\begin{tabular}{|%s|}\n", join("|", @columnDefinitionArray));
         }
     } elsif ($line =~ /\\tabularnewline/){
         $line =~ s/\\tabularnewline/\\tabularnewline \\hline/;
