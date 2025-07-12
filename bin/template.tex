@@ -1,6 +1,9 @@
 \documentclass[12pt, a4paper]{book}
 \usepackage[a4paper, margin=25mm]{geometry}
 
+\renewcommand{\familydefault}{\sfdefault}
+
+
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{4pt}\setlength{\parskip}{4pt}}
 
@@ -10,16 +13,15 @@
 \usepackage{caption}
 \usepackage{hyperref}
 \usepackage{parskip}
-\usepackage{xcolor}
 \usepackage{titlesec}
 
 \widowpenalty10000
 \clubpenalty10000
 \raggedbottom
 \raggedright
+\titlespacing*{\chapter}{0pt}{1ex}{1ex}
 
 \captionsetup[table]{labelformat=empty}
-\usepackage[font={small,it}]{caption}
 
 \hypersetup{colorlinks=false}
 
@@ -30,7 +32,13 @@
 \fancyfoot[RO,LE]{\thepage}
 \pagestyle{fancy}
 
+\renewcommand{\thechapter}{\arabic{chapter}}
+
+% Don't break words across lines
+\usepackage[none]{hyphenat}
+
 % section numbering
+% Society section numbering
 \titleformat{\chapter}[hang]{\normalfont\bfseries\LARGE}{\thechapter}{1em}{}[]
 \titleformat{\section}[hang]{\normalfont\bfseries\Large}{\thesection}{1em}{}[]
 \titleformat{\subsection}[hang]{\normalfont\bfseries\large}{\thesubsection}{1em}{}[]
@@ -40,7 +48,6 @@
 \renewcommand{\numberline}[1]{#1~}
 
 \begin{document}
-\raggedright
 
 $include-before$
 
