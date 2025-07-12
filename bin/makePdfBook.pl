@@ -371,6 +371,7 @@ for(my $i = 0; $i<3; $i++){
     $result = `$cmd`;
     if($result =~ /Fatal error occurred/){
         print $result;
+        last;
     }
 }
 
