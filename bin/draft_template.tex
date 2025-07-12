@@ -1,4 +1,4 @@
-\documentclass[12pt, a4paper]{book}
+\documentclass[12pt, a4paper, openany]{book}
 \usepackage[a4paper, margin=25mm]{geometry}
 
 \renewcommand{\familydefault}{\sfdefault}
@@ -34,6 +34,9 @@
 \pagestyle{fancy}
 
 \renewcommand{\thechapter}{\arabic{chapter}}
+
+% Don't break words across lines
+\usepackage[none]{hyphenat}
 
 % section numbering
 % Society section numbering
