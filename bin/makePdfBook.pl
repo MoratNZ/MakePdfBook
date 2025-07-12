@@ -134,9 +134,9 @@ if($titlepageFile){
 } else {
     $titleOption = "";
 }
-
+my $removing_figcaption=0;
 # Do some cleanup on the HTML files, to remove a bunch of extraneous crap that mediawiki leaves in on export
-
+my @modified_chapters;
 foreach my $chapter (@chapters){
     open my $in, '<:encoding(utf8)', $chapter or die("Error: couldn't open $chapter for reading - $!");
     chomp (my @lines = <$in>);
@@ -144,8 +144,31 @@ foreach my $chapter (@chapters){
     
     my @output;
     foreach my $line (@lines){   
+        if($removing_figcaption){
+            if ($line =~ /<\/figcaption>/){
+                $line =~ s/.*<\/figcaption>//ig;
+                $removing_figcaption = 0;
+            } else {
+                next; # skip this line
+            }
+        }
+                
+        # change <figure> tags to <div> tags, and remove any figcaptions
+        $line =~ s/<figure/<div/ig;
+        $line =~ s/<\/figure>/<\/div>/ig;
 
+        if ($line =~ /<figcaption>/){
+            if($line =~ /<\/figcaption>/){
+                $line =~ s/<figcaption>(.*?)<\/figcaption>//ig;
+            } else {
+                $line =~ s/<figcaption>(.*?)//ig;
+                $removing_figcaption = 1;
+            }
+        }
+
+        # Convert some common HTML entities to LaTeX equivalents (or rather, to markers that we will convert to lateX equivalents later)
         $line =~s/&#8804;/SYMBOLlessThanOrEqualToSYMBOL/g;
+
         # $line =~ s/<div class="thumbinner".*?(<img src=.*?\/>).*?<div class="thumbcaption"><div.*?<a.*?<\/a><\/div>(.*?)<\/div>/<figure>\1<figcaption>\2<\/figcaption><\/figure>/;
 #<div class="thumbinner" style="width:302px;"><a href="/mediawiki/index.php/File:Fencing_Handbook_2020_Figure_1.png" class="image"><img src="/var/lib/mediawiki-1.34.0/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/300px-Fencing_Handbook_2020_Figure_1.png" decoding="async" width="300" height="291" class="thumbimage" srcset="/mediawiki/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/450px-Fencing_Handbook_2020_Figure_1.png 1.5x, /mediawiki/images/thumb/3/3f/Fencing_Handbook_2020_Figure_1.png/600px-Fencing_Handbook_2020_Figure_1.png 2x" /></a>  <div class="thumbcaption"><div class="magnify"><a href="/mediawiki/index.php/File:Fencing_Handbook_2020_Figure_1.png" class="internal" title="Enlarge"></a></div>Figure 1. With the handle vertical, the tip must touch the ground. In this example, the sword on the left is allowed, the sword on the right is not.</div></div><
         
@@ -159,11 +182,15 @@ foreach my $chapter (@chapters){
         # Ditto for the 'comment' marking
         $line =~ s/<span class="comment">(.*?)<\/span>/COMMENTSTART\1COMMENTSTOP/ig;
 
+
+
+
         push @output, $line;
     }
 
-    
-    open my $out,'>:encoding(utf8)', $chapter or die("Error: couldn't open $chapter for writing - $!");
+
+    open my $out,'>:encoding(utf8)', "modified_$chapter" or die("Error: couldn't open $chapter for writing - $!");
+    push @modified_chapters, "modified_$chapter";
     print $out @output;
     close $out;
 
@@ -171,7 +198,7 @@ foreach my $chapter (@chapters){
 
 
 # Build the tex file for the body of the book
-my $sourceFileString = join(" ", @chapters);
+my $sourceFileString = join(" ", @modified_chapters);
 my $templateFile = "template.tex";
 $cmd = "PATH=/usr/bin/: pandoc  -f html -t latex --template $templateFile $titleOption -o book.original.tex $sourceFileString  2>&1";
 $result = `$cmd`;
@@ -295,7 +322,7 @@ for(my $i = 0; $i < $lineCount; $i++){
             }
             $line = sprintf "\\begin{table}[hbt!]\n%s\\begin{tabular}{|%s|}\n", $captionLine, join("|",  @columnDefinitionArray);
         } else {
-            $line = sprintf("\\begin{table}[hbt!]\n\\begin{tabular}{|%s|}\n", join("|", @lineArray));
+            $line = sprintf("\\begin{table}[hbt!]\n\\begin{tabular}{|%s|}\n", join("|", @columnDefinitionArray));
         }
     } elsif ($line =~ /\\tabularnewline/){
         $line =~ s/\\tabularnewline/\\tabularnewline \\hline/;
