@@ -309,7 +309,9 @@ for(my $i = 0; $i < $lineCount; $i++){
         $line = "";
     } elsif ($line =~ /endhead/){
         $line = "";
-    } elsif ($line =~ /includegraphics(?:\[\S+\])?\{(\S+.svg)\}/){
+    }
+    
+    if ($line =~ /includegraphics(?:\[\S+\])?\{(\S+.svg)\}/){
         my $img_file = $1;
 
         my $converted_file_name = $img_file;
@@ -329,6 +331,36 @@ for(my $i = 0; $i < $lineCount; $i++){
 
 
         $line =~ s/$img_file/$converted_file_name/;
+    }
+    # replace internal \href directives with \hyperlink42 directives, 
+    # so that we can use the pdf's internal linking
+    if($line =~ /\\href{\/index.php\//){
+        my $link_target = "";
+        if($line =~ /\\href\{\/index.php\/\S+:(\S+?)\}/){
+            $link_target = $1;
+        } else {
+            # the end of the \href directive is not on this line, so we need to append the next line
+            my $line .= $lines[$i + 1];
+            
+            #clear the following line, so that we don't end up with a double \ref
+            $lines[$i + 1] = "";
+            if($line =~ /\\href\{\/index.php\/\S+:(\S+?)\}/){
+                $link_target = $1;
+            } else {
+                die("Error: couldn't find the end of the \\href directive in line $i of book.original.tex\n".
+                "The line was:\n$line\n");
+            }
+        }
+        
+        # Now we have the link target
+        # Check if the target has an anchor in it. 
+        # We need to We only want to convert hrefs with anchors.
+        if($link_target =~ /#(.*)/){
+            $link_target = $1;
+            
+        }
+        $line =~ s/\\href\{\/index.php\/\S+:\S+?\}/\\protect\\hyperlink\{$link_target\}/;
+
     }
 
     # $line =~ s/\\begin\{minipage\}\[\S+\]\{\S+\\columnwidth\}//;
