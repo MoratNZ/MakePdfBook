@@ -272,6 +272,7 @@ close $in;
 my $lineCount = scalar(@lines);
 my $inTable = 0;
 my $tableType = "";
+my $inMiniPage = 0;
 
 for(my $i = 0; $i < $lineCount; $i++){
     my $line = $lines[$i];
@@ -286,7 +287,7 @@ for(my $i = 0; $i < $lineCount; $i++){
         #     >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
         #     >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}
         #     >{\raggedright\arraybackslash}p{(\columnwidth - 10\tabcolsep) * \real{0.1667}}@{}}
-        my $count = 1;
+        my $count = 0;
         my $offset = 1;
         if($line =~ /^\s*\\begin\{longtable\}\[\]\{@\{\}(.*)@\{\}\}$/){
             my $columndefs = $1;
@@ -397,8 +398,21 @@ for(my $i = 0; $i < $lineCount; $i++){
 
     }
 
-    # $line =~ s/\\begin\{minipage\}\[\S+\]\{\S+\\columnwidth\}//;
-    # $line =~ s/\\end\{minipage\}//;
+    # detecting if we are in a minipage environment
+    # (Which we'd get if there is wrapped text inside a table cell) 
+    # and if so, we need to not add a \hline at the end of the line
+    # (because it will be added at the end of the minipage, not at the end of the line)
+
+    if($line =~ /\\begin\{minipage\}/){
+        $inMiniPage = 1;
+    }
+    if($line =~ /\\end\{minipage\}/){
+        $inMiniPage = 0;
+    }
+    if($line =~ /\\end\{minipage\}.*\\begin\{minipage\}/){
+        # If we have a minipage ending and starting on the same line, we need to set the inMiniPage flag
+        $inMiniPage = 1;
+    }
 
     # And now employ a filthy hack to deal with a pandoc html>tex regression
 
@@ -406,11 +420,13 @@ for(my $i = 0; $i < $lineCount; $i++){
     $line =~ s/^.subsection/\\section/;
     $line =~ s/^.subsubsection/\\subsection/;
 
-    if($inTable and $line =~ /\\$/){
-        $lines[$i] = $line."\\hline\n";
-    } else {
-        $lines[$i] = $line;
-    }
+    # Add horizontal lines between table rows
+
+    if($inTable and !$inMiniPage and $line =~ /\\$/){
+        # We're at the end of a table row
+        $line .= "\\hline\n";
+    } 
+    $lines[$i] = $line;
     
 }
 
