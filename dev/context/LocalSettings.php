@@ -137,7 +137,11 @@ wfLoadExtension('TemplateData');
 
 
 # Allow uploading of SVGs and render them correctly
-$wgFileExtensions[] = 'svg';
+$wgFileExtensions = array_merge(
+    $wgFileExtensions, [
+            'pdf', 'svg'
+    ]
+);
 $wgAllowTitlesInSVG = true;
 $wgSVGNativeRendering = true;
 
