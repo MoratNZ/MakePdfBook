@@ -17,6 +17,10 @@ Need to write up:
 - Run `docker compose up`.
 - Edit away; the `docker-compose.yaml` hot-mounts this directory as the MakePdfBook extension in the MediaWiki container, so any changes you make here will be instantly reflected in the container's behaviour.
 
+The included database is pre-populated with some test text to test assorted behaviour. 
+
+There is a superuser account in it with username and password both `Admin`
+
 TODO: write notes somewhere about debugging MakePdfBook behaviour - specifically about jumping into the mediawiki container and going spelunking in the temp files generated into `/tmp/MakePdfBook/Test`
 
 ## Acknowledgements
