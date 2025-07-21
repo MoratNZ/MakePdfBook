@@ -35,6 +35,10 @@ services:
         source: ../
         target: /var/www/html/extensions/MakePdfBook
         read_only: false
+      - type: bind
+        source: container_tmp
+        target: /tmp
+        read_only: false
       
   database:
     image: ghcr.io/moratnz/sca-rules-db:latest
