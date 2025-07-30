@@ -152,7 +152,9 @@ foreach my $chapter (@chapters){
                 next; # skip this line
             }
         }
-                
+        # Remove dir="ltr" attributes - they cause problems with the LaTeX conversion
+        $line =~ s/lang="en-GB" dir="ltr"//ig;
+
         # change <figure> tags to <div> tags, and remove any figcaptions
         $line =~ s/<figure/<div/ig;
         $line =~ s/<\/figure>/<\/div>/ig;
@@ -440,7 +442,11 @@ $content =~ s/SYMBOLlessThanOrEqualToSYMBOL/\$\\leq\$/gs;
 $content =~ s/REVSTART(.*?)REVSTOP/\\textcolor{red}{\1}/gs;
 $content =~ s/COMMENTSTART(.*?)COMMENTSTOP/\\emph{\\textcolor{blue}{\1}}/gs;
 
-
+# remove left-to-right markers
+$content =~ s/\\begin{LTR}//gs;
+$content =~ s/\\end{LTR}//gs;
+$content =~ s/\\begin{otherlanguage}{british}//gs;
+$content =~ s/\\end{otherlanguage}{british}//gs;
 
 open( my $out, '>:encoding(utf8)', 'book.tex') or die("Unable to open file book.tex to write revised version - $!");
 print $out $content;
@@ -517,8 +523,6 @@ if($pdf_generation_error){
         print "The error occured on line $error_line\nThe error was: '$error_text'\n\n";
         print "The problematic tex was:\n----------\n$sample_text\n-----------\n\n";
         print "The full error was:\n$result\n";
-
-
     } else {
         print "\n\nWe encountered a problem generating the PDF file.\n\nThe error line couldn't be localised,sorry.\n\nDetails:\n$result\n";
     }
