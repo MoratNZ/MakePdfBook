@@ -446,7 +446,7 @@ $content =~ s/COMMENTSTART(.*?)COMMENTSTOP/\\emph{\\textcolor{blue}{\1}}/gs;
 $content =~ s/\\begin{LTR}//gs;
 $content =~ s/\\end{LTR}//gs;
 $content =~ s/\\begin{otherlanguage}{british}//gs;
-$content =~ s/\\end{otherlanguage}{british}//gs;
+$content =~ s/\\end{otherlanguage}//gs;
 
 open( my $out, '>:encoding(utf8)', 'book.tex') or die("Unable to open file book.tex to write revised version - $!");
 print $out $content;
