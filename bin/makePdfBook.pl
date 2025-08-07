@@ -445,8 +445,8 @@ $content =~ s/KINGDOMSTART(.*?)KINGDOMSTOP/\\textcolor{purple}{\1}/gs;
 # remove left-to-right markers
 $content =~ s/\\begin{LTR}//gs;
 $content =~ s/\\end{LTR}//gs;
-$content =~ s/\\begin{otherlanguage}{british}//gs;
-$content =~ s/\\end{otherlanguage}//gs;
+$content =~ s/\\begin\{otherlanguage\}\{.*?\}//gs;
+$content =~ s/\\end\{otherlanguage\}//gs;
 
 open( my $out, '>:encoding(utf8)', 'book.tex') or die("Unable to open file book.tex to write revised version - $!");
 print $out $content;
