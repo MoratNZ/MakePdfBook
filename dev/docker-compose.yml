@@ -21,7 +21,7 @@ services:
       - BACKUPS_LOCATION=/image_backups
     restart: always
     ports:
-      - 80:80
+      - 8080:80
     volumes:
       - type: bind
         source: ${CONTEXT_DIRECTORY}/image_backups

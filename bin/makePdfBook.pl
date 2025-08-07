@@ -182,10 +182,10 @@ foreach my $chapter (@chapters){
         $line =~ s/<span class="revision">(.*?)<\/span>/REVSTART\1REVSTOP/ig;
         # <span class="revision">Discuss proposed changes with the Kingdom Armoured Combat Marshal and the Earl Marshal.</span>
         # Ditto for the 'comment' marking
-        $line =~ s/<span class="comment">(.*?)<\/span>/COMMENTSTART\1COMMENTSTOP/ig;
+        $line =~ s/<span class="note">(.*?)<\/span>/NOTESTART\1NOTESTOP/ig;
 
-
-
+        # Ditto for the 'kingdom' marking
+        $line =~ s/<span class="kingdom">(.*?)<\/span>/KINGDOMSTART\1KINGDOMSTOP/ig;
 
         push @output, $line;
     }
@@ -440,8 +440,8 @@ $content =~ s/\"(.*?)\"/``$1''/gs;
 
 $content =~ s/SYMBOLlessThanOrEqualToSYMBOL/\$\\leq\$/gs;
 $content =~ s/REVSTART(.*?)REVSTOP/\\textcolor{red}{\1}/gs;
-$content =~ s/COMMENTSTART(.*?)COMMENTSTOP/\\emph{\\textcolor{blue}{\1}}/gs;
-
+$content =~ s/NOTESTART(.*?)NOTESTOP/\\textcolor{blue}{\1}/gs;
+$content =~ s/KINGDOMSTART(.*?)KINGDOMSTOP/\\textcolor{purple}{\1}/gs;
 # remove left-to-right markers
 $content =~ s/\\begin{LTR}//gs;
 $content =~ s/\\end{LTR}//gs;
