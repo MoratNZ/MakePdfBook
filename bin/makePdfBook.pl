@@ -421,6 +421,8 @@ for(my $i = 0; $i < $lineCount; $i++){
     $line =~ s/^.section/\\chapter/;
     $line =~ s/^.subsection/\\section/;
     $line =~ s/^.subsubsection/\\subsection/;
+    $line =~ s/^.paragraph/\\subsubsection/;
+    $line =~ s/^.subparagraph/\\paragraph/;
 
     # Add horizontal lines between table rows
 
@@ -439,9 +441,9 @@ my $content = join "", @lines;
 $content =~ s/\"(.*?)\"/``$1''/gs;
 
 $content =~ s/SYMBOLlessThanOrEqualToSYMBOL/\$\\leq\$/gs;
-$content =~ s/REVSTART(.*?)REVSTOP/\\textcolor{red}{\1}/gs;
-$content =~ s/NOTESTART(.*?)NOTESTOP/\\textcolor{blue}{\1}/gs;
-$content =~ s/KINGDOMSTART(.*?)KINGDOMSTOP/\\textcolor{purple}{\1}/gs;
+$content =~ s/REVSTART(.*?)REVSTOP/\\textcolor{revision}{\1}/gs;
+$content =~ s/NOTESTART(.*?)NOTESTOP/\\textit{\\textcolor{note}{\1}}/gs;
+$content =~ s/KINGDOMSTART(.*?)KINGDOMSTOP/\\textcolor{kingdom}{\1}/gs;
 # remove left-to-right markers
 $content =~ s/\\begin{LTR}//gs;
 $content =~ s/\\end{LTR}//gs;

@@ -34,25 +34,25 @@
 \fancyfoot[RO,LE]{\thepage}
 \pagestyle{fancy}
 
+%define colors
+\definecolor{revision}{RGB}{220, 50, 32}
+\definecolor{note}{RGB}{220, 50, 32}
+\definecolor{kingdom}{RGB}{0, 90, 181}
+
 % paragrah and subsubsection are defined the same way, owing to pandoc sometimes converting h4 as one or the other
 \renewcommand{\thechapter}{\arabic{chapter}}
-\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
-\renewcommand{\thesubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}}
-\renewcommand{\thesubsubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}  
-\renewcommand{\theparagraph}{\arabic{chapter}.\arabic{section}.\arabic{subsection}.\arabic{paragraph}} 
-\renewcommand{\thesubparagraph}{\arabic{chapter}.\arabic{section}.\arabic{subsection}.\arabic{paragraph}.\arabic{subparagraph}}
 
 % Don't break words across lines
 \usepackage[none]{hyphenat}
 
 % section numbering
 % Society section numbering
+% paragrah and subsubsection are defined the same way, owing to pandoc sometimes converting h4 as one or the other
 \titleformat{\chapter}[hang]{\normalfont\bfseries\LARGE}{\thechapter}{1em}{}[]
 \titleformat{\section}[hang]{\normalfont\bfseries\Large}{\thesection}{1em}{}[]
 \titleformat{\subsection}[hang]{\normalfont\bfseries\large}{\thesubsection}{1em}{}[]
 \titleformat{\subsubsection}[hang]{\normalfont\bfseries}{\thesubsubsection}{1em}{}[]
 \titleformat{\paragraph}[hang]{\normalfont\bfseries\small}{\theparagraph}{1em}{}
-\titleformat{\subparagraph}[hang]{\normalfont\bfseries\tiny}{\theparagraph}{1em}{}
 % \renewcommand{\numberline}[1]{#1~}
 
 \begin{document}
