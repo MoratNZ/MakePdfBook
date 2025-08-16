@@ -46,11 +46,14 @@
 
 % section numbering
 % Society section numbering
+% paragrah and subsubsection are defined the same way, owing to pandoc sometimes converting h4 as one or the other
 \titleformat{\chapter}[hang]{\normalfont\bfseries\LARGE}{\thechapter}{1em}{}[]
 \titleformat{\section}[hang]{\normalfont\bfseries\Large}{\thesection}{1em}{}[]
 \titleformat{\subsection}[hang]{\normalfont\bfseries\large}{\thesubsection}{1em}{}[]
 \titleformat{\subsubsection}[hang]{\normalfont\bfseries}{\thesubsubsection}{1em}{}[]
 \titleformat{\paragraph}[hang]{\normalfont\bfseries\small}{\theparagraph}{1em}{}
+\titleformat{\subparagraph}[hang]{\normalfont\bfseries\tiny}{\theparagraph}{1em}{}
+% \renewcommand{\numberline}[1]{#1~}
 \titleformat{\subparagraph}[hang]{\normalfont\bfseries\tiny}{\theparagraph}{1em}{}
 % \renewcommand{\numberline}[1]{#1~}
 
@@ -59,7 +62,7 @@
 $include-before$
 
 \setcounter{secnumdepth}{5}
-\setcounter{tocdepth}{3}
+\setcounter{tocdepth}{5}
 \tableofcontents
 
 $body$
