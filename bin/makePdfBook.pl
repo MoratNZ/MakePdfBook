@@ -347,7 +347,8 @@ for(my $i = 0; $i < $lineCount; $i++){
         $line = "";
         $inTable = 1;
     }
-    
+    $line =~ s/includesvg/includegraphics/g;
+
     if ($line =~ /includegraphics(?:\[\S+\])?\{(\S+.svg)\}/){
         my $img_file = $1;
 
