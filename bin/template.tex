@@ -1,24 +1,22 @@
 \documentclass[12pt, a4paper, openany]{book}
 \usepackage[a4paper, margin=25mm]{geometry}
 
+\usepackage{helvet}
 \renewcommand{\familydefault}{\sfdefault}
 
-
 \providecommand{\tightlist}{%
-  \setlength{\itemsep}{4pt}\setlength{\parskip}{4pt}}
+\setlength{\itemsep}{4pt}\setlength{\parskip}{4pt}}
 
 \usepackage{booktabs}
 \usepackage{graphicx}
 \usepackage{array}
 \usepackage{hyperref}
 \usepackage{caption}
-\usepackage{xcolor }
+\usepackage{xcolor}
 \usepackage[normalem]{ulem}
-
 \usepackage{parskip}
 \usepackage{titlesec}
 \usepackage{fancyhdr}
-
 
 \widowpenalty10000
 \clubpenalty10000
@@ -35,7 +33,13 @@
 \fancyfoot[RO,LE]{\thepage}
 \pagestyle{fancy}
 
+% paragrah and subsubsection are defined the same way, owing to pandoc sometimes converting h4 as one or the other
 \renewcommand{\thechapter}{\arabic{chapter}}
+\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}  
+\renewcommand{\theparagraph}{\arabic{chapter}.\arabic{section}.\arabic{subsection}.\arabic{paragraph}} 
+\renewcommand{\thesubparagraph}{\arabic{chapter}.\arabic{section}.\arabic{subsection}.\arabic{paragraph}.\arabic{subparagraph}}
 
 % Don't break words across lines
 \usepackage[none]{hyphenat}
@@ -47,8 +51,8 @@
 \titleformat{\subsection}[hang]{\normalfont\bfseries\large}{\thesubsection}{1em}{}[]
 \titleformat{\subsubsection}[hang]{\normalfont\bfseries}{\thesubsubsection}{1em}{}[]
 \titleformat{\paragraph}[hang]{\normalfont\bfseries\small}{\theparagraph}{1em}{}
-
-\renewcommand{\numberline}[1]{#1~}
+\titleformat{\subparagraph}[hang]{\normalfont\bfseries\tiny}{\theparagraph}{1em}{}
+% \renewcommand{\numberline}[1]{#1~}
 
 \begin{document}
 
