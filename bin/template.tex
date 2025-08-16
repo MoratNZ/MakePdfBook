@@ -36,26 +36,30 @@
 \pagestyle{fancy}
 
 \renewcommand{\thechapter}{\arabic{chapter}}
-
+\renewcommand{\thesection}{\arabic{chapter}.\arabic{section}}
+\renewcommand{\thesubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}}
+\renewcommand{\thesubsubsection}{\arabic{chapter}.\arabic{section}.\arabic{subsection}.\arabic{subsubsection}}  
+\renewcommand{\theparagraph}{\arabic{chapter}.\arabic{section}.\arabic{subsection}.\arabic{paragraph}}  
 % Don't break words across lines
 \usepackage[none]{hyphenat}
 
 % section numbering
 % Society section numbering
+% paragrah and subsubsection are defined the same way, owing to pandoc sometimes converting h4 as one or the other
 \titleformat{\chapter}[hang]{\normalfont\bfseries\LARGE}{\thechapter}{1em}{}[]
 \titleformat{\section}[hang]{\normalfont\bfseries\Large}{\thesection}{1em}{}[]
 \titleformat{\subsection}[hang]{\normalfont\bfseries\large}{\thesubsection}{1em}{}[]
 \titleformat{\subsubsection}[hang]{\normalfont\bfseries}{\thesubsubsection}{1em}{}[]
 \titleformat{\paragraph}[hang]{\normalfont\bfseries\small}{\theparagraph}{1em}{}
-
-\renewcommand{\numberline}[1]{#1~}
+\titleformat{\subparagraph}[hang]{\normalfont\bfseries\tiny}{\theparagraph}{1em}{}
+% \renewcommand{\numberline}[1]{#1~}
 
 \begin{document}
 
 $include-before$
 
 \setcounter{secnumdepth}{5}
-\setcounter{tocdepth}{3}
+\setcounter{tocdepth}{5}
 \tableofcontents
 
 $body$
