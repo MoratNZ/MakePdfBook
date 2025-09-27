@@ -10,6 +10,10 @@
   background: #00FF00;
 }
 
+.kingdom {
+  background: #B0E0E6;
+}
+
 /* Remove mediawiki TOC numbering, which always starts with 1*/
 .rulesNumbering~div#toc span.tocnumber {
   display: none;
