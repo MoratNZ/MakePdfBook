@@ -346,7 +346,10 @@ for(my $i = 0; $i < $lineCount; $i++){
     } elsif ($line =~ /endhead/){
         $line = "";
         $inTable = 1;
+    } elsif ($line =~ /endlastfoot/){
+        $line = "";
     }
+
     $line =~ s/includesvg/includegraphics/g;
 
     if ($line =~ /includegraphics(?:\[\S+\])?\{(\S+.svg)\}/){
