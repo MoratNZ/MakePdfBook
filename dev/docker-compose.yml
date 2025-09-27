@@ -7,7 +7,7 @@ services:
       database:
         condition: service_healthy
         restart: true
-    image: ghcr.io/moratnz/sca-rules-wiki:latest
+    image: ghcr.io/moratnz/sca-rules-wiki:v1.1.5
     environment:
       - SITE_NAME=${SITE_NAME}
       - BASE_URL=${BASE_URL}
@@ -39,7 +39,7 @@ services:
         source: container_tmp
         target: /tmp
         read_only: false
-      
+
   database:
     image: ghcr.io/moratnz/sca-rules-db:latest
     environment:
