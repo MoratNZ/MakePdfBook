@@ -161,7 +161,11 @@ class Sidebar
             $firstImage = $pageImages[0];
             $fileTitle = Title::newFromText(sprintf("File:%s", $firstImage));
             $file = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileTitle);
-            $fileUrl = $file->getUrl();
+            try{
+                $fileUrl = $file->getUrl();
+            } catch (Exception $e) {
+                $fileUrl = "";
+            }
         } else {
             $fileUrl = "";
         }
