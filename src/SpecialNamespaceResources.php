@@ -54,12 +54,12 @@ class SpecialNamespaceResources extends SpecialPage
     }
     public function drawNamespaceTable(array $namespaces): string
     {
-        $textString = "{| class=\"wikitable\"\n|-\n!Namespace\n!Logo page\n!Banner page\n";
-        $textString .= "|-\n!Default\n|[[Mediawiki:Logo|logo]]\n|[[Mediawiki:Banner|banner]]\n";
+        $textString = "{| class=\"wikitable\"\n|-\n!Namespace\n!Logo page\n!Banner page\n!Sidebar page\n";
+        $textString .= "|-\n!Default\n|[[Mediawiki:Logo|logo]]\n|[[Mediawiki:Banner|banner]]\n|[[Mediawiki:Sidebar|sidebar]]\n";
 
         foreach ($namespaces as $namespace => $namespaceIndex) {
             $textString .= sprintf(
-                "|-\n![%s %s]\n|[[%s:Logo|logo]]\n|[[%s:Banner|banner]]\n",
+                "|-\n![%s %s]\n|[[%s:Logo|logo]]\n|[[%s:Banner|banner]]\n|[[%s:Sidebar|sidebar]]\n",
                 sprintf("{{fullurl:Special:PrefixIndex|namespace=%s}}", $namespaceIndex),
                 $namespace,
                 $namespace,
