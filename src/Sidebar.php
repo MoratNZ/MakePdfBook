@@ -10,31 +10,36 @@ class Sidebar
 {
     public static function onSidebarBeforeOutput($skin, &$sidebar)
     {
-        $sidebar = [];
+        $namespace = $skin->getRelevantTitle()->getNsText();
+
+    //     $sidebar = [];
         $sidebar['navigation'] = [
             [
                 "text" => "Main page",
                 "href" => "/"
             ]
         ];
+        $sidebar['TOOLBOX'] = [];
+        $sidebar['LANGUAGES'] = [];
+
         if ($skin->getUser()->isRegistered()) {
-            $sidebar['navigation'][] = [
+            $sidebar['TOOLBOX'][] = [
                 "text" => "Special Pages",
                 "href" => "/index.php/Special:SpecialPages"
             ];
-            $sidebar['navigation'][] = [
+            $sidebar['TOOLBOX'][] = [
                 "text" => "Book assets",
                 "href" => "/index.php/Special:MakePdfBook"
             ];
-            $sidebar['navigation'][] = [
+            $sidebar['TOOLBOX'][] = [
                 "text" => "Namespace resources",
                 "href" => "/index.php/Special:NamespaceResources"
             ];
-            $sidebar['navigation'][] = [
+            $sidebar['TOOLBOX'][] = [
                 "text" => "File list",
                 "href" => "/index.php/Special:ListFiles"
             ];
-            $sidebar['navigation'][] = [
+            $sidebar['TOOLBOX'][] = [
                 "text" => "Upload file",
                 "href" => "/index.php/Special:Upload"
             ];
@@ -43,52 +48,43 @@ class Sidebar
     public static function onSkinAfterPortlet($skin, $portletName, &$html)
     {
         if ($portletName == 'navigation') {
-            $bookSet = new BookSet();
-
             $pageRelevantTitle = $skin->getRelevantTitle();
+            $pageName = $pageRelevantTitle->getPrefixedText();
+            $nameParts = explode(':', $pageName);
+            $namespace = $pageRelevantTitle->getNsText();
 
-            $html .= "<hr><span class = 'makepdfbook-sidebar-title'>Books</span>\n";
-            $html .= "<div class = 'makepdfbook-book-list'>\n";
+            $sidebarPageName = "MediaWiki:DefaultSidebar";
 
-            $activeChapter = $pageRelevantTitle->getPrefixedText();
-
-            foreach ($bookSet->getBooks() as $book) {
-                if ($book->title && $book->title->getText() == $pageRelevantTitle->getText()) {
-                    $activeBook = true;
-                } else if ($book->contentsPage && $book->contentsPage->getPrefixedText() == $activeChapter) {
-                    $activeBook = true;
-                } else if ($book->containsChapter($activeChapter)) {
-                    $activeBook = true;
-                } else {
-                    $activeBook = false;
+            if($namespace){
+                $namespaceSidebarName = "$namespace:Sidebar";
+                $namespaceSidebarTitle = Title::newFromText($namespaceSidebarName);
+                if ($namespaceSidebarTitle->isKnown()) {
+                    $sidebarPageName = $namespaceSidebarName;
                 }
-
-                $html .= sprintf(
-                    "<div class='makepdfbook-book-content%s'>",
-                    $activeBook ? " makepdfbook-active-book" : ""
-                );
-                $html .= sprintf(
-                    "<div class='makepdfbook-book-title'><a href = '%s'>%s</a></div>\n",
-                    $book->getUrl(),
-                    $book->title->getText()
-                );
-                $html .= sprintf(
-                    "<div class='makepdfbook-pdf-icon' ><a href = '%s' ><img src='%s' %s/></a></div>\n",
-                    $book->getPdfLink(),
-                    "https://upload.wikimedia.org/wikipedia/commons/6/6c/PDF_icon.svg",
-                    "width='18' height='18'" #This is filthy - need to find a better way of avoiding FOUT - probably including and resizing the svg
-                );
-                if ($activeBook) {
-                    $html .= self::generateChapterHtml($book, $activeChapter);
-                }
-                $html .= "</div>";
             }
+
+            $sidebarTitle = Title::newFromText($sidebarPageName);
+            $sidebarPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle($sidebarTitle);
+            $sidebarText = $sidebarPage->getContent()->getText();
+
+            $parser = MediaWikiServices::getInstance()->getParserFactory()->create();
+            if ($skin->getUser()->isRegistered()) {
+                $parserOptions = \ParserOptions::newFromUser($skin->getUser());
+            } else {
+                $parserOptions = \ParserOptions::newFromAnon();
+            }
+            $sidebarOutput = $parser->parse($sidebarText, $sidebarTitle, $parserOptions);
+            $html .= $sidebarOutput->getText(options: [
+                'allowTOC' => false,
+                'enableSectionEditLinks' => false,
+                'unwrap' => false,
+                'deduplicateStyles' => true,
+            ]);  
+
             $html .= self::getLogoAndBannerSetJs($skin);
             if (!$skin->getUser()->isRegistered()) {
                 $html .= self::getHideRightNavJs($skin);
             }
-
-            $html .= "</div>";
 
         }
     }
@@ -171,6 +167,45 @@ class Sidebar
         }
 
         return $fileUrl;
+    }
+    private static function getPageTitleParts($pageTitle)
+    {
+        $parts = explode('--', $pageTitle);
+        if (count($parts) > 1) {
+            $kingdom = array_shift($parts);
+        } else {
+            $kingdom = null;
+        }
+        $subparts = explode(':', $parts[0]);
+        $handbook = $subparts[0] == "Armored Combat" ? "Armored Combat - Rattan" : $subparts[0];
+        $chapter = $subparts[1] ?? null;
+
+        return [$kingdom, $handbook, $chapter];
+    }
+    private static function pageBelongsToBook($pageName, $book)
+    {
+        if ($book->title && $book->title->getText() == $pageName) {
+            return true;
+        } else if ($book->contentsPage && $book->contentsPage->getPrefixedText() == $pageName) {
+            return true;
+        } else if ($book->containsChapter($pageName)) {
+            return true;
+        }
+        return false;
+    }
+    private static function generateBookHtml($book, $activeChapter)
+    {
+        $html = "<div class='makepdfbook-book'>\n";
+        $html .= sprintf(
+            "<div class='makepdfbook-book-title'><a href = '%s'>%s</a></div>\n",
+            $book->getUrl(),
+            $book->title->getText()
+        );
+        if($activeChapter){
+            $html .= self::generateChapterHtml($book, $activeChapter);
+        }
+        $html .= "</div>";
+        return $html;
     }
     private static function generateChapterHtml($book, $activeChapter)
     {
