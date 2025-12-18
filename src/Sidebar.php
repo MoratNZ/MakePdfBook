@@ -55,7 +55,7 @@ class Sidebar
 
             $sidebarPageName = "MediaWiki:DefaultSidebar";
 
-            if($namespace){
+            if($namespace and $namespace != "MediaWiki") {
                 $namespaceSidebarName = "$namespace:Sidebar";
                 $namespaceSidebarTitle = Title::newFromText($namespaceSidebarName);
                 if ($namespaceSidebarTitle->isKnown()) {
@@ -65,7 +65,7 @@ class Sidebar
 
             $sidebarTitle = Title::newFromText($sidebarPageName);
             $sidebarPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle($sidebarTitle);
-            $sidebarText = $sidebarPage->getContent()->getText();
+            $sidebarText = $sidebarPage->getContent() ? $sidebarPage->getContent()->getText(): "No sidebar available";
 
             $parser = MediaWikiServices::getInstance()->getParserFactory()->create();
             if ($skin->getUser()->isRegistered()) {
