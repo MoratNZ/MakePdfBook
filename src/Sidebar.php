@@ -124,7 +124,7 @@ class Sidebar
             )
         );
         if ($nsLogoPageTitle->isKnown()) {
-            return self::getFirstImageUrlFromTitle($nsLogoPageTitle, $user);
+            return self::getRandomImageFromTitle($nsLogoPageTitle, $user);
         }
         $defaultLogoPageTitle = $nsLogoPageTitle = Title::newFromText(
             sprintf(
@@ -133,11 +133,11 @@ class Sidebar
             )
         );
         if ($defaultLogoPageTitle->isKnown()) {
-            return self::getFirstImageUrlFromTitle($nsLogoPageTitle, $user);
+            return self::getRandomImageFromTitle($nsLogoPageTitle, $user);
         }
         return null;
     }
-    private static function getFirstImageUrlFromTitle(Title $title, $user): string
+    private static function getRandomImageFromTitle(Title $title, $user): string
     {
         $logoPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle($title);
         $logoPageText = $logoPage->getContent()->getText();
@@ -153,12 +153,13 @@ class Sidebar
 
         $pageImages = array_keys($output->getImages());
 
-        if (key_exists(0, $pageImages)) {
-            $firstImage = $pageImages[0];
-            $fileTitle = Title::newFromText(sprintf("File:%s", $firstImage));
+        if (count($pageImages)) {
+            $selectedImageIndex = array_rand($pageImages);
+            $selectedImage = $pageImages[$selectedImageIndex];
+            $fileTitle = Title::newFromText(sprintf("File:%s", $selectedImage));
             $file = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileTitle);
             try{
-                $fileUrl = $file->getUrl();
+                $fileUrl = $file ? $file->getUrl() : "";
             } catch (Exception $e) {
                 $fileUrl = "";
             }
