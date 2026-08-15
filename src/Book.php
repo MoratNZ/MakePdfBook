@@ -99,8 +99,8 @@ class Book implements \JsonSerializable
     // public function fetchTitlePage(): Book
     // {
     //     # TODO: This is currently bypassed, with BookSet always grabbing all
-    //     # chapters and titlepages, as this is getting the wrong book's 
-    //     # page under some circumstances, and I can't see why. 
+    //     # chapters and titlepages, as this is getting the wrong book's
+    //     # page under some circumstances, and I can't see why.
 
     //     $query = $this->bookSet->dbr->newSelectQueryBuilder()
     //         ->select([
@@ -130,8 +130,8 @@ class Book implements \JsonSerializable
     // public function fetchChapters(): Book
     // {
     //     # TODO: This is currently bypassed, with BookSet always grabbing all
-    //     # chapters and titlepages, as this is getting the wrong book's 
-    //     # page under some circumstances, and I can't see why. 
+    //     # chapters and titlepages, as this is getting the wrong book's
+    //     # page under some circumstances, and I can't see why.
     //     $query = $this->bookSet->dbr->newSelectQueryBuilder()
     //         ->select([
     //             'cat_title',
@@ -210,5 +210,12 @@ class Book implements \JsonSerializable
             $chapterNumber++;
             $chapter->writeHtml(sprintf("%s/chapter-%s.html", $directory, $chapterNumber));
         }
+        # Structured manifest (title, titlepage, ordered chapter titles) for
+        # bin/render_pdf_book.py - avoids it having to re-derive chapter
+        # order/titles by scraping HTML.
+        file_put_contents(
+            sprintf("%s/book.json", $directory),
+            json_encode($this, JSON_PRETTY_PRINT)
+        );
     }
 }

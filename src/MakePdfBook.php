@@ -30,27 +30,20 @@ class MakePdfBook
 
         $content->writeContent($tempDir);
 
-        if ($makepdfIsDraft) {
-            $templateFileName = dirname(__FILE__) . "/../bin/draft_template.tex";
-        } else {
-            $templateFileName = dirname(__FILE__) . "/../bin/template.tex";
-        }
-
-        copy($templateFileName, sprintf("%s/template.tex", $tempDir));
-
+        // Call HTML->PDF pipeline on the contents of tempDir, and write output to pdfFileName
         $cmd = sprintf(
-            "%s/../bin/makePdfBook.pl %s %s 2>&1",
+            "python3 %s/../bin/render_pdf_book.py %s %s %s 2>&1",
             dirname(__FILE__),
-            $tempDir,
-            $pdfFileName
+            escapeshellarg($tempDir),
+            escapeshellarg($pdfFileName),
+            $makepdfIsDraft ? 'true' : 'false'
         );
 
-        $shellResult = shell_exec($cmd);
+        exec($cmd, $outputLines, $exitCode);
 
-        if ($shellResult) {
-            throw new \Exception($shellResult);
+        if ($exitCode !== 0) {
+            throw new \Exception(implode("\n", $outputLines));
         }
-        // throw new \Exception($cmd);
         return $pdfFileName;
     }
     private function getCacheFileName(string $cacheHash): string

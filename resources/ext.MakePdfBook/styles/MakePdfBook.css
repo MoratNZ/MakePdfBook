@@ -10,6 +10,13 @@
   background: #00FF00;
 }
 
+/* Real content uses class="comment", not "note" - MediaWiki:Common.css has
+   this rule (this file didn't), so it renders on-screen today via that page
+   but not here. Added so styling doesn't depend on having both loaded. */
+.comment {
+  background: #00FF00;
+}
+
 .kingdom {
   background: #B0E0E6;
 }
@@ -33,8 +40,8 @@ body {
 }
 
 .rulesNumbering~h1:before,
-.rulesNumbering~div.globalContent>h1:before {
-  content: counter(page) " ";
+.rulesNumbering~div.globalContent h1:before {
+  content: counter(bookChapter) " ";
 }
 
 .rulesNumbering~* li.toclevel-1>a {
@@ -42,49 +49,49 @@ body {
 }
 
 .rulesNumbering~h2,
-.rulesNumbering~div.globalContent>h2,
+.rulesNumbering~div.globalContent h2,
 .rulesNumbering~* li.toclevel-2 {
   counter-set: h3Counter 0 h4Counter 0 h5Counter 0;
 }
 
 .rulesNumbering~h2:before,
-.rulesNumbering~div.globalContent>h2:before,
+.rulesNumbering~div.globalContent h2:before,
 .rulesNumbering~* li.toclevel-2>a>span.toctext:before {
   counter-increment: h2Counter;
-  content: counter(page) "." counter(h2Counter) " ";
+  content: counter(bookChapter) "." counter(h2Counter) " ";
 }
 
 .rulesNumbering~h3,
-.rulesNumbering~div.globalContent>h3,
+.rulesNumbering~div.globalContent h3,
 .rulesNumbering~* li.toclevel-3 {
   counter-set: h4Counter 0 h5Counter 0;
 }
 
 .rulesNumbering~h3:before,
-.rulesNumbering~div.globalContent>h3:before,
+.rulesNumbering~div.globalContent h3:before,
 .rulesNumbering~* li.toclevel-3>a>span.toctext:before {
   counter-increment: h3Counter;
-  content: counter(page) "." counter(h2Counter) "." counter(h3Counter) " ";
+  content: counter(bookChapter) "." counter(h2Counter) "." counter(h3Counter) " ";
 }
 
 .rulesNumbering~h4,
-.rulesNumbering~div.globalContent>h4,
+.rulesNumbering~div.globalContent h4,
 .rulesNumbering~* li.toclevel-4 {
   counter-set: h5Counter 0;
 }
 
 .rulesNumbering~h4:before,
-.rulesNumbering~div.globalContent>h4:before,
+.rulesNumbering~div.globalContent h4:before,
 .rulesNumbering~* li.toclevel-4>a>span.toctext:before {
   counter-increment: h4Counter;
-  content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) " ";
+  content: counter(bookChapter) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) " ";
 }
 
 .rulesNumbering~h5:before,
-.rulesNumbering~div.globalContent>h5:before,
+.rulesNumbering~div.globalContent h5:before,
 .rulesNumbering~* li.toclevel-5>a>span.toctext:before {
   counter-increment: h5Counter;
-  content: counter(page) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) "." counter(h5Counter) " ";
+  content: counter(bookChapter) "." counter(h2Counter) "." counter(h3Counter) "." counter(h4Counter) "." counter(h5Counter) " ";
 }
 
 /* this is required to stop the 'contents' heading in the ToC from becoming '1 contents' */
@@ -98,52 +105,52 @@ body {
 
 /* styling for ordered lists */
 .rulesNumbering~ol,
-.rulesNumbering~div.globalContent>ol {
+.rulesNumbering~div.globalContent ol {
   list-style-type: decimal;
 }
 
 .rulesNumbering~ol>li>ol,
-.rulesNumbering~div.globalContent>ol>li>ol {
+.rulesNumbering~div.globalContent ol>li>ol {
   list-style-type: lower-alpha;
 }
 
 .rulesNumbering~ol>li>ol>li>ol,
-.rulesNumbering~div.globalContent>ol>li>ol>li>ol {
+.rulesNumbering~div.globalContent ol>li>ol>li>ol {
   list-style-type: lower-roman;
 }
 
 .rulesNumbering~ul,
-.rulesNumbering~div.globalContent>ul {
+.rulesNumbering~div.globalContent ul {
   text-indent: 0px;
   list-style-type: circle;
 }
 
 .rulesNumbering~ul>li>ul,
-.rulesNumbering~div.globalContent>ul>li>ul {
+.rulesNumbering~div.globalContent ul>li>ul {
   text-indent: 0px;
   list-style-type: circle;
 }
 
 .rulesNumbering~ul>li>ul>li>ul,
-.rulesNumbering~div.globalContent>ul>li>ul>li>ul {
+.rulesNumbering~div.globalContent ul>li>ul>li>ul {
   text-indent: 0px;
   list-style-type: circle;
 }
 
 .rulesNumbering~caption:before,
 .rulesNumbering~* caption:before,
-.rulesNumbering~div.globalContent>caption:before,
-.rulesNumbering~div.globalContent>* caption:before {
+.rulesNumbering~div.globalContent caption:before,
+.rulesNumbering~div.globalContent * caption:before {
   counter-increment: tableCounter;
-  content: "Table " counter(page) "." counter(tableCounter) " ";
+  content: "Table " counter(bookChapter) "." counter(tableCounter) " ";
 }
 
 .rulesNumbering~figcaption:before,
 .rulesNumbering~* figcaption:before,
-.rulesNumbering~div.globalContent>figcaption:before,
-.rulesNumbering~div.globalContent>* figcaption:before {
+.rulesNumbering~div.globalContent figcaption:before,
+.rulesNumbering~div.globalContent * figcaption:before {
   counter-increment: figureCounter;
-  content: "Figure " counter(page) "." counter(figureCounter) " ";
+  content: "Figure " counter(bookChapter) "." counter(figureCounter) " ";
 }
 
 /* Giving table borders */
@@ -233,7 +240,7 @@ div#mw-panel {
 
 #content {
   margin-left: 300px;
-  min-height: 75vh;
+  min-height: 600px;
 }
 
 #left-navigation {
