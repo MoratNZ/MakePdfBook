@@ -142,13 +142,21 @@ def build_stylesheet(is_draft: bool, today: str) -> str:
     if is_draft:
         watermark_path = os.path.join(IMAGES_DIR, "draft-watermark.svg")
         WATERMARK_BACKGROUND_SIZE = "990pt 990pt"
+        # Watermark must be the last thing in <body>.
         css += f"""
 @page {{
+  @bottom-center {{ content: "Draft PDF generated: {today}"; }}
+}}
+.draft-watermark {{
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
   background-image: url("{watermark_path}");
   background-repeat: no-repeat;
   background-position: center;
   background-size: {WATERMARK_BACKGROUND_SIZE};
-  @bottom-center {{ content: "Draft PDF generated: {today}"; }}
 }}
 """
     return css
@@ -187,6 +195,39 @@ def process_titlepage(temp_dir: str, book: dict) -> tuple[str, list[str]]:
     ]
 
     return html, toc_entries
+
+
+def wiki_link_target(href: str) -> str | None:
+    """The mw-headline id an internal wiki link points at (its fragment, or
+    else the linked page's own title, which MediaWiki uses as that page's h1
+    id) - or None for anything else (external URL, redlink query string)."""
+    if href.startswith("#"):
+        return href[1:] or None
+    m = re.match(r"^/index\.php/([^#?]+)(?:#(.+))?$", href)
+    if not m:
+        return None
+    return m.group(2) or m.group(1).split(":", 1)[-1]
+
+
+def resolve_internal_links(html: str) -> str:
+    """Rewrite <a href> that target another page/heading in this same book
+    into an in-document jump (e.g. "see Injury procedures") instead of a
+    dead external URL - the old LaTeX pipeline did this via pandoc/hyperref;
+    WeasyPrint has no equivalent. Runs once over the fully assembled
+    document, since mw-headline ids are already chapter-prefixed by then and
+    a link can point at a heading in any chapter, not just its own.
+    """
+    tree = lxml.html.document_fromstring(html)
+    id_map = {}
+    for span in tree.iter("span"):
+        el_id = span.get("id")
+        if span.get("class") == "mw-headline" and el_id:
+            id_map[re.sub(r"^chapter-\d+-", "", el_id)] = el_id
+    for link in tree.iter("a"):
+        target_id = wiki_link_target(link.get("href", ""))
+        if target_id and target_id in id_map:
+            link.set("href", f"#{id_map[target_id]}")
+    return "<!DOCTYPE html>\n" + lxml.html.tostring(tree, encoding="unicode")
 
 
 def process_chapter(temp_dir: str, n: int, chapter: dict) -> tuple[str, str]:
@@ -228,10 +269,6 @@ def process_chapter(temp_dir: str, n: int, chapter: dict) -> tuple[str, str]:
     id_map = {hid: f"{cid}-{hid}" for hid in all_ids}
     for old_id, new_id in id_map.items():
         tree.get_element_by_id(old_id).set("id", new_id)
-    for link in tree.iter("a"):
-        href = link.get("href", "")
-        if href.startswith("#") and href[1:] in id_map:
-            link.set("href", f"#{id_map[href[1:]]}")
 
     content = apply_magic_words(smarten_quotes(lxml.html.tostring(tree, encoding="unicode")))
     html = f'<section class="chapter" id="{cid}">\n{content}\n</section>'
@@ -248,7 +285,9 @@ def process_chapter(temp_dir: str, n: int, chapter: dict) -> tuple[str, str]:
     return html, toc_entry
 
 
-def build_combined_html(book: dict, css: str, titlepage_html: str, toc_entries: list[str], chapters_html: list[str]) -> str:
+def build_combined_html(book: dict, css: str, titlepage_html: str, toc_entries: list[str], chapters_html: list[str], is_draft: bool) -> str:
+    # The watermark must be the last thing in <body> to paint on top of everything else
+    watermark_html = '<div class="draft-watermark"></div>' if is_draft else ""
     return f"""<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -273,6 +312,7 @@ def build_combined_html(book: dict, css: str, titlepage_html: str, toc_entries: 
 
 {chr(10).join(chapters_html)}
 
+{watermark_html}
 </body>
 </html>
 """
@@ -296,9 +336,10 @@ if __name__ == "__main__":
         chapters_html.append(chapter_html)
         toc_entries.append(toc_entry)
 
+    is_draft = args.draft == "true"
     today = datetime.now().strftime("%d %B %Y")
-    css = build_stylesheet((args.draft == "true"), today)
-    final_html = build_combined_html(book, css, titlepage_html, toc_entries, chapters_html)
+    css = build_stylesheet(is_draft, today)
+    final_html = resolve_internal_links(build_combined_html(book, css, titlepage_html, toc_entries, chapters_html, is_draft))
 
     final_html_path = os.path.join(args.temp_dir, "final.html")
     with open(final_html_path, "w", encoding="utf-8") as f:

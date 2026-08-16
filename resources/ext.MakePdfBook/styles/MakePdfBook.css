@@ -26,7 +26,9 @@
   display: none;
 }
 
-/* Rules numbering for headings and TOC*/
+/* Rules numbering for headings and TOC. No table/figure auto-numbering:
+   many existing captions already have a hand-typed "Table N."/"Figure N."
+   prefix. */
 body {
   counter-reset: h2Counter h3Counter h4Counter h5Counter;
 }
@@ -137,11 +139,6 @@ body {
   list-style-type: circle;
 }
 
-/* Table/figure auto-numbering removed: many existing captions already have
-   a hand-typed "Table N."/"Figure N." prefix (a workaround from when the old
-   LaTeX pipeline never rendered this CSS at all), so auto-numbering collides
-   with those and shows both side by side. */
-
 /* Giving table borders */
 table.withBorders {
   border-collapse: collapse;
@@ -229,6 +226,8 @@ div#mw-panel {
 
 #content {
   margin-left: 300px;
+  /* Fixed px, not 75vh: WeasyPrint doesn't support viewport units and
+     silently fails the whole PDF render on this rule otherwise. */
   min-height: 600px;
 }
 
