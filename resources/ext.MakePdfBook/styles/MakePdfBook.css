@@ -28,7 +28,7 @@
 
 /* Rules numbering for headings and TOC*/
 body {
-  counter-reset: h2Counter h3Counter h4Counter h5Counter tableCounter figureCounter;
+  counter-reset: h2Counter h3Counter h4Counter h5Counter;
 }
 
 .rulesNumbering~div#toc+* {
@@ -137,21 +137,10 @@ body {
   list-style-type: circle;
 }
 
-.rulesNumbering~caption:before,
-.rulesNumbering~* caption:before,
-.rulesNumbering~div.globalContent caption:before,
-.rulesNumbering~div.globalContent * caption:before {
-  counter-increment: tableCounter;
-  content: "Table " counter(bookChapter) "." counter(tableCounter) " ";
-}
-
-.rulesNumbering~figcaption:before,
-.rulesNumbering~* figcaption:before,
-.rulesNumbering~div.globalContent figcaption:before,
-.rulesNumbering~div.globalContent * figcaption:before {
-  counter-increment: figureCounter;
-  content: "Figure " counter(bookChapter) "." counter(figureCounter) " ";
-}
+/* Table/figure auto-numbering removed: many existing captions already have
+   a hand-typed "Table N."/"Figure N." prefix (a workaround from when the old
+   LaTeX pipeline never rendered this CSS at all), so auto-numbering collides
+   with those and shows both side by side. */
 
 /* Giving table borders */
 table.withBorders {

@@ -111,7 +111,9 @@ def apply_magic_words(html: str) -> str:
     html = re.sub(r'%endCenter%', '</div>', html, flags=re.I)
     html = re.sub(r'%startHuge%', '<div class="huge">', html, flags=re.I)
     html = re.sub(r'%endHuge%', '</div>', html, flags=re.I)
-    html = re.sub(r'%vspace%(\d+)%', lambda m: f'<div class="vspace" style="height:{int(m.group(1))}mm"></div>', html, flags=re.I)
+    # Capped at 20mm: large vspace values on image-heavy titlepages (e.g.
+    # Rapier's) can overflow onto a near-blank second page.
+    html = re.sub(r'%vspace%(\d+)%', lambda m: f'<div class="vspace" style="height:{min(int(m.group(1)), 20)}mm"></div>', html, flags=re.I)
     html = re.sub(r'%pageBreak%', '<div class="pagebreak"></div>', html, flags=re.I)
     return html
 
