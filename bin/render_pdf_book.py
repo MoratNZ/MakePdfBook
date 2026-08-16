@@ -47,25 +47,29 @@ def parse_html_fragment(raw: str) -> HtmlElement:
     return lxml.html.fromstring(raw, parser=lxml.html.HTMLParser(remove_comments=True))
 
 
-def smarten_quotes(html: str) -> str:
+def smarten_quotes(tree: HtmlElement) -> None:
     """Classify each '"' by what actually precedes it (opening after
     whitespace/an opening bracket/start of document, closing otherwise);
-    dumb pair breaks on e.g. inch markers. Context is carried across tag
-    boundaries via prev_char - resetting "start of segment" at every tag
-    would wrongly treat e.g. word<b>"quoted"</b> differently from the
-    untagged word"quoted", since a tag renders no character of its own.
+    dumb pair breaks on e.g. inch markers.
     """
-    parts = re.split(r'(<[^>]+>)', html)
     OPENING_QUOTE_RE = re.compile(r'(?<=[\s([{])"')
     prev_char = " "  # start-of-document counts as an opening boundary
-    for i in range(0, len(parts), 2):
-        segment = parts[i]
-        if not segment:
-            continue
-        opened = OPENING_QUOTE_RE.sub('“', prev_char + segment)[1:]
-        parts[i] = opened.replace('"', '”')
-        prev_char = segment[-1]
-    return ''.join(parts)
+
+    def process(text):
+        nonlocal prev_char
+        if not text:
+            return text
+        opened = OPENING_QUOTE_RE.sub('“', prev_char + text)[1:]
+        prev_char = text[-1]
+        return opened.replace('"', '”')
+
+    def walk(el):
+        el.text = process(el.text)
+        for child in el:
+            walk(child)
+            child.tail = process(child.tail)
+
+    walk(tree)
 
 
 def fix_svg_img_sizing(tree: HtmlElement) -> None:
@@ -111,15 +115,25 @@ def apply_magic_words(html: str) -> str:
     html = re.sub(r'%endCenter%', '</div>', html, flags=re.I)
     html = re.sub(r'%startHuge%', '<div class="huge">', html, flags=re.I)
     html = re.sub(r'%endHuge%', '</div>', html, flags=re.I)
-    # Capped at 20mm: large vspace values on image-heavy titlepages (e.g.
-    # Rapier's) can overflow onto a near-blank second page.
+    # Capped at 20mm: large vspace values can overflow onto a near-blank second page.
     html = re.sub(r'%vspace%(\d+)%', lambda m: f'<div class="vspace" style="height:{min(int(m.group(1)), 20)}mm"></div>', html, flags=re.I)
     html = re.sub(r'%pageBreak%', '<div class="pagebreak"></div>', html, flags=re.I)
     return html
 
 
+def render_tree(tree: HtmlElement) -> str:
+    smarten_quotes(tree)
+    return apply_magic_words(lxml.html.tostring(tree, encoding="unicode"))
+
+
 def find_mw_headline(el: HtmlElement) -> HtmlElement | None:
     return el.find('.//span[@class="mw-headline"]')
+
+
+def headline_spans(tree: HtmlElement):
+    """Every mw-headline span in tree that has an id - the anchors internal
+    wiki links can target."""
+    return (span for span in tree.iter("span") if span.get("class") == "mw-headline" and span.get("id"))
 
 
 def extract_subsections(tree: HtmlElement) -> list[tuple[str, str]]:
@@ -135,7 +149,7 @@ def extract_subsections(tree: HtmlElement) -> list[tuple[str, str]]:
 
 def build_stylesheet(is_draft: bool, today: str) -> str:
     with open(os.path.join(STYLES_DIR, "MakePdfBook.css"), encoding="utf-8") as f:
-        base_css = f.read()
+        base_css = f.read().replace("min-height: 75vh;", "min-height: 600px;") # weasyprint chokes on 75vh, doesn't like units
     with open(os.path.join(STYLES_DIR, "MakePdfBookPrint.css"), encoding="utf-8") as f:
         print_css = f.read().replace("__PDF_GENERATED_DATE__", today)
     css = base_css + "\n" + print_css
@@ -184,7 +198,7 @@ def process_titlepage(temp_dir: str, book: dict) -> tuple[str, list[str]]:
     fix_svg_img_sizing(tree)
     fix_table_headers(tree)
 
-    html = apply_magic_words(smarten_quotes(lxml.html.tostring(tree, encoding="unicode")))
+    html = render_tree(tree)
 
     # "toc-entry-plain": same size/indent as a chapter entry but regular
     # weight with a dot leader - distinct from both chapter (bold) and
@@ -198,9 +212,7 @@ def process_titlepage(temp_dir: str, book: dict) -> tuple[str, list[str]]:
 
 
 def wiki_link_target(href: str) -> str | None:
-    """The mw-headline id an internal wiki link points at (its fragment, or
-    else the linked page's own title, which MediaWiki uses as that page's h1
-    id) - or None for anything else (external URL, redlink query string)."""
+    """The mw-headline id an internal wiki link points at - or None for anything else (external URL, redlink query string)."""
     if href.startswith("#"):
         return href[1:] or None
     m = re.match(r"^/index\.php/([^#?]+)(?:#(.+))?$", href)
@@ -211,18 +223,10 @@ def wiki_link_target(href: str) -> str | None:
 
 def resolve_internal_links(html: str) -> str:
     """Rewrite <a href> that target another page/heading in this same book
-    into an in-document jump (e.g. "see Injury procedures") instead of a
-    dead external URL - the old LaTeX pipeline did this via pandoc/hyperref;
-    WeasyPrint has no equivalent. Runs once over the fully assembled
-    document, since mw-headline ids are already chapter-prefixed by then and
-    a link can point at a heading in any chapter, not just its own.
+    into an in-document link instead of an external URL
     """
     tree = lxml.html.document_fromstring(html)
-    id_map = {}
-    for span in tree.iter("span"):
-        el_id = span.get("id")
-        if span.get("class") == "mw-headline" and el_id:
-            id_map[re.sub(r"^chapter-\d+-", "", el_id)] = el_id
+    id_map = {span.get("data-original-id", span.get("id")): span.get("id") for span in headline_spans(tree)}
     for link in tree.iter("a"):
         target_id = wiki_link_target(link.get("href", ""))
         if target_id and target_id in id_map:
@@ -251,10 +255,6 @@ def process_chapter(temp_dir: str, n: int, chapter: dict) -> tuple[str, str]:
     h1_span = find_mw_headline(h1) if h1 is not None else None
     label = h1_span.text_content().strip() if h1_span is not None else chapter["title"]
 
-    # "bookChapter" (not "page") avoids colliding with WeasyPrint's own
-    # page-number counter - confirmed empirically (ToC entries resolved to
-    # chapter number instead of page). Per-chapter h2Counter/etc. resets
-    # live in MakePdfBookPrint.css's .chapter rule instead.
     if rules_div is not None:
         rules_div.set("style", f"counter-reset: bookChapter {chapter_num}")
 
@@ -264,13 +264,14 @@ def process_chapter(temp_dir: str, n: int, chapter: dict) -> tuple[str, str]:
     # MediaWiki only guarantees mw-headline ids are unique per page - once
     # chapters are concatenated, e.g. two chapters' h3 "General" collide
     # unless every heading level (not just the h2s with a ToC entry) is
-    # prefixed here.
-    all_ids = [span.get("id") for span in tree.iter("span") if span.get("class") == "mw-headline" and span.get("id")]
-    id_map = {hid: f"{cid}-{hid}" for hid in all_ids}
-    for old_id, new_id in id_map.items():
-        tree.get_element_by_id(old_id).set("id", new_id)
+    # prefixed here. The original id is kept in data-original-id so
+    # resolve_internal_links() can later match wiki links against it.
+    for span in list(headline_spans(tree)):
+        old_id = span.get("id")
+        span.set("data-original-id", old_id)
+        span.set("id", f"{cid}-{old_id}")
 
-    content = apply_magic_words(smarten_quotes(lxml.html.tostring(tree, encoding="unicode")))
+    content = render_tree(tree)
     html = f'<section class="chapter" id="{cid}">\n{content}\n</section>'
 
     sub_toc = ""
@@ -280,7 +281,8 @@ def process_chapter(temp_dir: str, n: int, chapter: dict) -> tuple[str, str]:
             for sub_num, (subsection_title, subsection_id) in enumerate(subsections, start=1)
         )
         sub_toc = f'<ol class="toc-sublist">\n{sub_items}\n</ol>'
-    toc_entry = build_toc_as_li("toc-entry", "toc-link", cid, f"{chapter_num}. {label}") + sub_toc
+
+    toc_entry = build_toc_as_li("toc-entry", "toc-link", cid, f"{chapter_num} {label}") + sub_toc
 
     return html, toc_entry
 
@@ -337,7 +339,7 @@ if __name__ == "__main__":
         toc_entries.append(toc_entry)
 
     is_draft = args.draft == "true"
-    today = datetime.now().strftime("%d %B %Y")
+    today = datetime.now().strftime("%B %d, %Y")
     css = build_stylesheet(is_draft, today)
     final_html = resolve_internal_links(build_combined_html(book, css, titlepage_html, toc_entries, chapters_html, is_draft))
 
@@ -347,8 +349,7 @@ if __name__ == "__main__":
 
     raw_pdf_path = os.path.join(args.temp_dir, "raw.pdf")
     # WeasyPrint reports broken images/fonts/CSS via logging, not exceptions -
-    # collect anything at WARNING+ so a degraded-but-"successful" render still
-    # fails loudly (PHP's caller only checks our exit code).
+    # collect anything at WARNING+ so we still fails loudly on warnings (PHP's caller only checks our exit code).
     log_handler = _CollectingHandler()
     logging.getLogger("weasyprint").addHandler(log_handler)
 

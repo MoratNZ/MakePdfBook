@@ -18,6 +18,13 @@
     font-family: "Nimbus Sans", Helvetica, Arial, sans-serif;
   }
 }
+/* Title page conventionally carries no footer/page number - :first takes
+   priority over both the rule above and the draft watermark's own @page
+   override in build_stylesheet(), regardless of source order. */
+@page :first {
+  @bottom-center { content: ""; }
+  @bottom-right { content: ""; }
+}
 
 html, body {
   font-family: "Nimbus Sans", Helvetica, Arial, sans-serif;

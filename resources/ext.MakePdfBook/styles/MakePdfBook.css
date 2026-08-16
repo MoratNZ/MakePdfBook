@@ -6,13 +6,8 @@
   background: #00ffff;
 }
 
-.note {
-  background: #00FF00;
-}
-
-/* Real content uses class="comment", not "note" - MediaWiki:Common.css has
-   this rule (this file didn't), so it renders on-screen today via that page
-   but not here. Added so styling doesn't depend on having both loaded. */
+/* Real content uses class="comment", not "note". */
+.note,
 .comment {
   background: #00FF00;
 }
@@ -27,8 +22,7 @@
 }
 
 /* Rules numbering for headings and TOC. No table/figure auto-numbering:
-   many existing captions already have a hand-typed "Table N."/"Figure N."
-   prefix. */
+   many existing captions already have a manual "Table N."/"Figure N." */
 body {
   counter-reset: h2Counter h3Counter h4Counter h5Counter;
 }
@@ -226,9 +220,7 @@ div#mw-panel {
 
 #content {
   margin-left: 300px;
-  /* Fixed px, not 75vh: WeasyPrint doesn't support viewport units and
-     silently fails the whole PDF render on this rule otherwise. */
-  min-height: 600px;
+  min-height: 75vh;
 }
 
 #left-navigation {
