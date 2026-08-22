@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800">
+  <text x="400" y="400"
+        font-family="Helvetica, Arial, sans-serif"
+        font-size="120"
+        font-weight="bold"
+        fill="#000000"
+        fill-opacity="0.15"
+        text-anchor="middle"
+        dominant-baseline="middle"
+        transform="rotate(-45 400 400)">DRAFT</text>
+</svg>

@@ -1,3 +1,7 @@
 **/archive
 **/.DS_Store
+**/__pycache__
 dev/container_tmp/*
+dev/docker-compose.override.yml
+/.*/
+/test/*
