@@ -18,7 +18,6 @@ class SpecialMakePdfBook extends SpecialPage
 	{
 		parent::__construct('MakePdfBook');
 		$this->config = MediaWikiServices::getInstance()->getConfigFactory()->makeConfig('MakePdfBook');
-		$this->parser = MediaWikiServices::getInstance()->getParser();
 		$this->bookSet = new BookSet();
 		$this->engine = new MakePdfBook();
 	}

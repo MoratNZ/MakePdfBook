@@ -97,7 +97,7 @@ class BookSet implements \JsonSerializable
             ])
             ->from('page')
             ->join('categorylinks', null, 'page_id=cl_from')
-            ->join('category', null, 'cl_to=cat_title')
+            ->join('category', null, 'cl_target_id=cat_title')
             ->caller('MakePdfBook');
 
         $result = $query->fetchResultSet();

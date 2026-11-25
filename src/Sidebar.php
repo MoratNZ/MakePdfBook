@@ -5,6 +5,7 @@ use MediaWiki\Extension\MakePdfBook\BookSet;
 use MediaWiki\Title\Title;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Parser\ParserOutput;
+use MediaWiki\Parser\ParserOutputLinkTypes;
 
 class Sidebar
 {
@@ -74,13 +75,14 @@ class Sidebar
                 $parserOptions = \ParserOptions::newFromAnon();
             }
             $sidebarOutput = $parser->parse($sidebarText, $sidebarTitle, $parserOptions);
-            $html .= $sidebarOutput->getText(options: [
+            $pipeline = MediaWikiServices::getInstance()->getDefaultOutputPipeline();
+            $transformedSidebarOutput = $pipeline->run($sidebarOutput, $parserOptions, [
                 'allowTOC' => false,
                 'enableSectionEditLinks' => false,
                 'unwrap' => false,
                 'deduplicateStyles' => true,
             ]);  
-
+            $html = $transformedSidebarOutput->getContentHolderText();
             $html .= self::getLogoAndBannerSetJs($skin);
             if (!$skin->getUser()->isRegistered()) {
                 $html .= self::getHideRightNavJs($skin);
@@ -151,12 +153,15 @@ class Sidebar
         }
         $output = $parser->parse($logoPageText, $title, $parserOptions);
 
-        $pageImages = array_keys($output->getImages());
+        $pageImages = $output->getLinkList( ParserOutputLinkTypes::MEDIA );
+        // throw new \Exception(var_dump($pageImages, true));
 
         if (count($pageImages)) {
             $selectedImageIndex = array_rand($pageImages);
             $selectedImage = $pageImages[$selectedImageIndex];
-            $fileTitle = Title::newFromText(sprintf("File:%s", $selectedImage));
+            $imageName = $selectedImage['link']->getDBkey();
+
+            $fileTitle = Title::newFromText(sprintf("File:%s", $imageName));
             $file = MediaWikiServices::getInstance()->getRepoGroup()->findFile($fileTitle);
             try{
                 $fileUrl = $file ? $file->getUrl() : "";
